@@ -101,6 +101,8 @@ export function useBusinessDashboardStats(
   const summaryPartialRef = useRef(new Map<AnalyticsTimeframe, Partial<BusinessDashboardStats>>());
   const analyticsPartialRef = useRef(new Map<AnalyticsTimeframe, Partial<BusinessDashboardStats>>());
   const hasSettledLiveUiRef = useRef(false);
+  /** Periods that completed at least one successful network fetch this dashboard session. */
+  const networkSettledTfsRef = useRef(new Set<AnalyticsTimeframe>());
   const loadStatsForRef = useRef<
     (
       tf: AnalyticsTimeframe,
@@ -155,6 +157,8 @@ export function useBusinessDashboardStats(
 
   const isPeriodSessionReady = useCallback(
     (tf: AnalyticsTimeframe): boolean => {
+      if (!canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) return false;
+      if (!networkSettledTfsRef.current.has(tf)) return false;
       const summaryPartial = summaryPartialRef.current.get(tf);
       if (!summaryPartial || !hasMetricValues(summaryPartial as BusinessDashboardStats)) {
         return false;
@@ -251,7 +255,9 @@ export function useBusinessDashboardStats(
     ): Promise<void> => {
       if (!sessionValidated || !enabled) return;
 
-      const revalidate = opts?.soft === true || opts?.forceNetwork === true;
+      const trustPeriodCache = canUsePeriodSwitchCache(hasSettledLiveUiRef.current);
+      const revalidate =
+        opts?.soft === true || opts?.forceNetwork === true || !trustPeriodCache;
 
       const kpisVisibleOnScreen = () =>
         hasBusinessKpiValues(statsRef.current) ||
@@ -274,10 +280,12 @@ export function useBusinessDashboardStats(
 
       hydratePeriodSessionCache(tf);
 
-      const sharedBundle = getBusinessAnalyticsBundle(tf);
-      if (sharedBundle?.periodStats && !revalidate) {
-        summaryPartialRef.current.set(tf, sharedBundle.periodStats);
-        analyticsPartialRef.current.set(tf, sharedBundle.periodStats);
+      if (trustPeriodCache) {
+        const sharedBundle = getBusinessAnalyticsBundle(tf);
+        if (sharedBundle?.periodStats && !revalidate) {
+          summaryPartialRef.current.set(tf, sharedBundle.periodStats);
+          analyticsPartialRef.current.set(tf, sharedBundle.periodStats);
+        }
       }
 
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
@@ -295,15 +303,16 @@ export function useBusinessDashboardStats(
 
       const summaryPartial = summaryPartialRef.current.get(tf);
       const summaryFromMemory =
+        trustPeriodCache &&
+        networkSettledTfsRef.current.has(tf) &&
         Boolean(summaryPartial) &&
         (!revalidate || hasMetricValues(summaryPartial as BusinessDashboardStats));
-      let summarySettled = summaryFromMemory || Boolean(cached && summaryPartialRef.current.has(tf));
-      const analyticsInMemory = Boolean(analyticsPartialRef.current.get(tf));
-      let analyticsSettled =
-        !advancedAnalyticsEnabledRef.current ||
-        (analyticsInMemory &&
-          (!revalidate || Boolean(cached && analyticsPartialRef.current.has(tf))));
       const periodSessionReady = isPeriodSessionReady(tf);
+      let summarySettled = periodSessionReady && !revalidate;
+      let analyticsSettled =
+        !advancedAnalyticsEnabledRef.current
+          ? summarySettled
+          : periodSessionReady && !revalidate;
 
       const existingInflight = statsLoadInflightByTfRef.current.get(tf);
       if (existingInflight && !revalidate) {
@@ -371,7 +380,7 @@ export function useBusinessDashboardStats(
 
       if (affectsUi) {
         setStatsLoadFailed(null);
-        if (periodSessionReady && !revalidate) {
+        if (periodSessionReady && !revalidate && trustPeriodCache) {
           setSummaryLoading(false);
           setAnalyticsLoading(false);
           setIsRevalidating(false);
@@ -485,6 +494,7 @@ export function useBusinessDashboardStats(
             });
             if (!stillActive()) return;
             summaryPartialRef.current.set(tf, periodStats);
+            networkSettledTfsRef.current.add(tf);
             summarySettled = true;
             if (advancedAnalyticsEnabledRef.current) {
               analyticsPartialRef.current.set(tf, periodStats);
@@ -604,12 +614,17 @@ export function useBusinessDashboardStats(
     const controller = new AbortController();
     heroAbortRef.current = controller;
 
-    const useCache = canUseDashboardSwrCache({
-      hasSettledLiveUi: hasSettledLiveUiRef.current,
-      soft: true,
-    });
+    const useCache =
+      canUseDashboardSwrCache({
+        hasSettledLiveUi: hasSettledLiveUiRef.current,
+        soft: true,
+      }) && networkSettledTfsRef.current.has("month");
     const monthSummary = summaryPartialRef.current.get("month");
-    if (monthSummary && hasMetricValues(monthSummary as BusinessDashboardStats)) {
+    if (
+      monthSummary &&
+      networkSettledTfsRef.current.has("month") &&
+      hasMetricValues(monthSummary as BusinessDashboardStats)
+    ) {
       const merged = mergeBusinessDashboardStats(
         monthSummary,
         analyticsPartialRef.current.get("month"),
@@ -638,9 +653,11 @@ export function useBusinessDashboardStats(
         silent: true,
         signal: controller.signal,
         scope: advancedAnalyticsEnabledRef.current ? "full" : "summary",
+        revalidate: !networkSettledTfsRef.current.has("month"),
       });
       if (controller.signal.aborted || tfRef.current !== activeAtStart) return;
       summaryPartialRef.current.set("month", summaryData);
+      networkSettledTfsRef.current.add("month");
       const merged = mergeBusinessDashboardStats(
         summaryData,
         analyticsPartialRef.current.get("month"),
@@ -703,10 +720,12 @@ export function useBusinessDashboardStats(
       tfRef.current = tf;
       setAnalyticsTimeframeState(tf);
 
-      const bundle = getBusinessAnalyticsBundle(tf);
-      if (bundle?.periodStats) {
-        summaryPartialRef.current.set(tf, bundle.periodStats);
-        analyticsPartialRef.current.set(tf, bundle.periodStats);
+      if (canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) {
+        const bundle = getBusinessAnalyticsBundle(tf);
+        if (bundle?.periodStats) {
+          summaryPartialRef.current.set(tf, bundle.periodStats);
+          analyticsPartialRef.current.set(tf, bundle.periodStats);
+        }
       }
       hydratePeriodSessionCache(tf);
 
@@ -774,8 +793,10 @@ export function useBusinessDashboardStats(
     abortByTfRef.current.forEach((c) => c.abort());
     abortByTfRef.current.clear();
     clearBusinessStatsClientCache();
+    clearBusinessAnalyticsStore();
     businessSwrStore.clear();
     hasSettledLiveUiRef.current = false;
+    networkSettledTfsRef.current.clear();
     summaryPartialRef.current.clear();
     analyticsPartialRef.current.clear();
     setHeroStats(null);
@@ -797,6 +818,10 @@ export function useBusinessDashboardStats(
   useEffect(() => {
     if (!sessionValidated || !enabled) return;
     const generation = ++statsMountGenerationRef.current;
+    if (!hasSettledLiveUiRef.current) {
+      clearBusinessAnalyticsStore();
+      networkSettledTfsRef.current.clear();
+    }
     const handle = window.setTimeout(() => {
       if (statsMountGenerationRef.current !== generation) return;
       const tf = analyticsTimeframe;
@@ -807,6 +832,7 @@ export function useBusinessDashboardStats(
         affectsUi: true,
         soft: warmMount,
         silent: warmMount,
+        forceNetwork: !hasSettledLiveUiRef.current,
       });
     }, 0);
     return () => {
@@ -945,6 +971,7 @@ export function useBusinessDashboardStats(
     businessSwrStore.delete(swrKey(tfRef.current));
     summaryPartialRef.current.delete(tfRef.current);
     analyticsPartialRef.current.delete(tfRef.current);
+    networkSettledTfsRef.current.delete(tfRef.current);
     setRefetchTick((n) => n + 1);
   }, []);
 
@@ -958,7 +985,10 @@ export function useBusinessDashboardStats(
       return stats;
     }
 
-    const cached = getBusinessAnalyticsBundle(analyticsTimeframe)?.periodStats;
+    const cached =
+      lastUpdatedAt != null && valuesMatchAnalyticsPeriod
+        ? getBusinessAnalyticsBundle(analyticsTimeframe)?.periodStats
+        : null;
     if (
       cached &&
       (hasBusinessDashboardVisibleContent(cached) || hasMetricValues(cached))
@@ -970,7 +1000,15 @@ export function useBusinessDashboardStats(
     if (hasBusinessDashboardVisibleContent(stats)) return stats;
     if (hasMetricValues(stats)) return stats;
     return null;
-  }, [pendingVerification, stats, statsTimeframe, analyticsTimeframe, dataRevision]);
+  }, [
+    pendingVerification,
+    stats,
+    statsTimeframe,
+    analyticsTimeframe,
+    dataRevision,
+    lastUpdatedAt,
+    valuesMatchAnalyticsPeriod,
+  ]);
 
   const displayMetrics = useMemo(() => {
     if (!displayStats || !hasMetricValues(displayStats)) return null;

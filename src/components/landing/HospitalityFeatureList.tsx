@@ -1,5 +1,4 @@
-import { Check } from "lucide-react";
-
+import { LandingBenefitCheckMark, landingBenefitRowClass } from "@/components/landing/LandingCheckBadge";
 import { caretipType } from "@/lib/typography/caretipType";
 import { cn } from "@/lib/utils";
 
@@ -20,10 +19,12 @@ export function HospitalityFeatureList({ features, className }: HospitalityFeatu
   return (
     <ul className={cn("caretip-hospitality-feature-list", className)} role="list">
       {features.map((feature, index) => (
-        <li key={`hospitality-feature-${index}`} className="caretip-hospitality-feature-list__item" role="listitem">
-          <span className="caretip-hospitality-feature-list__mark" aria-hidden>
-            <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
-          </span>
+        <li
+          key={`hospitality-feature-${index}`}
+          className={cn("caretip-hospitality-feature-list__item", landingBenefitRowClass)}
+          role="listitem"
+        >
+          <LandingBenefitCheckMark />
           <div className="caretip-hospitality-feature-list__body min-w-0">
             <h3
               className={cn(

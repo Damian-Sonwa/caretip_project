@@ -66,6 +66,10 @@
     overflow-x: clip;
     overscroll-behavior: contain;
     max-width: 100%;
+    background-color: hsl(var(--sidebar));
+    background-image: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .caretip-dashboard-shell .dashboard-table-panel,
@@ -242,6 +246,35 @@
   .caretip-dashboard-shell .business-dashboard-stats-grid > .business-stat-card,
   .caretip-dashboard-shell .employee-dashboard-stats-grid > .employee-stat-card {
     min-height: 6.75rem;
+  }
+
+  /* Period analytics KPIs — primary full width, secondary 2-up (business + employee). */
+  .caretip-dashboard-shell .dashboard-period-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .caretip-dashboard-shell .dashboard-period-metrics-grid > .dashboard-metric-stat-card--featured {
+    grid-column: 1 / -1;
+  }
+
+  /* Employee streak (4th card): full row avoids orphaned half-width slot. */
+  .caretip-dashboard-shell .dashboard-period-metrics-grid > .dashboard-metric-stat-card:nth-child(4):last-child {
+    grid-column: 1 / -1;
+  }
+
+  .caretip-dashboard-shell .dashboard-period-metrics-grid .dashboard-metric-stat-card__label-text {
+    hyphens: none;
+    word-break: normal;
+    overflow-wrap: normal;
+    text-wrap: pretty;
+  }
+
+  .caretip-dashboard-shell .dashboard-period-metrics-grid .dashboard-metric-stat-card__change {
+    hyphens: none;
+    word-break: normal;
+    overflow-wrap: normal;
+    text-wrap: pretty;
   }
 
   .caretip-dashboard-shell .dashboard-metric-stat-card__value {

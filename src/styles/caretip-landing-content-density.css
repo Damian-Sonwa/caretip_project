@@ -210,6 +210,19 @@ html.dark .caretip-expandable-info-card__image-label {
   gap: var(--caretip-narrative-gap-points-action, 1rem);
 }
 
+@media (max-width: 1023px) {
+  .caretip-landing .caretip-showcase-action-cluster,
+  .caretip-landing .caretip-motivation-after {
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .caretip-landing .caretip-showcase-action-cluster .caretip-hospitality-feature-panel,
+  .caretip-landing .caretip-motivation-after .caretip-motivation-points {
+    width: 100%;
+  }
+}
+
 .caretip-landing #for-employees .caretip-showcase-action-cluster .caretip-landing-section-cta,
 .caretip-landing #business-section .caretip-showcase-action-cluster .caretip-landing-section-cta,
 .caretip-landing #recognition .caretip-motivation-after .caretip-landing-section-cta,
@@ -224,9 +237,26 @@ html.dark .caretip-expandable-info-card__image-label {
   justify-content: flex-start;
 }
 
+@media (max-width: 1023px) {
+  .caretip-landing #for-employees .caretip-landing-section-cta,
+  .caretip-landing #business-section .caretip-landing-section-cta,
+  .caretip-landing #recognition .caretip-landing-section-cta,
+  .caretip-landing #recognition .caretip-motivation-cta {
+    justify-content: center;
+  }
+}
+
 .caretip-landing #for-employees .caretip-landing-cta-unit--section,
 .caretip-landing #business-section .caretip-landing-cta-unit--section,
 .caretip-landing #recognition .caretip-landing-cta-unit--section {
   margin-inline: 0;
   align-items: stretch;
+}
+
+@media (max-width: 1023px) {
+  .caretip-landing #for-employees .caretip-landing-cta-unit--section,
+  .caretip-landing #business-section .caretip-landing-cta-unit--section,
+  .caretip-landing #recognition .caretip-landing-cta-unit--section {
+    margin-inline: auto;
+  }
 }

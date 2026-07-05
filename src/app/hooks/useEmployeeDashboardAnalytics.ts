@@ -160,6 +160,8 @@ export function useEmployeeDashboardAnalytics(
   const summaryPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
   const analyticsPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
   const hasSettledLiveUiRef = useRef(false);
+  /** Periods that completed at least one successful network fetch this dashboard session. */
+  const networkSettledTfsRef = useRef(new Set<EmployeeAnalyticsTimeframe>());
   const analyticsDeferTimerRef = useRef<number | null>(null);
   const loadForRef = useRef<
     (tf: EmployeeAnalyticsTimeframe, opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean; forceNetwork?: boolean }) => Promise<void>
@@ -232,6 +234,7 @@ export function useEmployeeDashboardAnalytics(
 
   const isPeriodSessionReady = useCallback((tf: EmployeeAnalyticsTimeframe): boolean => {
     if (!canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) return false;
+    if (!networkSettledTfsRef.current.has(tf)) return false;
     const summaryPartial = summaryPartialRef.current.get(tf);
     if (!hasEmployeeMetricValues(summaryPartial)) {
       return false;
@@ -326,7 +329,10 @@ export function useEmployeeDashboardAnalytics(
         }
       }
 
-      void loadForRef.current(tf, { affectsUi: true });
+      void loadForRef.current(tf, {
+        affectsUi: true,
+        soft: canUsePeriodSwitchCache(hasSettledLiveUiRef.current),
+      });
     },
     [
       abortInactiveTimeframes,
@@ -345,9 +351,11 @@ export function useEmployeeDashboardAnalytics(
 
       hydratePeriodSessionCache(tf);
 
+      const trustPeriodCache = canUsePeriodSwitchCache(hasSettledLiveUiRef.current);
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
-      const revalidate = opts?.soft === true || opts?.forceNetwork === true;
+      const revalidate =
+        opts?.soft === true || opts?.forceNetwork === true || !trustPeriodCache;
       const periodSessionReady = isPeriodSessionReady(tf);
 
       const payloadVisibleOnScreen = () =>
@@ -475,6 +483,7 @@ export function useEmployeeDashboardAnalytics(
           });
           if (!stillActive()) return;
           summaryPartialRef.current.set(tf, summaryData);
+          networkSettledTfsRef.current.add(tf);
           summarySettled = true;
           if (applyBundledAnalyticsFromSummary(summaryData)) {
             analyticsSettled = true;
@@ -509,6 +518,7 @@ export function useEmployeeDashboardAnalytics(
             });
             if (!stillActive()) return;
             analyticsPartialRef.current.set(tf, analyticsData);
+            networkSettledTfsRef.current.add(tf);
             analyticsSettled = true;
             if (affectsUi && stillActive()) {
               setAnalyticsLoading(false);
@@ -621,6 +631,7 @@ export function useEmployeeDashboardAnalytics(
     clearEmployeeTipsClientCache();
     employeePeriodSwrStore.clear();
     hasSettledLiveUiRef.current = false;
+    networkSettledTfsRef.current.clear();
     summaryPartialRef.current.clear();
     analyticsPartialRef.current.clear();
     setPayload(null);
@@ -638,6 +649,9 @@ export function useEmployeeDashboardAnalytics(
   useEffect(() => {
     if (!isActive) return;
     const generation = ++mountGenerationRef.current;
+    if (!hasSettledLiveUiRef.current) {
+      networkSettledTfsRef.current.clear();
+    }
     const tf = analyticsTimeframe;
     const timer = window.setTimeout(() => {
       if (mountGenerationRef.current !== generation) return;

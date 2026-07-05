@@ -5,6 +5,7 @@ import { BusinessStatCard } from "./BusinessStatCard";
 import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { formatEur } from "../../lib/formatEur";
 import { businessUi } from "./businessDashboardUi";
+import { DASHBOARD_PERIOD_METRICS_GRID } from "../dashboard/dashboardPeriodUi";
 import { cn } from "@/lib/utils";
 import type { AnalyticsTimeframe } from "../../hooks/useBusinessDashboardStats";
 
@@ -40,7 +41,8 @@ function BusinessDashboardMetricsGridInner({
     <div
       className={cn(
         businessUi.statsGrid,
-        "relative transition-opacity duration-300",
+        DASHBOARD_PERIOD_METRICS_GRID,
+        "business-dashboard-stats-grid--period relative transition-opacity duration-300",
         isPeriodRefreshing && "opacity-[0.94]",
       )}
     >
@@ -73,13 +75,6 @@ function BusinessDashboardMetricsGridInner({
             : undefined
         }
         icon={<CareIcon name="team" size="nav" className="dashboard-metric-stat-card__icon-glyph" />}
-      />
-      <BusinessStatCard
-        loading={loading}
-        label={t("business.dashboard.tipsCount")}
-        value={<CountUpMetric value={tipCount} kind="integer" />}
-        change={hasTipActivityInPeriod ? undefined : t("format.metricZeroTips")}
-        icon={<CareIcon name="employeePerformance" size="nav" className="dashboard-metric-stat-card__icon-glyph" />}
       />
       <BusinessStatCard
         loading={loading}

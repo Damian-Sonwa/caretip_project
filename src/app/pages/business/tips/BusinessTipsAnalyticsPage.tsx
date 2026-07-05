@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../../hooks/useRequireAuth";
 import { useBusinessEntitlementsContext } from "../../../contexts/BusinessEntitlementsContext";
 import { useSubscriptionEntitlements } from "../../../hooks/useSubscriptionEntitlements";
@@ -13,7 +12,6 @@ import {
 
 /** Tips → Analytics: sole owner of reporting, exports, and drill-downs. Gated at layout level. */
 export function BusinessTipsAnalyticsPage() {
-  const { t } = useTranslation();
   const { user, sessionValidated } = useRequireAuth();
   const [revenueTimeframe, setRevenueTimeframe] = useState<AnalyticsTimeframe>("month");
   const [qrTimeframe, setQrTimeframe] = useState<AnalyticsTimeframe>("month");
@@ -33,13 +31,17 @@ export function BusinessTipsAnalyticsPage() {
     revenueTimeframe,
   );
 
+  const handleRevenueTimeframeChange = (timeframe: AnalyticsTimeframe) => {
+    setRevenueTimeframe(timeframe);
+    setQrTimeframe(timeframe);
+  };
+
   return (
     <div className="space-y-6 pt-6">
-      <p className="text-sm text-muted-foreground">{t("business.tips.analyticsDesc")}</p>
       <BusinessAnalyticsReporting
         data={data}
         revenueTimeframe={revenueTimeframe}
-        onRevenueTimeframeChange={setRevenueTimeframe}
+        onRevenueTimeframeChange={handleRevenueTimeframeChange}
         qrTimeframe={qrTimeframe}
         onQrTimeframeChange={setQrTimeframe}
       />

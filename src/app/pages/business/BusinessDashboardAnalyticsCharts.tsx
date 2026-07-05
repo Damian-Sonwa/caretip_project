@@ -2,6 +2,8 @@ import { memo } from "react";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { Users, TrendingUp } from "lucide-react";
+import { DashboardViewAllLink } from "../../components/dashboard/DashboardViewAllLink";
+import { TOP_PERFORMERS_PAGE_PATH } from "../../components/business/insights/TopPerformersTeaser";
 import {
   Area,
   AreaChart,
@@ -69,13 +71,6 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
   const tipsChartMotion = useDashboardBlockMotion(0.12);
   const employeeChartMotion = useDashboardBlockMotion(0.18);
 
-  const tipsPerformanceDescKey =
-    analyticsTimeframe === "week"
-      ? "business.dashboard.tipsPerformanceDescWeek"
-      : analyticsTimeframe === "year"
-        ? "business.dashboard.tipsPerformanceDescYear"
-        : "business.dashboard.tipsPerformanceDescMonth";
-
   const monthAxisInterval =
     analyticsTimeframe === "month" && tipDistributionChartData.length > 10
       ? Math.max(1, Math.floor(tipDistributionChartData.length / 6))
@@ -92,9 +87,8 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
         className="flex h-full min-h-0 w-full"
       >
         <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
-          <CardHeader className="business-dashboard-panel-card__header space-y-1">
+          <CardHeader className="business-dashboard-panel-card__header">
             <CardTitle className="text-lg leading-snug">{t("business.dashboard.tipsPerformanceTitle")}</CardTitle>
-            <p className="text-sm text-muted-foreground">{t(tipsPerformanceDescKey)}</p>
           </CardHeader>
           <CardContent
             className={cn(
@@ -155,11 +149,6 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
-                  <p className="business-dashboard-chart-insight">
-                    {t("business.dashboard.chartDistributionTotal", {
-                      total: formatEur(tipDistributionTotal),
-                    })}
-                  </p>
                 </DeferredContentFade>
               )}
             </DashboardStableChartSlot>
@@ -173,7 +162,14 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
       >
         <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
           <CardHeader className="business-dashboard-panel-card__header">
-            <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeePerformanceTitle")}</CardTitle>
+            <div className="flex w-full min-w-0 items-start justify-between gap-3">
+              <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeePerformanceTitle")}</CardTitle>
+              {!employeeChartEmpty ? (
+                <DashboardViewAllLink to={TOP_PERFORMERS_PAGE_PATH}>
+                  {t("business.dashboard.viewAllTopPerformers")}
+                </DashboardViewAllLink>
+              ) : null}
+            </div>
           </CardHeader>
           <CardContent
             className={cn(

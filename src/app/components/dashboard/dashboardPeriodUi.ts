@@ -1,6 +1,8 @@
 /**
  * Shared period segmented-control tokens (business + employee analytics).
  */
+export const DASHBOARD_PERIOD_METRICS_GRID = "dashboard-period-metrics-grid";
+
 export const dashboardPeriodUi = {
   periodToggle:
     "dashboard-period-toggle flex w-full min-w-0 max-w-full flex-nowrap gap-0.5 rounded-lg border border-border bg-card p-0.5 shadow-sm sm:gap-1.5 sm:p-1 sm:w-fit",

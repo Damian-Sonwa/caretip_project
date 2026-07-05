@@ -26,7 +26,7 @@ export const businessUi = {
   /** Overview analytics stack — consistent vertical rhythm below hero. */
   section: "employee-section business-dashboard-section",
   statsGrid:
-    "business-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3 gap-y-3 sm:gap-3.5 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-5",
+    "business-dashboard-stats-grid grid w-full min-w-0 grid-cols-2 items-stretch gap-3 gap-y-3 sm:gap-3.5 md:grid-cols-3 md:gap-4 lg:grid-cols-3 lg:gap-5",
   /** At-a-glance mini-stats — 2-up on phones, 3-up from tablet. */
   atAGlanceGrid:
     "dashboard-at-a-glance__grid grid grid-cols-2 gap-2 text-center min-[375px]:gap-2.5 sm:grid-cols-3 sm:gap-3",
@@ -36,7 +36,7 @@ export const businessUi = {
     "business-mobile-card block rounded-lg border border-border bg-card p-4 shadow-sm transition-colors active:bg-muted/30",
   tableWrap: "hidden overflow-x-auto lg:block",
   analyticsChartsGrid:
-    "business-dashboard-analytics-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2 lg:gap-6",
+    "business-dashboard-analytics-grid grid w-full min-w-0 items-stretch gap-5 sm:gap-6 lg:grid-cols-2 lg:gap-6",
   bottomGrid:
     "business-dashboard-bottom-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-3 lg:gap-6",
   card:

@@ -202,6 +202,8 @@ export function AdminDashboard() {
       <div className={cn(platformUi.pageInner, "platform-dashboard-body", platformUi.overviewSection, "pt-3 sm:pt-4")}>
         <PlatformAdminOverviewHero health={health} adminName={user.name} locale={i18n.language} />
 
+        <PlatformAdminAttentionAlerts alerts={attentionAlerts} />
+
         <section aria-labelledby="platform-kpis-heading" className="platform-overview-kpis">
           <div className="mb-5 flex items-end justify-between gap-3">
             <h2 id="platform-kpis-heading" className="text-sm font-semibold text-foreground sm:text-base">
@@ -250,8 +252,6 @@ export function AdminDashboard() {
           </Suspense>
         </DashboardChartsIdleMount>
 
-        <PlatformAdminAttentionAlerts alerts={attentionAlerts} />
-
         <section aria-labelledby="platform-teasers-heading" className="platform-overview-teasers">
           <h2 id="platform-teasers-heading" className="sr-only">
             {t("admin.overview.teasersTitle")}
@@ -268,8 +268,8 @@ export function AdminDashboard() {
                   value: String(newBusinessesWeek),
                 },
                 {
-                  label: t("admin.overview.kpi.pendingOnboarding"),
-                  value: String(pendingOnboardingCount),
+                  label: t("admin.overview.kpi.staff"),
+                  value: String(stats?.employeesCount ?? 0),
                 },
               ]}
             />

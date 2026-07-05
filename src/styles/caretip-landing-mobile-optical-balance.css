@@ -64,12 +64,12 @@
 
   .caretip-landing #for-employees .caretip-mobile-stack-after .caretip-landing-section-cta,
   .caretip-landing #business-section .caretip-mobile-stack-after .caretip-landing-section-cta {
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .caretip-landing #for-employees .caretip-mobile-stack-after .caretip-landing-cta-unit,
   .caretip-landing #business-section .caretip-mobile-stack-after .caretip-landing-cta-unit {
-    margin-inline: 0;
+    margin-inline: auto;
   }
 
   .caretip-landing #payments-trust .caretip-payments-trust-visual {

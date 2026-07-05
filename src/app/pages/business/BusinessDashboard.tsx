@@ -27,7 +27,6 @@ import { useBusinessEntitlementsContext } from "../../contexts/BusinessEntitleme
 import { FeatureGate } from "../../components/subscription/FeatureGate";
 import { DashboardPremiumFeaturesSection } from "../../components/business/dashboard/DashboardPremiumFeaturesSection";
 import { DashboardFeaturePreviewCard } from "../../components/business/dashboard/DashboardFeaturePreviewCard";
-import { DashboardAnalyticsPreviewCard } from "../../components/business/dashboard/DashboardAnalyticsPreviewCard";
 import { isUnsubscribedDashboardPreview } from "../../components/business/dashboard/isUnsubscribedDashboardPreview";
 import {
   DashboardHeroMetricSkeleton,
@@ -57,7 +56,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BusinessDashboardMetricsGrid } from "../../components/business/BusinessDashboardMetricsGrid";
 import { RecentCustomerFeedbackPanel } from "../../components/business/RecentCustomerFeedbackPanel";
-import { TopPerformersTeaser, TOP_PERFORMERS_PAGE_PATH, DASHBOARD_EMPLOYEE_TEASER_LIMIT } from "../../components/business/insights/TopPerformersTeaser";
 import { BusinessDashboardAnalyticsEmpty } from "../../components/business/BusinessDashboardAnalyticsEmpty";
 import { businessUi } from "../../components/business/businessDashboardUi";
 import { BusinessResponsiveData } from "../../components/business/BusinessResponsiveData";
@@ -80,6 +78,7 @@ import {
   sumTipPerformanceTotal,
 } from "../../lib/businessDashboardChartData";
 import { dashboardChartBarFill } from "../../components/dashboard/dashboardChartTheme";
+import { DASHBOARD_EMPLOYEE_TEASER_LIMIT } from "../../components/business/insights/TopPerformersTeaser";
 import { BusinessDashboardChartsFallback } from "./BusinessDashboardChartsFallback";
 
 const BusinessDashboardAnalyticsCharts = lazy(() =>
@@ -221,19 +220,6 @@ export function BusinessDashboard() {
       ).length,
     [employees],
   );
-  const topPerformersTeaser = useMemo(() => {
-    return (employees ?? [])
-      .filter((e) => e.isActive === true && e.activationStatus === "active" && e.emailVerified === true)
-      .sort((a, b) => b.tipsTotal - a.tipsTotal)
-      .slice(0, DASHBOARD_EMPLOYEE_TEASER_LIMIT)
-      .map((e) => ({
-        id: e.id,
-        name: e.name,
-        avatar: e.avatar,
-        tips: e.tipsTotal,
-      }));
-  }, [employees]);
-
   const useDevDemo = shouldUseBusinessDashboardDevDemo({
     isDev: import.meta.env.DEV,
     isWalkthroughDemoAccount: isWalkthroughDemoManager(user),
@@ -604,7 +590,47 @@ export function BusinessDashboard() {
       </div>
 
       <TracingBeam className={cn(businessUi.pageInner, "business-dashboard-body business-dashboard-mobile-body !pt-2 sm:!pt-3")}>
-        <div className={businessUi.section}>
+        <section
+          className={cn(
+            "business-dashboard-analytics-intro mb-1",
+            isPeriodRefreshing && !showMetricsSkeleton && "business-dashboard-analytics-intro--refreshing",
+          )}
+          aria-labelledby="business-analytics-period-heading"
+        >
+          <div className="business-dashboard-analytics-intro__head">
+            <div className="min-w-0 space-y-1">
+              <h2
+                id="business-analytics-period-heading"
+                className="text-base font-semibold tracking-tight text-foreground"
+              >
+                {t("business.dashboard.analyticsSectionTitle")}
+              </h2>
+            </div>
+            <DashboardStatusStrip
+              placeholder={showMetricsSkeleton}
+              items={dashboardStatusItems}
+            />
+          </div>
+          <DashboardAnalyticsPeriodToggle
+            ariaLabel={t("business.dashboard.analyticsPeriodAria")}
+            value={analyticsTimeframe}
+            onChange={(period) => {
+              runWithViewportScrollPreserved(() => setAnalyticsTimeframe(period));
+            }}
+            options={(["week", "month", "year"] as const).map((period) => ({
+              id: period,
+              label: analyticsPeriodLabel(period),
+              loading: analyticsTimeframeLoading === period,
+            }))}
+          />
+          <DashboardAnalyticsPhaseHintSlot
+            className="mt-2"
+            show={isPeriodRefreshing && !showMetricsSkeleton}
+            label={t("dashboard.loading.secondary")}
+          />
+        </section>
+
+        <div className={cn(businessUi.section, "pt-1")}>
           {!isPreviewMode ? (
             <FixPrompt
               id="missingQR"
@@ -616,40 +642,6 @@ export function BusinessDashboard() {
               actionTo="/dashboard/qr-studio/employees"
             />
           ) : null}
-
-          <section className="business-dashboard-analytics-intro business-dashboard-block--primary" aria-labelledby="business-analytics-period-heading">
-            <div className="business-dashboard-analytics-intro__head">
-              <div className="min-w-0 space-y-1">
-                <h2
-                  id="business-analytics-period-heading"
-                  className="text-base font-semibold tracking-tight text-foreground"
-                >
-                  {t("business.dashboard.analyticsSectionTitle")}
-                </h2>
-              </div>
-              <DashboardStatusStrip
-                placeholder={showMetricsSkeleton}
-                items={dashboardStatusItems}
-              />
-            </div>
-            <DashboardAnalyticsPeriodToggle
-              ariaLabel={t("business.dashboard.analyticsPeriodAria")}
-              value={analyticsTimeframe}
-              onChange={(period) => {
-                runWithViewportScrollPreserved(() => setAnalyticsTimeframe(period));
-              }}
-              options={(["week", "month", "year"] as const).map((period) => ({
-                id: period,
-                label: analyticsPeriodLabel(period),
-                loading: analyticsTimeframeLoading === period,
-              }))}
-            />
-            <DashboardAnalyticsPhaseHintSlot
-              className="mt-3"
-              show={isPeriodRefreshing && !showMetricsSkeleton}
-              label={t("dashboard.loading.secondary")}
-            />
-          </section>
 
           <motion.div
             {...dashboardBlockMotion}
@@ -683,7 +675,7 @@ export function BusinessDashboard() {
               loading={showMetricsSkeleton}
               isPeriodRefreshing={isPeriodRefreshing}
               hasTipActivityInPeriod={hasTipActivityInPeriod}
-              topPerformersCount={topPerformersTeaser.length}
+              topPerformersCount={employeePerformance.length}
             />
           </motion.div>
 
@@ -759,8 +751,8 @@ export function BusinessDashboard() {
                     <CardTitle className="text-base font-semibold leading-snug">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
                   </button>
                   {employeeGoalsList.length > 0 ? (
-                    <DashboardViewAllLink to={TOP_PERFORMERS_PAGE_PATH}>
-                      {t("business.dashboard.viewAllTopPerformers")}
+                    <DashboardViewAllLink to="/dashboard/team/employees">
+                      {t("business.dashboard.viewAllGoals")}
                     </DashboardViewAllLink>
                   ) : null}
                 </div>
@@ -882,31 +874,13 @@ export function BusinessDashboard() {
             )}
           </motion.div>
 
-          {/* Top Performers teaser & help */}
-          <div className={cn(businessUi.bottomGrid, "business-dashboard-block--tertiary")}>
-            <motion.div
-              {...dashboardBlockMotion}
-              transition={{ delay: 0.6 }}
-              className="business-dashboard-bottom-grid__main lg:col-span-2"
-            >
-              {isPreviewMode ? (
-                <DashboardAnalyticsPreviewCard />
-              ) : (
-                <FeatureGate featureKey="advancedAnalytics" role="business" enabled={isBusiness}>
-                  <TopPerformersTeaser
-                    employees={topPerformersTeaser}
-                    loading={showMetricsSkeleton && !useDevDemo}
-                  />
-                </FeatureGate>
-              )}
-            </motion.div>
-
-            <motion.div
-              {...dashboardBlockMotion}
-              transition={{ delay: 0.7 }}
-              className="business-dashboard-bottom-grid__aside flex h-full flex-col gap-5 sm:gap-6"
-            >
-              <Card className={cn(businessUi.cardStatic, "business-dashboard-help-card business-dashboard-panel-card mt-auto w-full")}>
+          {/* Help */}
+          <motion.div
+            {...dashboardBlockMotion}
+            transition={{ delay: 0.6 }}
+            className="business-dashboard-block business-dashboard-block--tertiary"
+          >
+            <Card className={cn(businessUi.cardStatic, "business-dashboard-help-card business-dashboard-panel-card w-full max-w-md")}>
                 <CardHeader className="business-dashboard-panel-card__header !pb-2">
                   <div className="business-dashboard-help-head">
                     <div
@@ -930,8 +904,7 @@ export function BusinessDashboard() {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
-          </div>
+          </motion.div>
         </div>
       </TracingBeam>
 

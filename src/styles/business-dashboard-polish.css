@@ -60,11 +60,21 @@
 /* —— KPI stat grid —— */
 .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid {
   align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Period analytics (3 KPIs) — equal columns across the full analytics band. */
+@media (min-width: 768px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid--period {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid > .business-stat-card {
   height: 100%;
   min-height: 7.5rem;
+  min-width: 0;
 }
 
 @media (min-width: 640px) {
@@ -76,6 +86,24 @@
 @media (min-width: 1024px) {
   .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid > .business-stat-card {
     min-height: 8.5rem;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid--period {
+    gap: 1.25rem;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid--period {
+    gap: 1.375rem;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-grid {
+    gap: 1.625rem;
   }
 }
 
@@ -109,11 +137,21 @@
 /* —— Chart row — equal height, aligned baselines —— */
 .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-grid {
   align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-grid > * {
   display: flex;
+  min-width: 0;
   min-height: 100%;
+  width: 100%;
 }
 
 .caretip-dashboard-shell.business-dashboard .business-dashboard-chart-card.business-dashboard-panel-card {

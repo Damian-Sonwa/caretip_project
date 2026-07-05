@@ -295,26 +295,22 @@
 }
 
 /* —— Analytics intro (primary band) —— */
-.caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro {
-  gap: 0.75rem;
-  /* Pull KPI cards closer to the period filter (section flex gap stays elsewhere). */
-  margin-bottom: calc(-1 * (var(--business-dash-block-gap) - 1.5rem));
-}
-
-@media (min-width: 640px) {
-  .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro {
-    margin-bottom: calc(-1 * (var(--business-dash-block-gap) - 1.75rem));
-  }
-}
-
 .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro h2 {
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.caretip-dashboard-shell.business-dashboard .business-dashboard-block--primary {
-  margin-top: -0.25rem;
+/* Toggle → KPI cards: match employee rhythm (intro sits outside section flex gap). */
+@media (max-width: 1023px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro {
+    margin-bottom: 0.25rem;
+    gap: 0.75rem;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro + .business-dashboard-section {
+    padding-top: 0.25rem;
+  }
 }
 
 /* —— Secondary panels (goals, feedback) —— */

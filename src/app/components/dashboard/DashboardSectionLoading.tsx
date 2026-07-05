@@ -249,7 +249,7 @@ export function DashboardAnalyticsPhaseHint({
   );
 }
 
-/** Reserves hint row height while charts load so the section does not jump. */
+/** Reserves hint row height only while the secondary phase hint is visible. */
 export function DashboardAnalyticsPhaseHintSlot({
   show,
   label,
@@ -259,9 +259,11 @@ export function DashboardAnalyticsPhaseHintSlot({
   label: string;
   className?: string;
 }) {
+  if (!show) return null;
+
   return (
-    <div className={cn("min-h-[1.375rem]", className)} aria-hidden={!show ? true : undefined}>
-      <DashboardAnalyticsPhaseHint label={label} className={cn(!show && "invisible")} />
+    <div className={cn("min-h-[1.375rem]", className)}>
+      <DashboardAnalyticsPhaseHint label={label} />
     </div>
   );
 }

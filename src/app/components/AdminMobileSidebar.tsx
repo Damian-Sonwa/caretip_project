@@ -66,7 +66,7 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
       </div>
 
       <div className="border-t border-sidebar-border p-3 sm:p-4">
-        <div className="flex items-center gap-3 rounded-lg border border-sidebar-border bg-sidebar-accent/70 px-3 py-2.5">
+        <div className="flex items-center gap-3 rounded-lg border border-sidebar-border bg-sidebar-accent px-3 py-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground">
             {displayName.charAt(0)}
           </div>

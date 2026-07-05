@@ -1,13 +1,14 @@
 import { memo } from "react";
-import { Star } from "lucide-react";
-import { CareIcon } from "@/components/icons";
+import { Flame, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CareIcon } from "@/components/icons";
 import { EmployeeStatCard } from "./EmployeeStatCard";
+import { computeEmployeeTipStreakDays } from "../../lib/employeeTipStreak";
 import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { formatEur } from "../../lib/formatEur";
 import { employeeUi } from "./employeeDashboardUi";
+import { DASHBOARD_PERIOD_METRICS_GRID } from "../dashboard/dashboardPeriodUi";
 import { cn } from "@/lib/utils";
-import type { EmployeeAnalyticsTimeframe } from "../../hooks/useEmployeeDashboardAnalytics";
 
 export type EmployeePeriodMetrics = {
   periodTipCount: number;
@@ -15,6 +16,7 @@ export type EmployeePeriodMetrics = {
   goalPct: number | null;
   rating: number | null;
   ratingCount: number;
+  tipStreakDays: number;
 };
 
 type EmployeeDashboardMetricsGridProps = {
@@ -32,7 +34,7 @@ function EmployeeDashboardMetricsGridInner({
   metrics,
 }: EmployeeDashboardMetricsGridProps) {
   const { t } = useTranslation();
-  const { periodTipCount, periodAmountEur, goalPct, rating, ratingCount } = metrics;
+  const { periodTipCount, periodAmountEur, goalPct, rating, ratingCount, tipStreakDays } = metrics;
   const showEmptyTipsState =
     metricsSettledForPeriod && !loading && periodTipCount === 0;
   const cardsSettled = metricsSettledForPeriod && !loading;
@@ -43,7 +45,8 @@ function EmployeeDashboardMetricsGridInner({
     <div
       className={cn(
         employeeUi.statsGrid,
-        "relative transition-opacity duration-300",
+        DASHBOARD_PERIOD_METRICS_GRID,
+        "employee-dashboard-stats-grid--period relative transition-opacity duration-300",
         isPeriodRefreshing && "opacity-[0.94]",
       )}
     >
@@ -57,7 +60,6 @@ function EmployeeDashboardMetricsGridInner({
             ? t("format.metricZeroTips")
             : t("employee.dashboard.statChangeEarned", {
                 amount: formatEur(periodAmountEur),
-                count: periodTipCount,
               })
         }
         icon={<CareIcon name="tips" size="md" />}
@@ -101,12 +103,21 @@ function EmployeeDashboardMetricsGridInner({
           loading
             ? undefined
             : showGoalValue
-              ? t("employee.dashboard.statGoalProgress")
+              ? t("employee.dashboard.statGoalProgressShort")
               : cardsSettled
-                ? t("employee.dashboard.statGoalSetHint")
+                ? t("employee.dashboard.statGoalSetHintShort")
                 : undefined
         }
         icon={<CareIcon name="goals" size="md" />}
+      />
+      <EmployeeStatCard
+        loading={loading}
+        label={t("employee.performance.streak")}
+        value={
+          cardsSettled ? t("employee.performance.streakDays", { count: tipStreakDays }) : null
+        }
+        change={cardsSettled ? t("employee.performance.streakHint") : undefined}
+        icon={<Flame className="h-5 w-5 text-amber-600" aria-hidden />}
       />
     </div>
   );

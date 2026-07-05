@@ -1,7 +1,23 @@
 import type { ReactNode } from "react";
-import { LandingLiveMinutesMarker, landingLiveMinutesRowClass } from "@/components/landing/LandingLiveMinutesMarker";
+import { Check } from "lucide-react";
 import { caretipType } from "@/lib/typography/caretipType";
 import { cn } from "@/lib/utils";
+
+/** Shared row layout for landing benefit bullets — matches #built-for-hospitality rhythm. */
+export const landingBenefitRowClass =
+  "caretip-landing-benefit-row flex items-start gap-3.5 sm:gap-3.5";
+
+/** @deprecated Use `landingBenefitRowClass` */
+export const landingLiveMinutesRowClass = landingBenefitRowClass;
+
+/** Single primary check — canonical marker for all landing benefit points. */
+export function LandingBenefitCheckMark({ className }: { className?: string }) {
+  return (
+    <span className={cn("caretip-landing-benefit-check", className)} aria-hidden>
+      <Check className="caretip-landing-benefit-check__glyph" strokeWidth={2.5} />
+    </span>
+  );
+}
 
 /** @deprecated Use `landingLiveMinutesRowClass` — kept for imports that reference the grid helper. */
 export const landingUptrendRowGrid = landingLiveMinutesRowClass;
@@ -14,7 +30,7 @@ type LandingBenefitChecklistProps = {
   className?: string;
 };
 
-/** Hero-style benefit list — circular list-check marker. */
+/** Hero-style benefit list — single check marker (matches hospitality section). */
 export function LandingBenefitChecklist({ items, tone, className }: LandingBenefitChecklistProps) {
   const textClass =
     tone === "default"
@@ -33,11 +49,11 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
       {items.map((label, i) => (
         <li
           key={i}
-          className={cn(landingLiveMinutesRowClass, caretipType.featureCopy, textClass)}
+          className={cn(landingBenefitRowClass, caretipType.featureCopy, textClass)}
           role="listitem"
         >
-          <LandingLiveMinutesMarker className="shrink-0 self-start" />
-          <span className="min-w-0 pt-1 [text-wrap:balance]">{label}</span>
+          <LandingBenefitCheckMark />
+          <span className="min-w-0 [text-wrap:pretty]">{label}</span>
         </li>
       ))}
     </ul>
@@ -61,13 +77,13 @@ export function LandingBenefitBlock({
   bodyClassName,
   className,
   variant = "default",
-  active = false,
+  active: _active = false,
 }: LandingBenefitBlockProps) {
   const isRich = variant === "split" || variant === "showcase";
 
   return (
-    <div className={cn(landingLiveMinutesRowClass, className)}>
-      <LandingLiveMinutesMarker active={active} className="mt-0.5 shrink-0 self-start" />
+    <div className={cn(landingBenefitRowClass, className)} role="listitem">
+      <LandingBenefitCheckMark />
       <div
         className={cn(
           "min-w-0 flex-1",
@@ -91,14 +107,7 @@ export function LandingBenefitBlock({
   );
 }
 
-/** @deprecated Use `LandingLiveMinutesMarker` — alias for gradual migration. */
-export function LandingCheckBadge({
-  className,
-  active,
-}: {
-  className?: string;
-  matchLineHeight?: boolean;
-  active?: boolean;
-}) {
-  return <LandingLiveMinutesMarker active={active} className={className} />;
+/** @deprecated Use `LandingBenefitCheckMark` */
+export function LandingCheckBadge({ className }: { className?: string; matchLineHeight?: boolean; active?: boolean }) {
+  return <LandingBenefitCheckMark className={className} />;
 }

@@ -184,20 +184,15 @@ export function BusinessAnalyticsReporting({
       </section>
 
       <section className="space-y-3" aria-labelledby="business-qr-analytics-heading">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2
-            id="business-qr-analytics-heading"
-            className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-          >
-            {t("business.team.performance.bi.qrTitle")}
-          </h2>
-          <DashboardAnalyticsPeriodToggle
-            ariaLabel={t("business.tips.analytics.qrPeriodAria")}
-            value={qrTimeframe}
-            onChange={onQrTimeframeChange}
-            options={periodOptions}
-          />
-        </div>
+        <h2
+          id="business-qr-analytics-heading"
+          className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+        >
+          {t("business.team.performance.bi.qrTitle")}
+          <span className="ml-2 font-normal normal-case text-muted-foreground/80">
+            ({periodLabel})
+          </span>
+        </h2>
         <QrAnalyticsSection
           timeframe={qrTimeframe}
           showHeading={false}

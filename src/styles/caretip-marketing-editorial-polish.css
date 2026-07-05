@@ -235,13 +235,15 @@ html.dark .caretip-landing #payments-trust .caretip-landing-feature-icon {
 
 .caretip-landing .caretip-hospitality-feature-list__item,
 .caretip-landing .caretip-hospitality-feature-panel li,
-.caretip-landing .caretip-landing-benefit-list li {
+.caretip-landing .caretip-landing-benefit-list li,
+.caretip-landing .caretip-landing-benefit-row {
   align-items: flex-start;
   gap: 0.875rem;
   line-height: 1.62;
   text-wrap: pretty;
 }
 
+.caretip-landing .caretip-landing-benefit-check,
 .caretip-landing .caretip-hospitality-feature-list__mark,
 .caretip-landing .caretip-hospitality-feature-panel li > span:first-child,
 .caretip-landing .caretip-landing-benefit-list li > span:first-child {

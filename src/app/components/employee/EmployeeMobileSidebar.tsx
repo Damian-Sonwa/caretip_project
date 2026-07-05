@@ -59,7 +59,7 @@ export function EmployeeMobileSidebar({
         <Link
           to={EMPLOYEE_DASHBOARD_HOME}
           onClick={onClose}
-          className="flex min-h-[2.75rem] min-w-0 flex-1 items-center gap-2 rounded-lg pr-2 outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          className="flex min-h-[2.75rem] min-w-0 flex-1 items-center gap-2 rounded-lg pr-2 outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
         >
           {businessBranding ? (
             <>

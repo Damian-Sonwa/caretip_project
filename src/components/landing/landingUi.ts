@@ -253,7 +253,7 @@ export const landingUi = {
   heroActionCluster:
     `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-4 md:max-w-none md:gap-4`,
   heroBenefits:
-    "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
+    "!mt-0 w-full max-md:gap-2.5 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!text-feature-copy",
   heroCtaRow:
     "caretip-hero-cta-row caretip-landing-cta-row relative z-10 flex w-full flex-col gap-2 [&_a]:no-underline max-lg:items-center max-lg:justify-center lg:items-start",
   heroCtaUnit:
@@ -261,7 +261,7 @@ export const landingUi = {
   heroCtaHint:
     "caretip-hero-cta-hint caretip-landing-cta-hint w-full text-center text-[10px] font-medium leading-[1.25] tracking-[0.02em] text-muted-foreground sm:text-[11px] sm:leading-[1.3]",
   sectionCtaCluster:
-    "caretip-landing-section-cta flex w-full justify-start",
+    "caretip-landing-section-cta flex w-full max-lg:justify-center lg:justify-start",
   sectionCtaUnit:
     "caretip-landing-cta-unit caretip-landing-cta-unit--section flex w-full max-w-[min(100%,17.5rem)] flex-col items-stretch sm:min-w-[16.25rem] sm:max-w-[18.75rem] sm:w-[17.5rem]",
   sectionCtaPrimary: cnCtaPrimary(

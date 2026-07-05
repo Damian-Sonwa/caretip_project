@@ -46,15 +46,18 @@
   }
 }
 
-/* Mobile drawer — align with desktop sidebar tokens in dark mode (lg:hidden panel only). */
+/* Mobile drawer — solid app menu surface (no glass / backdrop-blur on panel). */
 @media (max-width: 1023px) {
   .caretip-dashboard-shell .caretip-mobile-drawer-panel {
-    background: linear-gradient(
-      to bottom,
-      hsl(var(--sidebar)),
-      hsl(var(--sidebar-accent) / 0.35)
-    );
+    background-color: hsl(var(--sidebar));
+    background-image: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     color: hsl(var(--sidebar-foreground));
+    border-color: hsl(var(--sidebar-border));
+  }
+
+  .caretip-dashboard-shell .caretip-mobile-drawer-panel [class*="border-sidebar-border"] {
     border-color: hsl(var(--sidebar-border));
   }
 

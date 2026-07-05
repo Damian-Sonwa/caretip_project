@@ -95,6 +95,14 @@ html.dark .caretip-landing [data-landing-accent] .caretip-landing-accent-text--m
   align-items: stretch;
 }
 
+@media (max-width: 1023px) {
+  .caretip-landing .caretip-landing-cta-unit--section {
+    width: 100%;
+    max-width: min(100%, 18.75rem);
+    margin-inline: auto;
+  }
+}
+
 .caretip-landing .caretip-landing-section-cta {
   margin-top: 0;
   justify-content: flex-start;
@@ -129,6 +137,37 @@ html.dark .caretip-landing [data-landing-accent] .caretip-landing-accent-text--m
 
 html.dark .caretip-landing .caretip-landing-cta-hint {
   color: rgb(163 163 163);
+}
+
+/* —— Unified benefit check markers (all landing feature/benefit bullets) —— */
+.caretip-landing .caretip-landing-benefit-check {
+  display: inline-flex;
+  height: 1.375rem;
+  width: 1.375rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.125rem;
+  color: hsl(var(--primary));
+}
+
+.caretip-landing .caretip-landing-benefit-check__glyph {
+  height: 0.875rem;
+  width: 0.875rem;
+}
+
+.caretip-landing .caretip-landing-benefit-row {
+  align-items: flex-start;
+  text-wrap: pretty;
+}
+
+.caretip-landing .caretip-landing-benefit-row .caretip-hospitality-feature-list__title,
+.caretip-landing .caretip-landing-benefit-row .caretip-hospitality-feature-list__desc,
+.caretip-landing .caretip-hospitality-feature-panel .caretip-landing-benefit-row > .min-w-0 {
+  hyphens: none;
+  word-break: normal;
+  overflow-wrap: normal;
+  text-wrap: pretty;
 }
 
 .caretip-landing .caretip-final-cta-subtitle + .caretip-final-cta-actions {

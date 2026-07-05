@@ -11,7 +11,6 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import {
   Star,
-  Eye,
   QrCode,
   Loader2,
   Sparkles,
@@ -58,7 +57,7 @@ import {
   DashboardHeroMetricSkeleton,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import { CountUpMetric } from "../../components/dashboard/CountUpMetric";
-import { EmployeePerformanceInsights } from "../../components/employee/EmployeePerformanceInsights";
+import { computeEmployeeTipStreakDays } from "../../lib/employeeTipStreak";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import {
   devMockEmployeeAccountSummary,
@@ -274,7 +273,10 @@ export function EmployeeDashboard() {
         : displayMonthlyGoal != null && displayMonthlyGoal > 0
           ? Math.min(100, Math.round((displayCurrentMonthTotal / displayMonthlyGoal) * 100))
           : null;
-    return { periodTipCount, periodAmountEur, goalPct, rating, ratingCount };
+    const tipStreakDays = useDevDemo
+      ? 3
+      : computeEmployeeTipStreakDays(displayPayload?.tips ?? []);
+    return { periodTipCount, periodAmountEur, goalPct, rating, ratingCount, tipStreakDays };
   }, [
     devPeriodSummary,
     displayMetrics,
@@ -286,6 +288,7 @@ export function EmployeeDashboard() {
     displayCurrentMonthTotal,
     displayPayload?.averageRating,
     displayPayload?.ratingCount,
+    displayPayload?.tips,
     displayMetrics?.averageRating,
     displayMetrics?.ratingCount,
   ]);
@@ -627,14 +630,6 @@ export function EmployeeDashboard() {
             />
           </motion.div>
 
-          <EmployeePerformanceInsights
-            tips={displayPayload?.tips ?? []}
-            goalProgress={displayPayload?.goalProgress ?? null}
-            periodAmountEur={displayPeriodAmountEur}
-            monthlyGoal={displayPayload?.monthlyGoal ?? null}
-            loading={showMetricsLoading}
-          />
-
           <FeatureGate featureKey="advancedAnalytics" role="employee" enabled={dashboardEnabled}>
           <DashboardChartsIdleMount
             whenVisible
@@ -649,65 +644,6 @@ export function EmployeeDashboard() {
             />
           </DashboardChartsIdleMount>
           </FeatureGate>
-
-          <motion.div {...dashboardBlockMotion} transition={{ delay: 0.5 }}>
-            <Card className={cn(employeeUi.cardStatic, "w-full")}>
-              <CardHeader className={employeeUi.cardHeader}>
-                <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.quickActions")}</CardTitle>
-              </CardHeader>
-              <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
-                <p className="mb-4 text-sm text-muted-foreground">{t("employee.dashboard.quickActionsDesc")}</p>
-                <div className="grid grid-cols-2 gap-3 sm:max-w-md">
-                  <Button
-                    type="button"
-                    className={cn(employeeUi.btnPrimary, employeeUi.quickActionTile)}
-                    onClick={() => void handleQrQuickAction()}
-                    disabled={slugLoading || generatingSlug}
-                  >
-                    {generatingSlug ? (
-                      <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-                    ) : (
-                      <QrCode className="h-5 w-5" aria-hidden />
-                    )}
-                    <span className={employeeUi.quickActionLabel}>
-                      {slugLoading
-                        ? t("employee.dashboard.qrTileLoading")
-                        : generatingSlug
-                          ? t("employee.dashboard.qrTileGenerating")
-                          : hasSlug
-                            ? t("employee.dashboard.qrTileMyQr")
-                            : t("employee.dashboard.qrTileGenerate")}
-                    </span>
-                  </Button>
-                  {hasSlug && !slugLoading ? (
-                    <Button
-                      variant="outline"
-                      className={cn(employeeUi.btnSecondary, employeeUi.quickActionTile)}
-                      asChild
-                    >
-                      <a href={`/staff/${staffSlug}`} target="_blank" rel="noopener noreferrer">
-                        <Eye className="h-5 w-5" aria-hidden />
-                        <span className={employeeUi.quickActionLabel}>
-                          {t("employee.dashboard.viewProfile")}
-                        </span>
-                      </a>
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      className={cn(employeeUi.btnSecondary, employeeUi.quickActionTile)}
-                      disabled
-                    >
-                      <Eye className="h-5 w-5" aria-hidden />
-                      <span className={employeeUi.quickActionLabel}>
-                        {slugLoading ? t("employee.dashboard.qrTileLoading") : t("employee.dashboard.viewProfile")}
-                      </span>
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
       </TracingBeam>
 
