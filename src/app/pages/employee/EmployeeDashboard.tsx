@@ -57,7 +57,7 @@ import {
   DashboardHeroMetricSkeleton,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import { CountUpMetric } from "../../components/dashboard/CountUpMetric";
-import { computeEmployeeTipStreakDays } from "../../lib/employeeTipStreak";
+import { computeEmployeeTipStreakDays } from "../../lib/employeeFormat";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import {
   devMockEmployeeAccountSummary,

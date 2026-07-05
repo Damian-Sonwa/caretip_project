@@ -3,7 +3,7 @@ import { Flame, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CareIcon } from "@/components/icons";
 import { EmployeeStatCard } from "./EmployeeStatCard";
-import { computeEmployeeTipStreakDays } from "../../lib/employeeTipStreak";
+import { computeEmployeeTipStreakDays } from "../../lib/employeeFormat";
 import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { formatEur } from "../../lib/formatEur";
 import { employeeUi } from "./employeeDashboardUi";

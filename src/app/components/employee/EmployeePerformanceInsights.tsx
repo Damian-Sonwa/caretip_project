@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Flame, Target, TrendingUp } from "lucide-react";
 import type { EmployeeGoalProgress, TipItem } from "../../lib/api";
-import { computeEmployeeTipStreakDays } from "../../lib/employeeTipStreak";
+import { computeEmployeeTipStreakDays } from "../../lib/employeeFormat";
 import { formatEur } from "../../lib/formatEur";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { employeeUi } from "../employee/employeeDashboardUi";
