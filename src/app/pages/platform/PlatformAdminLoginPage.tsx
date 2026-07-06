@@ -10,6 +10,7 @@ import { logClientError } from "../../lib/clientLog";
 import { isPlatformAdminSessionRole, shouldShowLoginSessionResumeUi } from "../../lib/authSession";
 import { shouldShowAuthBootstrapShell } from "../../lib/authBootstrapUi";
 import { AuthBootstrapShell } from "@/app/components/auth/AuthBootstrapShell";
+import { useAuthPostLoginTransitionOverlay } from "@/app/lib/useAuthPostLoginTransitionOverlay";
 import { AuthMinimalFooter } from "@/app/components/auth/AuthMinimalFooter";
 import { caretipBtnPrimaryCompact, caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,7 @@ export function PlatformAdminLoginPage() {
         !isPlatformAdminSessionRole(user.role),
     );
   const authTransitionPending = authFlowInProgress && Boolean(postAuthRedirectRef.current);
+  useAuthPostLoginTransitionOverlay(authTransitionPending);
 
   const loginSubmitBlocked = Boolean(
     user && !sessionValidated && isPlatformAdminSessionRole(user.role) && !forceLogin,

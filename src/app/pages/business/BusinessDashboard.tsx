@@ -19,6 +19,7 @@ import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { subscribeTipReceived } from "../../lib/realtime/subscribeTipReceived";
 import { shouldProcessRealtimeEvent } from "../../lib/realtime/realtimeEventDedupe";
 import { DashboardStatusStrip } from "../../components/dashboard/DashboardStatusStrip";
+import { DashboardRefreshIndicator } from "../../components/dashboard/DashboardRefreshIndicator";
 import { deriveBusinessDashboardStatus } from "../../lib/dashboardStatus/deriveDashboardStatus";
 import { FixPrompt } from "../../components/FixPrompt";
 import { useBusinessDashboardStats } from "../../hooks/useBusinessDashboardStats";
@@ -32,7 +33,6 @@ import {
   DashboardHeroMetricSkeleton,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import {
-  DashboardAnalyticsPhaseHintSlot,
   DashboardStableChartSlot,
   GoalsTableLoadingShell,
 } from "../../components/dashboard/DashboardSectionLoading";
@@ -156,8 +156,12 @@ export function BusinessDashboard() {
     isMetricsInitialLoad,
     isGoalsInitialLoad,
     isPeriodRefreshing,
+    isPeriodSyncing,
+    isMetricsSettled,
+    hasVisibleMetrics,
     isAnalyticsSettled,
     hasPeriodActivity,
+    lastUpdatedAt,
     analyticsLoading: isAnalyticsSectionLoading,
     showStatsSkeleton,
     refreshStatsQuiet,
@@ -336,18 +340,20 @@ export function BusinessDashboard() {
     (displayStats?.employees ?? []).some((e) => e.slug == null || e.slug === "");
 
   const showMetricsSkeleton = isMetricsInitialLoad && !useDevDemo;
+  const periodMetricsLoading = showMetricsSkeleton || (!useDevDemo && !displayMetrics);
   const heroPulseLoading =
-    !useDevDemo && showMetricsSkeleton && !heroStats && !operationalPulse;
+    !useDevDemo && !isMetricsSettled && !operationalPulse;
   const showGoalsLoading = isGoalsInitialLoad && !useDevDemo;
+  const periodRefreshingLabel = t("dashboard.refresh.updating");
 
   const dashboardStatusItems = useMemo(
     () =>
       deriveBusinessDashboardStatus(
         {
-          isInitialLoading: showMetricsSkeleton,
-          isPeriodRefreshing,
-          isAnalyticsSettled,
+          isPeriodSyncing,
+          isMetricsSettled,
           hasPeriodActivity,
+          hasVisibleMetrics,
           pendingVerification: showOnboardingReviewNotice,
           statsLoadFailed,
           socketStatus: connectionStatus,
@@ -355,10 +361,10 @@ export function BusinessDashboard() {
         t,
       ),
     [
-      showMetricsSkeleton,
-      isPeriodRefreshing,
-      isAnalyticsSettled,
+      isPeriodSyncing,
+      isMetricsSettled,
       hasPeriodActivity,
+      hasVisibleMetrics,
       showOnboardingReviewNotice,
       statsLoadFailed,
       connectionStatus,
@@ -611,11 +617,13 @@ export function BusinessDashboard() {
               >
                 {t("business.dashboard.analyticsSectionTitle")}
               </h2>
+              <DashboardRefreshIndicator
+                isRefreshing={isPeriodSyncing}
+                lastUpdatedAt={lastUpdatedAt}
+                refreshFailed={Boolean(statsLoadFailed && hasVisibleMetrics)}
+              />
             </div>
-            <DashboardStatusStrip
-              placeholder={showMetricsSkeleton}
-              items={dashboardStatusItems}
-            />
+            <DashboardStatusStrip items={dashboardStatusItems} />
           </div>
           <DashboardAnalyticsPeriodToggle
             ariaLabel={t("business.dashboard.analyticsPeriodAria")}
@@ -628,11 +636,6 @@ export function BusinessDashboard() {
               label: analyticsPeriodLabel(period),
               loading: analyticsTimeframeLoading === period,
             }))}
-          />
-          <DashboardAnalyticsPhaseHintSlot
-            className="mt-2"
-            show={isPeriodRefreshing && !showMetricsSkeleton}
-            label={t("dashboard.loading.secondary")}
           />
         </section>
 
@@ -678,8 +681,9 @@ export function BusinessDashboard() {
                       }
                     : null
               }
-              loading={showMetricsSkeleton}
+              loading={periodMetricsLoading}
               isPeriodRefreshing={isPeriodRefreshing}
+              refreshingLabel={periodRefreshingLabel}
               hasTipActivityInPeriod={hasTipActivityInPeriod}
               topPerformersCount={employeePerformance.length}
             />

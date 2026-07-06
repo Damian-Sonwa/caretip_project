@@ -10,6 +10,8 @@ type BusinessStatCardProps = {
   featured?: boolean;
   className?: string;
   loading?: boolean;
+  refreshing?: boolean;
+  refreshingLabel?: ReactNode;
   showSpinner?: boolean;
   loadingVariant?: "currency" | "count" | "pulse";
 };

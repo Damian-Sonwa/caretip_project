@@ -21,13 +21,7 @@ interface RoleProtectedRouteProps {
 export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRouteProps) {
   const gate = useProtectedRouteGate(allowedRoles);
   const rolesKey = allowedRoles.join(",");
-  const sessionBlocking = gate.authBlocking || gate.storedSessionSync;
 
-  useAppLoadingRegistration(
-    `role-protected-route-session:${rolesKey}`,
-    APP_LOADING_PRIORITY.AUTH,
-    sessionBlocking,
-  );
   useAppLoadingRegistration(
     `role-protected-route-guard:${rolesKey}:${gate.pathname}`,
     APP_LOADING_PRIORITY.ROUTE_GUARD,

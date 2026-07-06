@@ -5,15 +5,17 @@ import { cn } from "@/lib/utils";
 type DashboardRefreshIndicatorProps = {
   isRefreshing: boolean;
   lastUpdatedAt: number | null;
+  refreshFailed?: boolean;
   className?: string;
 };
 
-const MIN_UPDATING_VISIBLE_MS = 750;
+const MIN_UPDATING_VISIBLE_MS = 400;
 
 /** Subtle “Updating…” / “Updated just now” for dashboard analytics sections. */
 export function DashboardRefreshIndicator({
   isRefreshing,
   lastUpdatedAt,
+  refreshFailed = false,
   className,
 }: DashboardRefreshIndicatorProps) {
   const { t } = useTranslation();
@@ -46,6 +48,22 @@ export function DashboardRefreshIndicator({
     return () => window.clearInterval(id);
   }, [lastUpdatedAt, showUpdating]);
 
+  if (refreshFailed && !isRefreshing && !showUpdating) {
+    return (
+      <div
+        className={cn(
+          "inline-flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-destructive/90",
+          className,
+        )}
+        role="status"
+        aria-live="polite"
+      >
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-destructive/80" aria-hidden />
+        {t("dashboard.status.refreshFailed")}
+      </div>
+    );
+  }
+
   if (!showUpdating && !lastUpdatedAt) return null;
 
   const label = showUpdating
@@ -55,12 +73,15 @@ export function DashboardRefreshIndicator({
   return (
     <div
       className={cn(
-        "text-[11px] font-medium tracking-wide text-muted-foreground/80 tabular-nums",
+        "inline-flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-muted-foreground/80 tabular-nums",
         className,
       )}
       role="status"
       aria-live="polite"
     >
+      {showUpdating ? (
+        <span className="inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-amber-500/80" aria-hidden />
+      ) : null}
       {label}
     </div>
   );

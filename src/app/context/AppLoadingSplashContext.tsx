@@ -3,20 +3,19 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
-import { CareTipLoadingOverlay } from "../components/CareTipLoadingOverlay";
-import { CARETIP_LOADER_FADE_MS } from "../lib/appLoaderTransition";
+import { LoadingSpinner } from "../components/ui/loading-spinner";
+import { CareTipLoadingTitle } from "../components/CareTipPageLoader";
 import { LaunchSplashVisibilityProvider } from "./AppLoadingManager";
 
 /**
- * Launch splash: first paint through app shell ready (all surfaces).
- * PWA keeps a short minimum visible time so the mark does not flash.
+ * Launch splash (CareTip + spinner): installed PWA / standalone only — first paint & hydration.
+ * Not used for in-app SPA navigations (those use {@link RouteTransitionOverlay}).
  */
-const MIN_VISIBLE_MS_PWA = 420;
+const MIN_VISIBLE_MS_PWA = 450;
+const EXIT_TRANSITION_MS = 480;
 /** If layout never signals (e.g. unusual error routes), still dismiss splash. */
 const SHELL_READY_FALLBACK_MS = 8000;
 
@@ -24,12 +23,13 @@ type Phase = "on" | "exit" | "off";
 
 type AppLoadingSplashContextValue = {
   markAppShellReady: () => void;
+  /** Branded overlay during SPA route transitions (hidden while launch splash is active). */
   setRouteTransitionPending: (pending: boolean) => void;
-  /** App shell may fade in route content — false while launch overlay is up or exiting. */
-  revealed: boolean;
 };
 
-const AppLoadingSplashContext = createContext<AppLoadingSplashContextValue | null>(null);
+const AppLoadingSplashContext = createContext<AppLoadingSplashContextValue | null>(
+  null
+);
 
 export function useAppLoadingCoordinator() {
   const ctx = useContext(AppLoadingSplashContext);
@@ -43,13 +43,40 @@ export function useMarkAppShellReady() {
   return useAppLoadingCoordinator().markAppShellReady;
 }
 
+/**
+ * Optional: routes outside the provider can no-op (should not happen in production).
+ */
 export function useMarkAppShellReadyOptional() {
   return useContext(AppLoadingSplashContext)?.markAppShellReady;
 }
 
-export function useAppRevealState(): { revealed: boolean } {
-  const ctx = useContext(AppLoadingSplashContext);
-  return { revealed: ctx?.revealed ?? true };
+function BrandedLoadingSplashOverlay({
+  phase,
+}: {
+  phase: "on" | "exit";
+}) {
+  const exiting = phase === "exit";
+
+  return (
+    <div
+      className={[
+        "fixed inset-0 z-[10000] flex flex-col items-center justify-center px-6",
+        "bg-gray-50 text-foreground dark:bg-neutral-950",
+        "transition-[opacity,transform,filter] duration-[480ms] ease-out motion-reduce:transition-none",
+        exiting ? "pointer-events-none opacity-0 scale-[0.98]" : "opacity-100 scale-100",
+      ].join(" ")}
+      aria-busy={!exiting}
+      aria-live="polite"
+      role="status"
+    >
+      <div className="flex max-w-sm flex-col items-center text-center">
+        <CareTipLoadingTitle />
+        <div className="mt-7 flex justify-center">
+          <LoadingSpinner size="md" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function AppLoadingSplashProvider({
@@ -61,16 +88,14 @@ export function AppLoadingSplashProvider({
     if (typeof window === "undefined") return false;
     return (
       window.matchMedia?.("(display-mode: standalone)")?.matches === true ||
-      (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+      (window.navigator as Navigator & { standalone?: boolean }).standalone ===
+        true
     );
   }, []);
 
-  const [phase, setPhase] = useState<Phase>("on");
+  const [phase, setPhase] = useState<Phase>(isStandalone ? "on" : "off");
   const [minElapsed, setMinElapsed] = useState(!isStandalone);
-  const [shellReady, setShellReady] = useState(false);
-  const [seamlessHandoff] = useState(
-    () => typeof window !== "undefined" && window.__caretipHtmlSplash === true,
-  );
+  const [shellReady, setShellReady] = useState(!isStandalone);
 
   const markAppShellReady = useCallback(() => {
     setShellReady(true);
@@ -80,11 +105,6 @@ export function AppLoadingSplashProvider({
     // Route transitions use the single global overlay — no second spinner.
   }, []);
 
-  useLayoutEffect(() => {
-    document.querySelector(".caretip-initial-splash")?.remove();
-    delete window.__caretipHtmlSplash;
-  }, []);
-
   useEffect(() => {
     if (!isStandalone) return;
     const id = window.setTimeout(() => setMinElapsed(true), MIN_VISIBLE_MS_PWA);
@@ -92,49 +112,37 @@ export function AppLoadingSplashProvider({
   }, [isStandalone]);
 
   useEffect(() => {
+    if (!isStandalone) return;
     const id = window.setTimeout(() => {
-      setShellReady(true);
+      setShellReady((s) => s || true);
     }, SHELL_READY_FALLBACK_MS);
     return () => window.clearTimeout(id);
-  }, []);
+  }, [isStandalone]);
 
   useEffect(() => {
+    if (!isStandalone) return;
     if (!minElapsed || !shellReady) return;
     setPhase("exit");
-    const id = window.setTimeout(() => setPhase("off"), CARETIP_LOADER_FADE_MS);
+    const id = window.setTimeout(() => setPhase("off"), EXIT_TRANSITION_MS);
     return () => window.clearTimeout(id);
-  }, [minElapsed, shellReady]);
-
-  const launchOverlayMounted = phase !== "off";
-  const revealed = phase === "off";
+  }, [isStandalone, minElapsed, shellReady]);
 
   const value = useMemo(
     () => ({
       markAppShellReady,
       setRouteTransitionPending: setRouteTransitionPendingStable,
-      revealed,
     }),
-    [markAppShellReady, setRouteTransitionPendingStable, revealed],
+    [markAppShellReady, setRouteTransitionPendingStable]
   );
+
+  const launchActive = phase !== "off";
 
   return (
     <AppLoadingSplashContext.Provider value={value}>
-      <LaunchSplashVisibilityProvider active={launchOverlayMounted}>
-        <div
-          className={cn(
-            "caretip-app-shell min-h-[100dvh] min-w-0",
-            !revealed && "caretip-app-shell--behind-loader",
-            revealed && "caretip-app-shell--revealed",
-          )}
-        >
-          {children}
-        </div>
-        {launchOverlayMounted ? (
-          <CareTipLoadingOverlay
-            seamless={seamlessHandoff}
-            steady={seamlessHandoff || phase === "exit"}
-            exiting={phase === "exit"}
-          />
+      <LaunchSplashVisibilityProvider active={launchActive}>
+        {children}
+        {launchActive ? (
+          <BrandedLoadingSplashOverlay phase={phase === "exit" ? "exit" : "on"} />
         ) : null}
       </LaunchSplashVisibilityProvider>
     </AppLoadingSplashContext.Provider>

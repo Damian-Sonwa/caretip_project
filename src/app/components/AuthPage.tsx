@@ -4,11 +4,8 @@ import { Link, useNavigate, useLocation } from 'react-router';
 import { AuthFieldGroup } from './auth/AuthFieldGroup';
 import { AuthEmployeeVenueBanner } from './auth/AuthEmployeeVenueBanner';
 import { AuthTrustStrip } from './auth/AuthTrustStrip';
-import {
-  APP_LOADING_PRIORITY,
-  useAppLoadingRegistration,
-} from "../context/AppLoadingManager";
-import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
+import { LoadingSpinner } from './ui/loading-spinner';
+import { useAuthPostLoginTransitionOverlay } from '../lib/useAuthPostLoginTransitionOverlay';
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
 import { useAuth, type User, parseUser } from '../hooks/useAuth';
@@ -466,14 +463,21 @@ export function AuthPage() {
   const resumeSessionPending = user != null && !sessionValidated;
   const inviteGateBlocking = isEmployeeJoinSignup && !inviteGateReady;
 
-  /** Only block UI for invite validation — never for redirects or session-hint-only bootstrap. */
-  useAppLoadingRegistration("auth-page", APP_LOADING_PRIORITY.AUTH, inviteGateBlocking);
+  const authTransitionPending = authFlowInProgress && Boolean(postAuthRedirectRef.current);
+  useAuthPostLoginTransitionOverlay(authTransitionPending);
 
   if (inviteGateBlocking) {
-    return <GlobalAppLoadingHold />;
+    return (
+      <div
+        className="caretip-auth-page relative flex min-h-[100dvh] items-center justify-center font-sans"
+        role="status"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <LoadingSpinner size="lg" className="text-primary/80" />
+      </div>
+    );
   }
-
-  const authTransitionPending = authFlowInProgress && Boolean(postAuthRedirectRef.current);
   if (
     shouldShowAuthBootstrapShell({
       authStatus,

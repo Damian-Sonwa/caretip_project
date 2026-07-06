@@ -35,6 +35,8 @@ function deriveSyncStatusItem(
     isRefreshing: boolean;
     isSettled: boolean;
     hasData: boolean;
+    refreshFailed?: boolean;
+    hasVisibleData?: boolean;
   },
   t: TFunction,
   updatingDescKey: string,
@@ -49,8 +51,21 @@ function deriveSyncStatusItem(
       description: t(updatingDescKey),
     };
   }
+  if (input.refreshFailed && input.hasVisibleData) {
+    return {
+      id: "sync",
+      tone: "action",
+      label: t("dashboard.status.refreshFailed"),
+      description: t("dashboard.status.dataLoadFailed"),
+    };
+  }
   if (!input.isSettled) {
-    return null;
+    return {
+      id: "sync",
+      tone: "updating",
+      label: t("dashboard.status.updating"),
+      description: t(updatingDescKey),
+    };
   }
   if (!input.hasData) {
     return {
@@ -70,21 +85,19 @@ function deriveSyncStatusItem(
 
 export function deriveBusinessDashboardStatus(
   input: {
-    isInitialLoading: boolean;
-    isPeriodRefreshing: boolean;
-    isAnalyticsSettled: boolean;
+    isPeriodSyncing: boolean;
+    isMetricsSettled: boolean;
     hasPeriodActivity: boolean;
     pendingVerification: boolean;
     statsLoadFailed: string | null;
+    hasVisibleMetrics: boolean;
     socketStatus: SocketConnectionStatus;
   },
   t: TFunction,
 ): DashboardStatusItem[] {
-  if (input.isInitialLoading) return [];
-
   const items: DashboardStatusItem[] = [];
 
-  if (input.statsLoadFailed) {
+  if (input.statsLoadFailed && !input.hasVisibleMetrics) {
     items.push({
       id: "data-action",
       tone: "action",
@@ -94,14 +107,25 @@ export function deriveBusinessDashboardStatus(
     return items;
   }
 
+  if (input.statsLoadFailed) {
+    items.push({
+      id: "data-action",
+      tone: "action",
+      label: t("dashboard.status.refreshFailed"),
+      description: input.statsLoadFailed,
+    });
+  }
+
   const connection = deriveConnectionStatusItem(input.socketStatus, t);
   if (connection) items.push(connection);
 
   const sync = deriveSyncStatusItem(
     {
-      isRefreshing: input.isPeriodRefreshing,
-      isSettled: input.isAnalyticsSettled,
+      isRefreshing: input.isPeriodSyncing,
+      isSettled: input.isMetricsSettled,
       hasData: input.hasPeriodActivity,
+      refreshFailed: Boolean(input.statsLoadFailed),
+      hasVisibleData: input.hasVisibleMetrics,
     },
     t,
     "dashboard.status.businessUpdatingDesc",
@@ -115,20 +139,18 @@ export function deriveBusinessDashboardStatus(
 
 export function deriveEmployeeDashboardStatus(
   input: {
-    isInitialLoading: boolean;
-    isPeriodRefreshing: boolean;
-    isAnalyticsSettled: boolean;
+    isPeriodSyncing: boolean;
+    isMetricsSettled: boolean;
     hasPeriodActivity: boolean;
     statsLoadFailed: string | null;
+    hasVisibleMetrics: boolean;
     socketStatus: SocketConnectionStatus;
   },
   t: TFunction,
 ): DashboardStatusItem[] {
-  if (input.isInitialLoading) return [];
-
   const items: DashboardStatusItem[] = [];
 
-  if (input.statsLoadFailed) {
+  if (input.statsLoadFailed && !input.hasVisibleMetrics) {
     items.push({
       id: "data-action",
       tone: "action",
@@ -138,14 +160,25 @@ export function deriveEmployeeDashboardStatus(
     return items;
   }
 
+  if (input.statsLoadFailed) {
+    items.push({
+      id: "data-action",
+      tone: "action",
+      label: t("dashboard.status.refreshFailed"),
+      description: input.statsLoadFailed,
+    });
+  }
+
   const connection = deriveConnectionStatusItem(input.socketStatus, t);
   if (connection) items.push(connection);
 
   const sync = deriveSyncStatusItem(
     {
-      isRefreshing: input.isPeriodRefreshing,
-      isSettled: input.isAnalyticsSettled,
+      isRefreshing: input.isPeriodSyncing,
+      isSettled: input.isMetricsSettled,
       hasData: input.hasPeriodActivity,
+      refreshFailed: Boolean(input.statsLoadFailed),
+      hasVisibleData: input.hasVisibleMetrics,
     },
     t,
     "dashboard.status.employeeUpdatingDesc",

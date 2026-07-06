@@ -33,6 +33,7 @@ import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { subscribeTipReceived } from "../../lib/realtime/subscribeTipReceived";
 import { useDashboardTabRefocus } from "../../hooks/useDashboardTabRefocus";
 import { DashboardStatusStrip } from "../../components/dashboard/DashboardStatusStrip";
+import { DashboardRefreshIndicator } from "../../components/dashboard/DashboardRefreshIndicator";
 import { deriveEmployeeDashboardStatus } from "../../lib/dashboardStatus/deriveDashboardStatus";
 import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
 import { useEmployeeDashboardAnalytics } from "../../hooks/useEmployeeDashboardAnalytics";
@@ -107,8 +108,12 @@ export function EmployeeDashboard() {
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
     isPeriodRefreshing: analyticsPeriodRefreshing,
+    isPeriodSyncing,
+    isMetricsSettled,
+    hasVisibleMetrics,
     isAnalyticsSettled,
     hasPeriodActivity,
+    lastUpdatedAt,
     analyticsTimeframeLoading,
     showMetricsSkeleton,
     hasMetricsData,
@@ -124,9 +129,6 @@ export function EmployeeDashboard() {
   );
 
   const showMetricsLoading = showMetricsSkeleton;
-  const showChartLoading = isAnalyticsInitialLoad;
-  const metricsSettledForPeriod =
-    isAnalyticsSettled && valuesMatchAnalyticsPeriod && hasMetricsData;
 
   const [error, setError] = useState<string | null>(null);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
@@ -305,24 +307,29 @@ export function EmployeeDashboard() {
 
   const valuesMatchPeriod = useDevDemo || valuesMatchAnalyticsPeriod;
 
+  const periodMetricsLoading = showMetricsLoading || (!useDevDemo && !displayMetrics);
+  const showChartLoading = isAnalyticsInitialLoad;
+  const metricsSettledForPeriod = isMetricsSettled && valuesMatchAnalyticsPeriod && hasMetricsData;
+  const periodRefreshingLabel = t("dashboard.refresh.updating");
+
   const dashboardStatusItems = useMemo(
     () =>
       deriveEmployeeDashboardStatus(
         {
-          isInitialLoading: showMetricsLoading,
-          isPeriodRefreshing: analyticsPeriodRefreshing,
-          isAnalyticsSettled,
+          isPeriodSyncing,
+          isMetricsSettled,
           hasPeriodActivity,
+          hasVisibleMetrics,
           statsLoadFailed: analyticsError,
           socketStatus: connectionStatus,
         },
         t,
       ),
     [
-      showMetricsLoading,
-      analyticsPeriodRefreshing,
-      isAnalyticsSettled,
+      isPeriodSyncing,
+      isMetricsSettled,
       hasPeriodActivity,
+      hasVisibleMetrics,
       analyticsError,
       connectionStatus,
       t,
@@ -579,11 +586,13 @@ export function EmployeeDashboard() {
               >
                 {t("employee.dashboard.analyticsSectionTitle")}
               </h2>
+              <DashboardRefreshIndicator
+                isRefreshing={isPeriodSyncing}
+                lastUpdatedAt={lastUpdatedAt}
+                refreshFailed={Boolean(analyticsError && hasVisibleMetrics)}
+              />
             </div>
-            <DashboardStatusStrip
-              placeholder={showMetricsLoading}
-              items={dashboardStatusItems}
-            />
+            <DashboardStatusStrip items={dashboardStatusItems} />
           </div>
           <DashboardAnalyticsPeriodToggle
             ariaLabel={t("employee.dashboard.analyticsPeriodAria")}
@@ -626,14 +635,16 @@ export function EmployeeDashboard() {
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
             <EmployeeDashboardMetricsGrid
-              loading={showMetricsLoading}
+              loading={periodMetricsLoading}
               isPeriodRefreshing={analyticsPeriodRefreshing}
+              refreshingLabel={periodRefreshingLabel}
               metricsSettledForPeriod={metricsSettledForPeriod}
               metrics={periodMetrics}
             />
           </motion.div>
 
           <FeatureGate featureKey="advancedAnalytics" role="employee" enabled={dashboardEnabled}>
+          <div className="employee-dashboard-charts-band">
           <DashboardChartsIdleMount
             whenVisible
             mountSignal={`${analyticsTimeframe}-${dataRevision}`}
@@ -646,6 +657,7 @@ export function EmployeeDashboard() {
               chartRenderKey={`${analyticsTimeframe}-${dataRevision}-${chartData.length}`}
             />
           </DashboardChartsIdleMount>
+          </div>
           </FeatureGate>
         </div>
       </TracingBeam>

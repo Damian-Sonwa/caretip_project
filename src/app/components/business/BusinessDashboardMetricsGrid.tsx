@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import { BusinessStatCard } from "./BusinessStatCard";
@@ -20,6 +20,7 @@ type BusinessDashboardMetricsGridProps = {
   metrics: BusinessDashboardMetrics | null;
   loading: boolean;
   isPeriodRefreshing: boolean;
+  refreshingLabel: ReactNode;
   hasTipActivityInPeriod: boolean;
   topPerformersCount: number;
 };
@@ -29,10 +30,13 @@ function BusinessDashboardMetricsGridInner({
   metrics,
   loading,
   isPeriodRefreshing,
+  refreshingLabel,
   hasTipActivityInPeriod,
   topPerformersCount,
 }: BusinessDashboardMetricsGridProps) {
   const { t } = useTranslation();
+  const cardsLoading = loading || metrics == null;
+  const cardsRefreshing = isPeriodRefreshing && !cardsLoading;
   const totalTips = metrics?.totalTips ?? 0;
   const tipCount = metrics?.tipCount ?? 0;
   const employeeCount = metrics?.employeeCount ?? 0;
@@ -48,7 +52,9 @@ function BusinessDashboardMetricsGridInner({
     >
       <BusinessStatCard
         featured
-        loading={loading}
+        loading={cardsLoading}
+        refreshing={cardsRefreshing}
+        refreshingLabel={refreshingLabel}
         loadingVariant="currency"
         label={
           analyticsTimeframe === "week"
@@ -66,7 +72,9 @@ function BusinessDashboardMetricsGridInner({
         icon={<CareIcon name="earnings" size="nav" className="dashboard-metric-stat-card__icon-glyph" />}
       />
       <BusinessStatCard
-        loading={loading}
+        loading={cardsLoading}
+        refreshing={cardsRefreshing}
+        refreshingLabel={refreshingLabel}
         label={t("business.dashboard.activeEmployees")}
         value={<CountUpMetric value={employeeCount} kind="integer" />}
         change={
@@ -77,7 +85,9 @@ function BusinessDashboardMetricsGridInner({
         icon={<CareIcon name="team" size="nav" className="dashboard-metric-stat-card__icon-glyph" />}
       />
       <BusinessStatCard
-        loading={loading}
+        loading={cardsLoading}
+        refreshing={cardsRefreshing}
+        refreshingLabel={refreshingLabel}
         label={t("business.dashboard.avgTipPerEmployee")}
         value={
           <CountUpMetric

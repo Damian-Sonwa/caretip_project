@@ -29,27 +29,39 @@ export function markDashboardLiveSettled(ref: { current: boolean }): void {
   ref.current = true;
 }
 
-/** KPI cards: skeleton until summary scope commits; subtle refresh when data exists. */
+/** KPI cards: skeleton on cold load only; period switches use refresh shimmer. */
 export function deriveDashboardMetricLoading(opts: {
   enabled: boolean;
   hasMetricsData: boolean;
   valuesMatchPeriod: boolean;
   summaryLoading: boolean;
   isRevalidating: boolean;
+  /** Cached KPIs or bundle data available while the active period revalidates. */
+  hasStaleVisibleMetrics?: boolean;
 }): {
   showMetricsSkeleton: boolean;
   isPeriodRefreshing: boolean;
 } {
-  const { enabled, hasMetricsData, valuesMatchPeriod, summaryLoading, isRevalidating } = opts;
+  const {
+    enabled,
+    hasMetricsData,
+    valuesMatchPeriod,
+    summaryLoading,
+    isRevalidating,
+    hasStaleVisibleMetrics = false,
+  } = opts;
   if (!enabled) {
     return { showMetricsSkeleton: false, isPeriodRefreshing: false };
   }
 
-  const awaitingSummaryCommit =
-    summaryLoading || !valuesMatchPeriod || (isRevalidating && !hasMetricsData);
+  const periodSwitchInFlight =
+    isRevalidating || (!valuesMatchPeriod && hasStaleVisibleMetrics);
 
-  return {
-    showMetricsSkeleton: !hasMetricsData && awaitingSummaryCommit,
-    isPeriodRefreshing: hasMetricsData && isRevalidating,
-  };
+  const showMetricsSkeleton =
+    !hasMetricsData && summaryLoading && !hasStaleVisibleMetrics;
+
+  const isPeriodRefreshing =
+    (hasMetricsData && isRevalidating) || periodSwitchInFlight;
+
+  return { showMetricsSkeleton, isPeriodRefreshing };
 }

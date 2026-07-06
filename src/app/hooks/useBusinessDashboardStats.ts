@@ -161,9 +161,22 @@ export function useBusinessDashboardStats(
   const isPeriodSessionReady = useCallback(
     (tf: AnalyticsTimeframe): boolean => {
       if (!canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) return false;
-      if (!networkSettledTfsRef.current.has(tf)) return false;
       const summaryPartial = summaryPartialRef.current.get(tf);
       if (!summaryPartial || !hasMetricValues(summaryPartial as BusinessDashboardStats)) {
+        const bundle = getBusinessAnalyticsBundle(tf);
+        if (bundle?.periodStats && hasMetricValues(bundle.periodStats as BusinessDashboardStats)) {
+          summaryPartialRef.current.set(tf, bundle.periodStats);
+          analyticsPartialRef.current.set(tf, bundle.periodStats);
+        } else {
+          return false;
+        }
+      }
+      if (!networkSettledTfsRef.current.has(tf)) {
+        const bundle = getBusinessAnalyticsBundle(tf);
+        if (!bundle?.periodStats) return false;
+      }
+      const resolvedSummary = summaryPartialRef.current.get(tf);
+      if (!resolvedSummary || !hasMetricValues(resolvedSummary as BusinessDashboardStats)) {
         return false;
       }
       if (!advancedAnalyticsEnabledRef.current) return true;
@@ -258,8 +271,11 @@ export function useBusinessDashboardStats(
       if (!sessionValidated || !enabled) return;
 
       const trustPeriodCache = canUsePeriodSwitchCache(hasSettledLiveUiRef.current);
+      const periodSessionReady = isPeriodSessionReady(tf);
       const revalidate =
-        opts?.soft === true || opts?.forceNetwork === true || !trustPeriodCache;
+        opts?.forceNetwork === true ||
+        !trustPeriodCache ||
+        (opts?.soft === true && !periodSessionReady);
 
       const kpisVisibleOnScreen = () =>
         hasBusinessKpiValues(statsRef.current) ||
@@ -309,7 +325,6 @@ export function useBusinessDashboardStats(
         networkSettledTfsRef.current.has(tf) &&
         Boolean(summaryPartial) &&
         (!revalidate || hasMetricValues(summaryPartial as BusinessDashboardStats));
-      const periodSessionReady = isPeriodSessionReady(tf);
       let summarySettled = periodSessionReady && !revalidate;
       let analyticsSettled =
         !advancedAnalyticsEnabledRef.current
@@ -401,6 +416,10 @@ export function useBusinessDashboardStats(
 
         setIsRevalidating(true);
         if (preserveVisibleUi) {
+          const targetPartial = summaryPartialRef.current.get(tf);
+          if (targetPartial && hasMetricValues(targetPartial as BusinessDashboardStats)) {
+            commitUiStats(tf, seq, false);
+          }
           setSummaryLoading(false);
           setAnalyticsLoading(false);
         } else if (summaryFromMemory && !opts?.soft) {
@@ -572,7 +591,7 @@ export function useBusinessDashboardStats(
         if (affectsUi && uiRequestSeqRef.current === seq) {
           if (summarySettled) setSummaryLoading(false);
           if (analyticsSettled) setAnalyticsLoading(false);
-          if (summarySettled || analyticsSettled) setIsRevalidating(false);
+          setIsRevalidating(false);
         }
         if (abortByTfRef.current.get(tf) === controller) {
           abortByTfRef.current.delete(tf);
@@ -722,7 +741,6 @@ export function useBusinessDashboardStats(
       tfRef.current = tf;
       setAnalyticsTimeframeState(tf);
       const seq = ++uiRequestSeqRef.current;
-      setStatsTimeframe(null);
 
       if (canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) {
         const bundle = getBusinessAnalyticsBundle(tf);
@@ -1049,6 +1067,49 @@ export function useBusinessDashboardStats(
     valuesMatchAnalyticsPeriod,
   ]);
 
+  const hasStaleVisibleMetrics = useMemo(() => {
+    if (hasMetricsData) return true;
+    if (statsTimeframe === analyticsTimeframe && hasBusinessKpiValues(stats)) return true;
+    const bundle = getBusinessAnalyticsBundle(analyticsTimeframe);
+    return Boolean(bundle?.periodStats && isBusinessSummaryFetched(bundle.periodStats as BusinessDashboardStats));
+  }, [
+    analyticsTimeframe,
+    hasMetricsData,
+    statsTimeframe,
+    stats?.totalTips,
+    stats?.tipCount,
+    stats?.employeeCount,
+    dataRevision,
+  ]);
+
+  const { showMetricsSkeleton, isPeriodRefreshing } = deriveDashboardMetricLoading({
+    enabled: enabled && sessionValidated && !pendingVerification,
+    hasMetricsData,
+    valuesMatchPeriod: valuesMatchAnalyticsPeriod,
+    summaryLoading,
+    isRevalidating,
+    hasStaleVisibleMetrics,
+  });
+
+  const isMetricsSettled =
+    enabled &&
+    sessionValidated &&
+    !pendingVerification &&
+    valuesMatchAnalyticsPeriod &&
+    hasMetricsData &&
+    lastUpdatedAt != null &&
+    !summaryLoading &&
+    !isRevalidating;
+
+  const isPeriodSyncing =
+    enabled &&
+    sessionValidated &&
+    !pendingVerification &&
+    !isMetricsSettled &&
+    (showMetricsSkeleton || isPeriodRefreshing || summaryLoading || isRevalidating);
+
+  const hasVisibleMetrics = hasMetricsData || hasStaleVisibleMetrics;
+
   const isAnalyticsSettled =
     enabled &&
     sessionValidated &&
@@ -1065,14 +1126,6 @@ export function useBusinessDashboardStats(
     () => hasBusinessPeriodActivity(displayStats),
     [displayStats?.tipCount, displayStats?.totalTips],
   );
-
-  const { showMetricsSkeleton, isPeriodRefreshing } = deriveDashboardMetricLoading({
-    enabled: enabled && sessionValidated && !pendingVerification,
-    hasMetricsData,
-    valuesMatchPeriod: valuesMatchAnalyticsPeriod,
-    summaryLoading,
-    isRevalidating,
-  });
 
   const isAnalyticsSectionLoading =
     enabled &&
@@ -1114,6 +1167,9 @@ export function useBusinessDashboardStats(
     isGoalsInitialLoad,
     isSecondarySectionLoading: isAnalyticsSectionLoading,
     isPeriodRefreshing,
+    isPeriodSyncing,
+    isMetricsSettled,
+    hasVisibleMetrics,
     isAnalyticsSettled,
     hasPeriodActivity,
     isDashboardHydrating: showMetricsSkeleton,

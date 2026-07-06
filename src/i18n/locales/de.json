@@ -1947,6 +1947,7 @@
       "live": "Live",
       "updating": "Aktualisierung",
       "dataUpToDate": "Aktuell",
+      "refreshFailed": "Aktualisierung fehlgeschlagen",
       "actionRequired": "Aktion erforderlich",
       "businessLiveDesc": "Dashboard-Daten synchronisiert",
       "businessUpdatingDesc": "Hintergrund-Aktualisierung läuft",

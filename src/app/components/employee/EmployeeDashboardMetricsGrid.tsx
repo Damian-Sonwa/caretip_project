@@ -1,4 +1,5 @@
 import { memo } from "react";
+import type { ReactNode } from "react";
 import { Flame, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CareIcon } from "@/components/icons";
@@ -22,6 +23,7 @@ export type EmployeePeriodMetrics = {
 type EmployeeDashboardMetricsGridProps = {
   loading: boolean;
   isPeriodRefreshing: boolean;
+  refreshingLabel: ReactNode;
   /** True only after the active period fetch finished (avoids empty-state flash). */
   metricsSettledForPeriod: boolean;
   metrics: EmployeePeriodMetrics;
@@ -30,14 +32,17 @@ type EmployeeDashboardMetricsGridProps = {
 function EmployeeDashboardMetricsGridInner({
   loading,
   isPeriodRefreshing,
+  refreshingLabel,
   metricsSettledForPeriod,
   metrics,
 }: EmployeeDashboardMetricsGridProps) {
   const { t } = useTranslation();
   const { periodTipCount, periodAmountEur, goalPct, rating, ratingCount, tipStreakDays } = metrics;
+  const cardsLoading = loading;
+  const cardsRefreshing = isPeriodRefreshing && !cardsLoading;
   const showEmptyTipsState =
-    metricsSettledForPeriod && !loading && periodTipCount === 0;
-  const cardsSettled = metricsSettledForPeriod && !loading;
+    metricsSettledForPeriod && !cardsLoading && periodTipCount === 0;
+  const cardsSettled = metricsSettledForPeriod && !cardsLoading;
   const showRatingValue = cardsSettled && rating != null;
   const showGoalValue = cardsSettled && goalPct != null;
 
@@ -52,7 +57,9 @@ function EmployeeDashboardMetricsGridInner({
     >
       <EmployeeStatCard
         featured
-        loading={loading}
+        loading={cardsLoading}
+        refreshing={cardsRefreshing}
+        refreshingLabel={refreshingLabel}
         label={t("employee.dashboard.statTotalTips")}
         value={<CountUpMetric value={periodTipCount} kind="integer" />}
         change={
@@ -65,7 +72,9 @@ function EmployeeDashboardMetricsGridInner({
         icon={<CareIcon name="tips" size="md" />}
       />
       <EmployeeStatCard
-        loading={loading}
+        loading={cardsLoading}
+        refreshing={cardsRefreshing}
+        refreshingLabel={refreshingLabel}
         label={
           showRatingValue
             ? t("employee.dashboard.statAvgRating")
@@ -90,7 +99,9 @@ function EmployeeDashboardMetricsGridInner({
         icon={<Star className="h-5 w-5" aria-hidden />}
       />
       <EmployeeStatCard
-        loading={loading}
+        loading={cardsLoading}
+        refreshing={cardsRefreshing}
+        refreshingLabel={refreshingLabel}
         label={t("employee.dashboard.statMonthlyGoal")}
         value={
           showGoalValue ? (
@@ -111,7 +122,9 @@ function EmployeeDashboardMetricsGridInner({
         icon={<CareIcon name="goals" size="md" />}
       />
       <EmployeeStatCard
-        loading={loading}
+        loading={cardsLoading}
+        refreshing={cardsRefreshing}
+        refreshingLabel={refreshingLabel}
         label={t("employee.performance.streak")}
         value={
           cardsSettled ? t("employee.performance.streakDays", { count: tipStreakDays }) : null

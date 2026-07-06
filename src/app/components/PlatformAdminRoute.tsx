@@ -4,10 +4,6 @@ import { useAuth } from "../hooks/useAuth";
 import { isAuthRestorePending } from "../lib/authRestore";
 import { hasClientStoredSession } from "../lib/authUserStore";
 import { isClientSessionRevoked } from "../lib/api";
-import {
-  APP_LOADING_PRIORITY,
-  useAppLoadingRegistration,
-} from "../context/AppLoadingManager";
 import { isPlatformAdminSessionRole } from "../lib/authSession";
 import { AppRouteGateShell } from "./AppRouteGateShell";
 import { navFlashLog } from "../lib/navigationFlashAudit";
@@ -24,12 +20,6 @@ export function PlatformAdminRoute({ children }: PlatformAdminRouteProps) {
   const storedSessionSync =
     !user && !isClientSessionRevoked() && hasClientStoredSession();
   const blocking = authBlocking || storedSessionSync;
-
-  useAppLoadingRegistration(
-    `platform-admin-route-session:${location.pathname}`,
-    APP_LOADING_PRIORITY.AUTH,
-    blocking,
-  );
 
   if (blocking) {
     navFlashLog("guard_started", {

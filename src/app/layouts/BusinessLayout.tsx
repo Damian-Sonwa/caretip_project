@@ -69,7 +69,7 @@ export function BusinessLayout() {
           )}
         >
           <DashboardHeader onMenuClick={openMobileMenu} />
-          <main className="min-w-0 flex-1 overflow-x-clip">
+          <main className="caretip-dashboard-page-enter min-w-0 flex-1 overflow-x-clip">
             <RouteChunkBoundary variant="shell" registrationKey="business-outlet">
               <BusinessEntitlementsProvider>
                 <BusinessFeatureInfoDrawerProvider>

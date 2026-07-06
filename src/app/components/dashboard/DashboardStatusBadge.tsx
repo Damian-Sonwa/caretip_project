@@ -10,7 +10,7 @@ const toneClass: Record<DashboardStatusTone, string> = {
 
 const dotClass: Record<DashboardStatusTone, string> = {
   live: "bg-emerald-500 ring-2 ring-emerald-500/20",
-  updating: "bg-amber-500 ring-2 ring-amber-500/20",
+  updating: "bg-amber-500 ring-2 ring-amber-500/20 animate-pulse",
   action: "bg-red-500 ring-2 ring-red-500/20",
 };
 

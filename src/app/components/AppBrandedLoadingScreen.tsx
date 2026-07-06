@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isLogoutPending } from "../lib/api";
 import { traceGlobalOverlayMounted } from "../lib/globalAppLoadingTrace";
-import { CareTipBrandLoader } from "./CareTipBrandLoader";
-import { CareTipLoadingOverlay } from "./CareTipLoadingOverlay";
+import { LoadingSpinner } from "./ui/loading-spinner";
 
 export type AppBrandedLoadingScreenProps = {
   className?: string;
@@ -16,7 +15,7 @@ export type AppBrandedLoadingScreenProps = {
 };
 
 /**
- * Global setup loader — CareTip wordmark + orange glow track (auth bootstrap, route gates).
+ * Global setup loader — spinner + copy only (no logo; branding lives in app chrome).
  */
 export function AppBrandedLoadingScreen({
   className,
@@ -33,32 +32,23 @@ export function AppBrandedLoadingScreen({
     traceGlobalOverlayMounted();
   }, [fixed, exiting]);
 
-  if (fixed) {
-    return (
-      <CareTipLoadingOverlay
-        className={cn("z-[9998]", className)}
-        exiting={exiting}
-        seamless
-        steady
-        message={resolvedMessage}
-        showMessage
-        aria-label={resolvedMessage}
-      />
-    );
-  }
-
   return (
     <div
       className={cn(
-        "flex min-h-[100dvh] w-full flex-col items-center justify-center bg-background px-6",
+        "app-setup-loading flex flex-col items-center justify-center gap-4 bg-background px-6",
+        fixed ? "fixed inset-0 z-[9998]" : "min-h-[100dvh] w-full",
+        exiting && "app-setup-loading--exiting",
         className,
       )}
       role="status"
-      aria-busy="true"
+      aria-busy={!exiting}
       aria-live="polite"
-      aria-label={resolvedMessage}
     >
-      <CareTipBrandLoader message={resolvedMessage} />
+      <LoadingSpinner size="lg" />
+      <div className="flex max-w-sm flex-col items-center gap-1 text-center">
+        <p className="text-sm font-medium text-foreground">{resolvedMessage}</p>
+        <p className="text-xs text-muted-foreground">{t("common.onlyAMoment")}</p>
+      </div>
     </div>
   );
 }

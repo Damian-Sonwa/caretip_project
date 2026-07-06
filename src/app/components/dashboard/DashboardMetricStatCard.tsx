@@ -23,6 +23,9 @@ export type DashboardMetricStatCardProps = {
   featured?: boolean;
   className?: string;
   loading?: boolean;
+  /** Keep values visible during background period refresh. */
+  refreshing?: boolean;
+  refreshingLabel?: ReactNode;
   showSpinner?: boolean;
   loadingVariant?: "currency" | "count" | "pulse";
 };
@@ -42,11 +45,17 @@ export function DashboardMetricStatCard({
   featured,
   className,
   loading,
+  refreshing = false,
+  refreshingLabel,
   showSpinner = false,
   loadingVariant = "currency",
 }: DashboardMetricStatCardProps) {
   const changeVisible =
-    !loading && change != null && change !== "" && change !== CHANGE_PLACEHOLDER;
+    !loading &&
+    !refreshing &&
+    change != null &&
+    change !== "" &&
+    change !== CHANGE_PLACEHOLDER;
   const changeContent = loading ? CHANGE_PLACEHOLDER : change ?? CHANGE_PLACEHOLDER;
 
   return (
@@ -56,9 +65,10 @@ export function DashboardMetricStatCard({
         "dashboard-metric-stat-card relative h-full overflow-hidden",
         featured && tokens.featuredClass,
         loading && "opacity-[0.72]",
+        refreshing && !loading && "dashboard-metric-stat-card--refreshing",
         className,
       )}
-      aria-busy={loading || undefined}
+      aria-busy={loading || refreshing || undefined}
     >
       <div
         className={cn(
@@ -101,15 +111,20 @@ export function DashboardMetricStatCard({
           tokens.changeClass,
           "dashboard-metric-stat-card__change",
           loading && "text-muted-foreground/25",
-          !changeVisible && !loading && "text-transparent select-none",
+          !changeVisible && !loading && !refreshing && "text-transparent select-none",
         )}
-        aria-hidden={!changeVisible && !loading ? true : undefined}
+        aria-hidden={!changeVisible && !loading && !refreshing ? true : undefined}
       >
         {loading ? (
           <span
             className="dashboard-hero-metric-skeleton__bar mt-0.5 block h-2.5 w-[52%] max-w-[8.5rem] rounded-md"
             aria-hidden
           />
+        ) : refreshing ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80">
+            <span className="inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-amber-500/80" aria-hidden />
+            {refreshingLabel}
+          </span>
         ) : (
           changeContent
         )}

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
-import { isAuthRestorePending } from "../lib/authRestore";
+import { hasPendingStoredSessionWithoutUser, isAuthRestorePending } from "../lib/authRestore";
 import { isPublicAuthenticationPath } from "../lib/authSession";
 import {
   APP_LOADING_PRIORITY,
@@ -21,6 +21,7 @@ import {
 function shouldBlockGlobalAuthLoader(
   pathname: string,
   authStatus: ReturnType<typeof useAuth>["authStatus"],
+  user: ReturnType<typeof useAuth>["user"],
 ): boolean {
   const restorePending = isAuthRestorePending();
   const initializing = authStatus === "initializing";
@@ -30,7 +31,11 @@ function shouldBlockGlobalAuthLoader(
 
   if (isPublicShellPath(pathname)) return false;
 
-  return initializing || restorePending;
+  return (
+    initializing ||
+    restorePending ||
+    hasPendingStoredSessionWithoutUser(user)
+  );
 }
 
 /**
@@ -38,10 +43,10 @@ function shouldBlockGlobalAuthLoader(
  * Public marketing and guest flows render immediately; auth login routes wait on bootstrap.
  */
 export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNode }) {
-  const { authStatus } = useAuth();
+  const { authStatus, user } = useAuth();
   const { pathname } = useLocation();
   const publicShell = isPublicShellPath(pathname);
-  const authBootstrapBlocking = shouldBlockGlobalAuthLoader(pathname, authStatus);
+  const authBootstrapBlocking = shouldBlockGlobalAuthLoader(pathname, authStatus, user);
   const releaseAppBootOverlay = useReleaseAppBootOverlay();
 
   useAppLoadingRegistration(

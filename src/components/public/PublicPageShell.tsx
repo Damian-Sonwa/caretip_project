@@ -32,7 +32,7 @@ export function PublicPageShell({
       <AuthLikePageBackground animated={false} />
       <div className={publicPageUi.shell}>
         <Navigation />
-        <main className={cn(publicPageUi.main, maxWidthClass[maxWidth], className)}>
+        <main className={cn(publicPageUi.main, maxWidthClass[maxWidth], "caretip-page-enter", className)}>
           <div className={contentClassName}>{children}</div>
         </main>
         <Footer />

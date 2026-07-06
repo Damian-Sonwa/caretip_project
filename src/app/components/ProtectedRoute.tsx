@@ -19,13 +19,7 @@ export function ProtectedRoute({
 }) {
   const gate = useProtectedRouteGate(allowedRoles);
   const rolesKey = allowedRoles.join(",");
-  const sessionBlocking = gate.authBlocking || gate.storedSessionSync;
 
-  useAppLoadingRegistration(
-    `protected-route-session:${rolesKey}`,
-    APP_LOADING_PRIORITY.AUTH,
-    sessionBlocking,
-  );
   useAppLoadingRegistration(
     `protected-route-guard:${rolesKey}:${gate.pathname}`,
     APP_LOADING_PRIORITY.ROUTE_GUARD,

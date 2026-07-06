@@ -237,17 +237,24 @@ export function useEmployeeDashboardAnalytics(
 
   const isPeriodSessionReady = useCallback((tf: EmployeeAnalyticsTimeframe): boolean => {
     if (!canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) return false;
-    if (!networkSettledTfsRef.current.has(tf)) return false;
-    const summaryPartial = summaryPartialRef.current.get(tf);
+    let summaryPartial = summaryPartialRef.current.get(tf);
     if (!hasEmployeeMetricValues(summaryPartial)) {
-      return false;
+      hydrateFromSwr(tf);
+      summaryPartial = summaryPartialRef.current.get(tf);
+      if (!hasEmployeeMetricValues(summaryPartial)) {
+        return false;
+      }
+    }
+    if (!networkSettledTfsRef.current.has(tf)) {
+      const swrHit = employeePeriodSwrStore.get(swrKey(tf), DASHBOARD_SWR_METRICS_TTL_MS);
+      if (!swrHit) return false;
     }
     if (!advancedAnalyticsEnabledRef.current) return true;
     return (
       summaryPartial?.analyticsBundled === true ||
       hasEmployeeAnalyticsPayload(analyticsPartialRef.current.get(tf))
     );
-  }, []);
+  }, [hydrateFromSwr]);
 
   const commitUiPayload = useCallback(
     (tf: EmployeeAnalyticsTimeframe, seq: number, fromNetwork: boolean) => {
@@ -291,7 +298,6 @@ export function useEmployeeDashboardAnalytics(
       tfRef.current = tf;
       setAnalyticsTimeframe(tf);
       const seq = ++uiRequestSeqRef.current;
-      setDataTimeframe(null);
 
       hydratePeriodSessionCache(tf);
 
@@ -358,9 +364,11 @@ export function useEmployeeDashboardAnalytics(
       const trustPeriodCache = canUsePeriodSwitchCache(hasSettledLiveUiRef.current);
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
-      const revalidate =
-        opts?.soft === true || opts?.forceNetwork === true || !trustPeriodCache;
       const periodSessionReady = isPeriodSessionReady(tf);
+      const revalidate =
+        opts?.forceNetwork === true ||
+        !trustPeriodCache ||
+        (opts?.soft === true && !periodSessionReady);
 
       const payloadVisibleOnScreen = () =>
         hasEmployeePayloadVisibleContent(payloadRef.current) ||
@@ -405,6 +413,10 @@ export function useEmployeeDashboardAnalytics(
           setIsRevalidating(true);
         }
         if (preserveVisibleUi) {
+          const targetPartial = summaryPartialRef.current.get(tf);
+          if (hasEmployeeMetricValues(targetPartial)) {
+            commitUiPayload(tf, seq, false);
+          }
           setSummaryLoading(false);
           setAnalyticsLoading(false);
         } else {
@@ -568,7 +580,7 @@ export function useEmployeeDashboardAnalytics(
         if (stillTargetPeriod && (isCurrentRequest || noReplacementInflight)) {
           if (summarySettled) setSummaryLoading(false);
           if (analyticsSettled) setAnalyticsLoading(false);
-          if (summarySettled || analyticsSettled) setIsRevalidating(false);
+          if (isCurrentRequest) setIsRevalidating(false);
         } else if (affectsUi && controller.signal.aborted && stillTargetPeriod) {
           const inflight = abortRef.current.get(tf);
           if (inflight == null || inflight === controller) {
@@ -844,6 +856,44 @@ export function useEmployeeDashboardAnalytics(
     valuesMatchAnalyticsPeriod,
   ]);
 
+  const hasStaleVisibleMetrics = useMemo(() => {
+    if (hasMetricsData) return true;
+    if (dataTimeframe === analyticsTimeframe && hasEmployeePayloadVisibleContent(payload)) return true;
+    const swrHit = employeePeriodSwrStore.get(swrKey(analyticsTimeframe), DASHBOARD_SWR_METRICS_TTL_MS);
+    return Boolean(swrHit?.payload && isEmployeeSummaryFetched(swrHit.payload));
+  }, [
+    analyticsTimeframe,
+    dataTimeframe,
+    hasMetricsData,
+    payload?.periodTipCount,
+    payload?.periodAmountEur,
+    dataRevision,
+  ]);
+
+  const { showMetricsSkeleton, isPeriodRefreshing } = deriveDashboardMetricLoading({
+    enabled: isActive,
+    hasMetricsData,
+    valuesMatchPeriod: valuesMatchAnalyticsPeriod,
+    summaryLoading,
+    isRevalidating,
+    hasStaleVisibleMetrics,
+  });
+
+  const isMetricsSettled =
+    isActive &&
+    valuesMatchAnalyticsPeriod &&
+    hasMetricsData &&
+    lastUpdatedAt != null &&
+    !summaryLoading &&
+    !isRevalidating;
+
+  const isPeriodSyncing =
+    isActive &&
+    !isMetricsSettled &&
+    (showMetricsSkeleton || isPeriodRefreshing || summaryLoading || isRevalidating);
+
+  const hasVisibleMetrics = hasMetricsData || hasStaleVisibleMetrics;
+
   const isAnalyticsSettled =
     isActive &&
     valuesMatchAnalyticsPeriod &&
@@ -862,14 +912,6 @@ export function useEmployeeDashboardAnalytics(
       displayPayload?.ratingCount,
     ],
   );
-
-  const { showMetricsSkeleton, isPeriodRefreshing } = deriveDashboardMetricLoading({
-    enabled: isActive,
-    hasMetricsData,
-    valuesMatchPeriod: valuesMatchAnalyticsPeriod,
-    summaryLoading,
-    isRevalidating,
-  });
 
   const isAnalyticsInitialLoad =
     isActive &&
@@ -896,6 +938,9 @@ export function useEmployeeDashboardAnalytics(
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
     isPeriodRefreshing,
+    isPeriodSyncing,
+    isMetricsSettled,
+    hasVisibleMetrics,
     isAnalyticsSettled,
     hasPeriodActivity,
     analyticsTimeframeLoading,
