@@ -118,14 +118,8 @@
     }
   }
 
-  /* Landing scroll — contain paint; no will-change (reduces sticky/jitter on mobile) */
+  /* Landing scroll — no content-visibility (prevents blank flicker on fast scroll) */
   @media (max-width: 1023px) {
-    .caretip-landing #how-it-works,
-    .caretip-landing #built-for-hospitality {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 420px;
-    }
-
     .caretip-landing [data-landing-accent] [data-accent-glow] {
       display: none;
     }

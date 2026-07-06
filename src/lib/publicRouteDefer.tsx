@@ -10,6 +10,24 @@ import {
   type ReactNode,
 } from "react";
 
+/** Default IO expansion — start preparing content before it enters the viewport. */
+export const PUBLIC_DEFER_ROOT_MARGIN = "400px 0px";
+export const PUBLIC_FOOTER_ROOT_MARGIN = "480px 0px";
+
+function parseLeadingRootMarginPx(rootMargin: string): number {
+  const leading = rootMargin.trim().split(/\s+/)[0] ?? "0px";
+  const match = leading.match(/^(-?\d+(?:\.\d+)?)px$/);
+  return match ? Math.abs(Number(match[1])) : 0;
+}
+
+/** Best-effort sync check — avoids blank placeholders when content is already near viewport. */
+export function isNearViewport(node: HTMLElement, rootMargin = PUBLIC_DEFER_ROOT_MARGIN): boolean {
+  const marginPx = parseLeadingRootMarginPx(rootMargin);
+  const rect = node.getBoundingClientRect();
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  return rect.top < vh + marginPx && rect.bottom > -marginPx;
+}
+
 type DeferredBelowFoldProps = {
   children: ReactNode;
   fallback?: ReactNode;
@@ -17,24 +35,35 @@ type DeferredBelowFoldProps = {
   minHeight?: string;
   rootMargin?: string;
   className?: string;
+  /** Mount immediately — use for first below-fold blocks and CTAs. */
+  eager?: boolean;
 };
 
-/** Mount children when the placeholder nears the viewport. */
+/** Mount children when the placeholder nears the viewport (stays mounted once visible). */
+/** @deprecated Do not wrap marketing page sections — mount layout eagerly; lazy-load assets inside sections instead. */
 export function DeferredBelowFold({
   children,
   fallback = null,
   minHeight,
-  rootMargin = "240px 0px",
+  rootMargin = PUBLIC_DEFER_ROOT_MARGIN,
   className,
+  eager = false,
 }: DeferredBelowFoldProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(eager);
 
   useEffect(() => {
+    if (eager) return;
+
     const node = hostRef.current;
     if (!node) return;
 
     if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+
+    if (isNearViewport(node, rootMargin)) {
       setVisible(true);
       return;
     }
@@ -51,7 +80,7 @@ export function DeferredBelowFold({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [rootMargin]);
+  }, [eager, rootMargin]);
 
   return (
     <div
@@ -94,23 +123,32 @@ type ViewportDeferredProps = {
   rootMargin?: string;
   minHeight?: string;
   className?: string;
+  eager?: boolean;
 };
 
-/** Mount when the anchor nears the viewport — avoids post-paint footer work above the fold. */
+/** Mount when the anchor nears the viewport — one-way gate (never unmounts). */
 export function ViewportDeferred({
   children,
-  rootMargin = "320px 0px",
+  rootMargin = PUBLIC_FOOTER_ROOT_MARGIN,
   minHeight,
   className,
+  eager = false,
 }: ViewportDeferredProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(eager);
 
   useEffect(() => {
+    if (eager) return;
+
     const node = hostRef.current;
     if (!node) return;
 
     if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+
+    if (isNearViewport(node, rootMargin)) {
       setVisible(true);
       return;
     }
@@ -127,7 +165,7 @@ export function ViewportDeferred({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [rootMargin]);
+  }, [eager, rootMargin]);
 
   return (
     <div

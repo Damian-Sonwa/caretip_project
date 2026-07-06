@@ -43,6 +43,8 @@ router.get("/subscriptions/activity", platformController.listSubscriptionActivit
 router.get("/businesses", platformController.listBusinesses);
 router.get("/businesses/:id", platformController.getBusiness);
 router.delete("/businesses/:id", platformController.deleteBusiness);
+router.post("/businesses/:id/soft-delete", platformController.softDeleteBusiness);
+router.patch("/businesses/:id/operational-status", platformController.updateBusinessOperationalStatus);
 router.patch("/businesses/:id/verify", platformController.verifyBusinessKyc);
 router.patch("/businesses/:id/verify-kyc", platformController.verifyBusinessKyc);
 router.patch("/businesses/:id/verify-onboarding", platformController.verifyBusinessOnboarding);

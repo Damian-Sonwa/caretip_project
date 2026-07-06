@@ -8,40 +8,30 @@ import { LandingRealLifeSection } from "../components/landing/LandingRealLifeSec
 import { LandingSocialProofSection } from "../components/landing/LandingSocialProofSection";
 import { LandingMotivationSection } from "../components/landing/LandingMotivationSection";
 import { LandingFinalCtaSection } from "../components/landing/LandingFinalCtaSection";
-import { DeferredBelowFold } from "@/lib/publicRouteDefer";
+
 /** Reversible: set true to restore #social-proof (PDF adjustment — hide testimonials & trust stats). */
 export const SHOW_LANDING_SOCIAL_PROOF = false;
 
-/** Below-the-fold landing sections — lazy-loaded after hero paints. */
+/** Below-the-fold landing sections — mount eagerly; images/animations may still lazy-load internally. */
 export function LandingPageBelowFold() {
   return (
     <>
-      <DeferredBelowFold minHeight="52rem" rootMargin="320px 0px">
-        <HospitalityTeamsUnifiedSection />
-      </DeferredBelowFold>
-      <DeferredBelowFold minHeight="44rem" rootMargin="240px 0px">
-        <BusinessLandingSection />
-        <EmployeeLandingSection />
-      </DeferredBelowFold>
-      <DeferredBelowFold minHeight="36rem" rootMargin="240px 0px">
-        <LandingFeaturesSection />
-        <PaymentsSection />
-      </DeferredBelowFold>
-      <DeferredBelowFold minHeight="40rem" rootMargin="200px 0px">
-        <LandingRealLifeSection />
-        <LandingMotivationSection />
-      </DeferredBelowFold>
-      <DeferredBelowFold minHeight="28rem" rootMargin="200px 0px">
-        <SimpleSetupSection />
-      </DeferredBelowFold>
-      {SHOW_LANDING_SOCIAL_PROOF ? (
-        <DeferredBelowFold minHeight="24rem" rootMargin="200px 0px">
-          <LandingSocialProofSection />
-        </DeferredBelowFold>
-      ) : null}
-      <DeferredBelowFold minHeight="18rem" rootMargin="200px 0px">
-        <LandingFinalCtaSection />
-      </DeferredBelowFold>
+      <HospitalityTeamsUnifiedSection />
+
+      <BusinessLandingSection />
+      <EmployeeLandingSection />
+
+      <LandingFeaturesSection />
+      <PaymentsSection />
+
+      <LandingRealLifeSection />
+      <LandingMotivationSection />
+
+      <SimpleSetupSection />
+
+      {SHOW_LANDING_SOCIAL_PROOF ? <LandingSocialProofSection /> : null}
+
+      <LandingFinalCtaSection />
     </>
   );
 }

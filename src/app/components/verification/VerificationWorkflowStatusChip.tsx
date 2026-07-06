@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { KycVerificationStatus, OnboardingVerificationStatus } from "../../lib/api";
+import type { KycVerificationStatus, OnboardingVerificationStatus, PlatformBusinessOperationalStatus } from "../../lib/api";
 import { kycStatusLabel, onboardingStatusLabel } from "../../lib/verificationWorkflowUi";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +83,46 @@ export function KycVerificationStatusChip({
       )}
     >
       {kycStatusLabel(status, t)}
+    </span>
+  );
+}
+
+function operationalTone(status: PlatformBusinessOperationalStatus | null | undefined): ChipTone {
+  switch (status ?? "active") {
+    case "active":
+      return "success";
+    case "suspended":
+      return "warn";
+    case "inactive":
+      return "danger";
+    default:
+      return "muted";
+  }
+}
+
+export function BusinessOperationalStatusChip({
+  status,
+  className,
+}: {
+  status: PlatformBusinessOperationalStatus | null | undefined;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const key =
+    status === "suspended"
+      ? "admin.allBusinessesPage.operationalStatus.suspended"
+      : status === "inactive"
+        ? "admin.allBusinessesPage.operationalStatus.inactive"
+        : "admin.allBusinessesPage.operationalStatus.active";
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold",
+        toneClass(operationalTone(status)),
+        className,
+      )}
+    >
+      {t(key)}
     </span>
   );
 }

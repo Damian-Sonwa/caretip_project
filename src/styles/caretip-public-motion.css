@@ -65,12 +65,10 @@
 }
 
 .caretip-pricing-tier-card {
-  content-visibility: auto;
   contain-intrinsic-size: auto 26rem;
 }
 
 .caretip-feature-showcase-card {
-  content-visibility: auto;
   contain-intrinsic-size: auto 18rem;
 }
 
@@ -82,6 +80,25 @@
   .caretip-public-scroll-reveal {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+}
+
+/* Marketing images — reserved space + smooth decode fade (no layout shift) */
+.caretip-marketing-img {
+  opacity: 0;
+  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  background-color: hsl(var(--muted) / 0.35);
+}
+
+.caretip-marketing-img--ready {
+  opacity: 1;
+  background-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-marketing-img {
+    opacity: 1;
     transition: none;
   }
 }

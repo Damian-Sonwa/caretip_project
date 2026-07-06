@@ -11,6 +11,21 @@
   overflow-y: visible;
   background-color: #f8f8f7;
   scroll-padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+  /* Auth logo hierarchy — mark inside capsule; card remains primary focus */
+  --caretip-auth-logo-w: 62px;
+  --caretip-auth-logo-max-w: 70px;
+  --caretip-auth-logo-container-max: 88px;
+  --caretip-auth-logo-container-max-h: 96px;
+}
+
+@media (min-width: 768px) {
+  .caretip-auth-page,
+  .caretip-auth-shell {
+    --caretip-auth-logo-w: 80px;
+    --caretip-auth-logo-max-w: 90px;
+    --caretip-auth-logo-container-max: 108px;
+    --caretip-auth-logo-container-max-h: 120px;
+  }
 }
 
 .dark .caretip-auth-page,
@@ -105,6 +120,19 @@
   overflow: visible;
   background: #f8f8f7;
   isolation: isolate;
+  --caretip-auth-logo-w: 62px;
+  --caretip-auth-logo-max-w: 70px;
+  --caretip-auth-logo-container-max: 88px;
+  --caretip-auth-logo-container-max-h: 96px;
+}
+
+@media (min-width: 768px) {
+  .caretip-auth-curved-container {
+    --caretip-auth-logo-w: 80px;
+    --caretip-auth-logo-max-w: 90px;
+    --caretip-auth-logo-container-max: 108px;
+    --caretip-auth-logo-container-max-h: 120px;
+  }
 }
 
 .dark .caretip-auth-curved-container {
@@ -219,7 +247,11 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  padding: 0.125rem 0.25rem;
+  justify-content: center;
+  box-sizing: border-box;
+  max-width: var(--caretip-auth-logo-container-max, 88px);
+  max-height: var(--caretip-auth-logo-container-max-h, 96px);
+  padding: 0.125rem 0.3125rem;
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
@@ -425,16 +457,16 @@
   position: relative;
   display: block;
   flex-shrink: 0;
-  width: 100px;
-  max-width: min(100px, 64vw);
+  width: var(--caretip-auth-logo-w, 62px);
+  max-width: var(--caretip-auth-logo-max-w, 70px);
   height: auto;
   min-height: unset;
   overflow: visible;
 }
 
 .caretip-auth-marketing__brand-row .caretip-auth-marketing__logo--compact:not(.caretip-auth-marketing__logo--on-surface) {
-  width: 100px;
-  max-width: min(100px, 58vw);
+  width: var(--caretip-auth-logo-w, 62px);
+  max-width: var(--caretip-auth-logo-max-w, 70px);
   height: auto;
   min-height: unset;
 }
@@ -453,8 +485,9 @@
 }
 
 .caretip-auth-logo-wrap--card.caretip-auth-logo-surface {
-  max-width: min(7.25rem, 92vw);
-  padding: 0.25rem 0.625rem;
+  max-width: var(--caretip-auth-logo-container-max, 88px);
+  max-height: var(--caretip-auth-logo-container-max-h, 96px);
+  padding: 0.1875rem 0.375rem;
   border-radius: 0.75rem;
 }
 
@@ -471,8 +504,8 @@
 
 .caretip-auth-logo-wrap--marketing.caretip-auth-logo-surface .caretip-auth-marketing__logo--on-surface {
   display: block !important;
-  width: 100px !important;
-  max-width: 100px !important;
+  width: var(--caretip-auth-logo-w, 62px) !important;
+  max-width: var(--caretip-auth-logo-max-w, 70px) !important;
   height: auto !important;
   max-height: none !important;
   margin-inline: auto;
@@ -482,15 +515,15 @@
 }
 
 .caretip-auth-logo-wrap--marketing-compact.caretip-auth-logo-surface .caretip-auth-marketing__logo--on-surface {
-  width: 100px !important;
-  max-width: 100px !important;
+  width: var(--caretip-auth-logo-w, 62px) !important;
+  max-width: var(--caretip-auth-logo-max-w, 70px) !important;
   height: auto !important;
   max-height: none !important;
 }
 
 .caretip-auth-logo-wrap--card.caretip-auth-logo-surface .caretip-auth-marketing__logo {
-  width: 100px !important;
-  max-width: 100px !important;
+  width: var(--caretip-auth-logo-w, 62px) !important;
+  max-width: var(--caretip-auth-logo-max-w, 70px) !important;
   height: auto !important;
   max-height: none !important;
   min-height: unset !important;
@@ -503,15 +536,15 @@
   }
 
   .caretip-auth-marketing__brand-row .caretip-auth-marketing__logo:not(.caretip-auth-marketing__logo--on-surface) {
-    width: 100px;
-    max-width: min(100px, 40vw);
+    width: var(--caretip-auth-logo-w, 80px);
+    max-width: var(--caretip-auth-logo-max-w, 90px);
     height: auto;
     min-height: unset;
   }
 
   .caretip-auth-marketing__brand-row .caretip-auth-marketing__logo--compact:not(.caretip-auth-marketing__logo--on-surface) {
-    width: 100px;
-    max-width: min(100px, 36vw);
+    width: var(--caretip-auth-logo-w, 80px);
+    max-width: var(--caretip-auth-logo-max-w, 90px);
     height: auto;
     min-height: unset;
   }
@@ -521,8 +554,8 @@
   }
 
   .caretip-auth-logo-wrap--card.caretip-auth-logo-surface .caretip-auth-marketing__logo {
-    width: 100px !important;
-    max-width: 100px !important;
+    width: var(--caretip-auth-logo-w, 80px) !important;
+    max-width: var(--caretip-auth-logo-max-w, 90px) !important;
     height: auto !important;
     max-height: none !important;
     min-height: unset !important;
@@ -534,8 +567,8 @@
   }
 
   .caretip-auth-logo-wrap--marketing.caretip-auth-logo-surface .caretip-auth-marketing__logo--on-surface {
-    width: 100px !important;
-    max-width: 100px !important;
+    width: var(--caretip-auth-logo-w, 80px) !important;
+    max-width: var(--caretip-auth-logo-max-w, 90px) !important;
     height: auto !important;
     max-height: none !important;
   }
@@ -547,8 +580,8 @@
   }
 
   .caretip-auth-marketing__brand-row .caretip-auth-marketing__logo:not(.caretip-auth-marketing__logo--on-surface) {
-    width: 100px;
-    max-width: 100px;
+    width: var(--caretip-auth-logo-w, 80px);
+    max-width: var(--caretip-auth-logo-max-w, 90px);
   }
 }
 
@@ -606,7 +639,7 @@
       radial-gradient(ellipse 80% 55% at 14% 0%, rgba(233, 120, 28, 0.32) 0%, transparent 48%),
       radial-gradient(ellipse 45% 35% at 92% 100%, rgba(233, 120, 28, 0.14) 0%, transparent 45%),
       linear-gradient(165deg, #0a0a0a 0%, #0a0a0a 42%, #111111 68%, #14100c 86%, #1a1208 100%);
-    padding-bottom: 0.875rem;
+    padding-bottom: 0.5rem;
   }
 
   .caretip-auth-curved-container--sign-up .caretip-auth-curved-brand {
@@ -653,11 +686,11 @@
   .caretip-auth-marketing__inner {
     max-width: 32.5rem;
     margin-inline: auto;
-    padding: max(0.625rem, env(safe-area-inset-top, 0px)) 1rem 0.25rem;
+    padding: max(0.5rem, env(safe-area-inset-top, 0px)) 1rem 0;
   }
 
   .caretip-auth-back-home--marketing {
-    margin-bottom: 0.375rem;
+    margin-bottom: 0.125rem;
   }
 
   .caretip-auth-back-home--marketing .caretip-auth-back-home__link {
@@ -713,7 +746,7 @@
 
   .caretip-auth-recovery-stage--compact-marketing .caretip-auth-curved-brand {
     min-height: 0;
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
   }
 
   /* Curved transition into form surface */
@@ -1522,7 +1555,7 @@
 .caretip-auth-logo-wrap {
   display: flex;
   width: fit-content;
-  max-width: 17.5rem;
+  max-width: var(--caretip-auth-logo-container-max, 108px);
   align-items: center;
   justify-content: flex-start;
   overflow: visible;
@@ -1530,7 +1563,7 @@
 
 .caretip-auth-logo-wrap--card {
   margin-inline: auto;
-  margin-bottom: 0.375rem;
+  margin-bottom: 0.25rem;
   justify-content: center;
 }
 

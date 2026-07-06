@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ImgHTMLAttributes } from "react";
+import { useEffect, useState, type ImgHTMLAttributes } from "react";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 
 import { LandingHeroFloatingCards } from "@/components/landing/LandingHeroFloatingCards";
@@ -20,6 +20,19 @@ const STORY_FRAMES = [
 const STORY_CYCLE_MS = 5600;
 const HERO_IMAGE_SIZES = "(max-width: 1023px) min(90vw, 448px), 672px";
 
+function preloadHeroFrame(frame: (typeof STORY_FRAMES)[number]) {
+  const img = new Image();
+  img.src = frame.avif;
+  img.onerror = () => {
+    const fallback = new Image();
+    fallback.src = frame.webp;
+    fallback.onerror = () => {
+      const png = new Image();
+      png.src = frame.png;
+    };
+  };
+}
+
 type LandingHeroStoryShowcaseProps = {
   alt: string;
   className?: string;
@@ -32,6 +45,11 @@ type LandingHeroStoryShowcaseProps = {
 export function LandingHeroStoryShowcase({ alt, className }: LandingHeroStoryShowcaseProps) {
   const reduceMotion = usePrefersReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [frameReady, setFrameReady] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    preloadHeroFrame(STORY_FRAMES[1]);
+  }, []);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -55,6 +73,7 @@ export function LandingHeroStoryShowcase({ alt, className }: LandingHeroStorySho
           <div className={landingUi.heroMediaClip}>
             {frames.map((frame, index) => {
               const isActive = index === activeIndex;
+              const isReady = frameReady[frame.key] ?? index === 0;
               return (
                 <picture key={frame.key} className="contents">
                   <source type="image/avif" srcSet={frame.avif} />
@@ -66,14 +85,17 @@ export function LandingHeroStoryShowcase({ alt, className }: LandingHeroStorySho
                     className={cn(
                       landingUi.heroShowcaseImg,
                       "caretip-hero-story-frame",
+                      "caretip-marketing-img",
+                      isReady && "caretip-marketing-img--ready",
                       isActive && "caretip-hero-story-frame--active",
                     )}
-                    loading={index === 0 ? "eager" : "lazy"}
+                    loading={index === 0 ? "eager" : "eager"}
                     decoding="async"
                     sizes={HERO_IMAGE_SIZES}
+                    onLoad={() => setFrameReady((prev) => ({ ...prev, [frame.key]: true }))}
                     {...(index === 0
                       ? ({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)
-                      : {})}
+                      : ({ fetchpriority: "low" } as ImgHTMLAttributes<HTMLImageElement>))}
                   />
                 </picture>
               );

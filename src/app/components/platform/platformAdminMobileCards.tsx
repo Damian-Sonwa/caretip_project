@@ -181,14 +181,18 @@ export function PlatformBusinessVerificationMobileCard({
   business: b,
   onApprove,
   onReject,
+  onDelete,
   onEdit,
   onOpenFile,
+  busy = false,
 }: {
   business: PlatformBusinessRow;
   onApprove: () => void;
   onReject: () => void;
+  onDelete?: () => void;
   onEdit: () => void;
   onOpenFile: (path: string) => void;
+  busy?: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -258,8 +262,9 @@ export function PlatformBusinessVerificationMobileCard({
         {b.onboardingVerificationStatus !== "approved" ? (
           <button
             type="button"
+            disabled={busy}
             onClick={onApprove}
-            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
             {t("admin.businessDetailPage.approveOnboarding")}
           </button>
@@ -267,10 +272,21 @@ export function PlatformBusinessVerificationMobileCard({
         {b.onboardingVerificationStatus === "submitted" ? (
           <button
             type="button"
+            disabled={busy}
             onClick={onReject}
-            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-lg border border-destructive px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
+            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-lg border border-destructive px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
           >
             {t("admin.businessDetailPage.rejectOnboarding")}
+          </button>
+        ) : null}
+        {onDelete ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onDelete}
+            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-lg border border-border px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
+          >
+            {t("admin.onboardingVerificationPage.btnDelete")}
           </button>
         ) : null}
       </div>

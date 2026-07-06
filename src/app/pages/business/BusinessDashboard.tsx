@@ -156,6 +156,8 @@ export function BusinessDashboard() {
     isMetricsInitialLoad,
     isGoalsInitialLoad,
     isPeriodRefreshing,
+    isAnalyticsSettled,
+    hasPeriodActivity,
     analyticsLoading: isAnalyticsSectionLoading,
     showStatsSkeleton,
     refreshStatsQuiet,
@@ -344,6 +346,8 @@ export function BusinessDashboard() {
         {
           isInitialLoading: showMetricsSkeleton,
           isPeriodRefreshing,
+          isAnalyticsSettled,
+          hasPeriodActivity,
           pendingVerification: showOnboardingReviewNotice,
           statsLoadFailed,
           socketStatus: connectionStatus,
@@ -353,6 +357,8 @@ export function BusinessDashboard() {
     [
       showMetricsSkeleton,
       isPeriodRefreshing,
+      isAnalyticsSettled,
+      hasPeriodActivity,
       showOnboardingReviewNotice,
       statsLoadFailed,
       connectionStatus,

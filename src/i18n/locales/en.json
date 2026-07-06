@@ -290,29 +290,14 @@
         "validation": "Please complete all required fields before submitting."
       }
     },
-    "features": {
-      "title": "Caring is Tipping",
-      "subtitleLead": "Because outstanding dedication deserves real recognition.",
-      "subtitleBody": "A platform tailor-made for hospitality, healthcare, and service industries. With CareTip, your guests, clients, or patients can say a digital thank you more easily and intuitively than ever before. Bring genuine appreciation straight to your team!",
-      "f1Title": "QR Code Tipping",
-      "f1Desc": "From salons and local services to showing appreciation for your midwife: Customers simply scan and tip in seconds, completely cashless, seamless, and with zero app installs.",
-      "f1Tag": "Customer flow",
-      "f2Title": "Team Overview",
-      "f2Desc": "Track tips, ratings, and shared goals in one central place, for a team that stays motivated.",
-      "f2Tag": "Team view",
-      "f3Title": "Analytics & Insights",
-      "f3Desc": "Track team performance, shift trends, and live activity across all your venues and areas, neatly organized in one real-time dashboard.",
-      "f3Tag": "Analytics",
-      "f4Title": "Secured by Stripe",
-      "f4Desc": "A globally trusted payment processor and modern security standards ensure every payment runs reliably and stays protected.",
-      "f4Tag": "Stripe secured",
-      "f5Title": "Live Notifications",
-      "f5Desc": "Real-time activity and instant alerts help you support your team and respond quickly whenever it matters.",
-      "f5Tag": "Live alerts",
-      "f6Title": "Flexible across locations",
-      "f6Desc": "Manage multiple businesses, venues, and areas with ease, without ever losing sight of the big picture.",
-      "f6Tag": "Multi location",
-      "about": {
+    "about": {
+      "pageAria": "About CareTip",
+      "hero": {
+        "badge": "About CareTip",
+        "title": "About CareTip",
+        "mission": "We make tipping simpler, fairer, and more transparent for hospitality teams, so great service is recognised when it happens."
+      },
+      "story": {
         "eyebrow": "About us",
         "title": "Two cities. One mission: appreciation that truly lands.",
         "intro": "Behind CareTip are [Name 1] & [Name 2], two founders from Berlin, united by a shared vision and two of Europe's most dynamic cities.",
@@ -326,6 +311,50 @@
         "driveBody": "CareTip isn't just a tech project for us. It's a tool for fair success, stronger teams, and future-ready businesses. We bridge modern digital convenience, 100% reliable infrastructure, highest data security, and genuine human recognition.",
         "driveClosing": "Because Caring is Tipping: contactless, direct, and tax-free."
       },
+      "missionSection": {
+        "title": "What we stand for",
+        "m1Title": "Teams get rewarded",
+        "m1Body": "Hospitality and service staff deserve recognition that reaches them directly, not lost in cashless moments or admin friction.",
+        "m2Title": "Digital tipping made simple",
+        "m2Body": "Guests scan, tip, and go. No app downloads, no awkward cash exchanges, just a smooth flow built for real venues.",
+        "m3Title": "Transparent team management",
+        "m3Body": "Managers see clear records, fair distribution, and live activity, so trust stays high across every shift."
+      },
+      "trustSection": {
+        "title": "Built on trust",
+        "t1Title": "Stripe-powered payments",
+        "t1Body": "Every tip runs through Stripe's trusted checkout, encrypted, familiar, and built for European businesses.",
+        "t2Title": "Transparency by design",
+        "t2Body": "Clear records for teams and leadership. No black boxes, just accountable tipping from scan to payout.",
+        "t3Title": "Made for modern hospitality",
+        "t3Body": "From restaurants and hotels to field services, CareTip fits how European teams work today."
+      },
+      "ctaTitle": "Ready to bring fair tipping to your team?",
+      "ctaPrimary": "Get started",
+      "ctaSecondary": "View pricing"
+    },
+    "features": {
+      "title": "Caring is Tipping",
+      "subtitleLead": "Because outstanding dedication deserves real recognition.",
+      "subtitleBody": "A platform tailor-made for hospitality and service industries. With CareTip, your guests or clients can say a digital thank you more easily and intuitively than ever before. Bring genuine appreciation straight to your team!",
+      "f1Title": "QR Code Tipping",
+      "f1Desc": "One scan, one click, one thank-you. For everyone delivering great hospitality every day, customers scan the QR code or type in the URL directly and tip in seconds. No app, no registration.",
+      "f1Tag": "Caring Journey",
+      "f2Title": "Team Dashboard",
+      "f2Desc": "Track tips, ratings, and shared goals in one central place, for a team that stays motivated.",
+      "f2Tag": "Team view",
+      "f3Title": "Analytics & Insights",
+      "f3Desc": "Track team performance, shift trends, and live activity across all your venues and areas, neatly organized in one real-time dashboard.",
+      "f3Tag": "Analytics",
+      "f4Title": "Payments secured by Stripe",
+      "f4Desc": "Stripe is one of the most trusted payment providers in the world. Your customers pay safely, reliably and without any detours, so you never have to worry.",
+      "f4Tag": "Stripe secured",
+      "f5Title": "Live Notifications",
+      "f5Desc": "Keep an easy eye on your team. Real-time updates show you what's happening, effortlessly and without any fuss.",
+      "f5Tag": "Live alerts",
+      "f6Title": "Flexible across locations",
+      "f6Desc": "Manage multiple businesses, venues, and areas with ease, without ever losing sight of the big picture.",
+      "f6Tag": "Multi location",
       "momentsTitle": "The best for everyone involved",
       "momentsSubtitle": "Tailored views for your entire environment. See how CareTip makes everyday life easier for guests, teams, managers, and finance.",
       "moments": {
@@ -355,7 +384,8 @@
         "tipAmount": "€24.00"
       },
       "ctaTitle": "Ready to take your team to the next level?",
-      "ctaBody": "",
+      "ctaBody": "Start accepting digital tips, reward your team, and manage everything transparently with CareTip.",
+      "ctaButton": "Start free",
       "ctaPrimary": "Start free / create your business account",
       "ctaPricing": ""
     },
@@ -471,28 +501,6 @@
         "transparent": "Transparent pricing",
         "stripe": "Secure Stripe payments",
         "setup": "Setup in minutes"
-      },
-      "faq": {
-        "title": "Frequently asked questions",
-        "subtitle": "Clear answers about fees, billing, and what to expect when you get started.",
-        "items": [
-          {
-            "q": "Are there monthly platform fees?",
-            "a": "Starter is €29/month (or €290/year) for core tipping and team tools. Business is €79/month (or €790/year) for advanced analytics, multi-location support, and branding. Enterprise pricing is upon request for groups and chains."
-          },
-          {
-            "q": "What does per-tip pricing mean?",
-            "a": "CareTip charges a small percentage plus Stripe’s fixed fee on each successful tip. Failed or cancelled payments are never charged. Rates depend on your plan."
-          },
-          {
-            "q": "Can I switch plans as my team grows?",
-            "a": "Yes. Upgrade anytime as you add locations or staff. Our team helps you move between plans so reporting and payouts stay consistent."
-          },
-          {
-            "q": "How does yearly billing work?",
-            "a": "Choose yearly billing to save 20% compared to paying monthly. You are billed once every 12 months. Annual subscriptions renew automatically unless you cancel before the end of the current term."
-          }
-        ]
       },
       "contractModels": {
         "title": "Contract options",
@@ -1093,40 +1101,49 @@
       "footerContact": "Questions? Contact us at legal@caretip.com"
     },
     "faq": {
-      "pageTitle": "FAQ",
-      "pageSubtitle": "Frequently asked questions",
+      "pageEyebrow": "HELP CENTER",
+      "pageTitle": "Questions? We've got answers.",
+      "pageSubtitle": "Everything you need to know about CareTip, digital tipping, team management, and secure payouts.",
       "items": [
         {
-          "q": "How does CareTip work: how do customers leave a tip?",
-          "a": "Customers simply scan a QR code, no download, no registration, no app required. After scanning, they select an amount and pay via credit card, Apple Pay, or Google Pay. The tip goes directly and transparently to the team. The entire process takes less than 30 seconds."
+          "q": "Are payments and customer data secure?",
+          "a": "Yes, absolutely. All transactions are processed through Stripe, one of the world's leading payment providers, certified as a PCI-DSS Level 1 Service Provider (the highest security standard in the card industry) and compliant with the European PSD2 directive. CareTip never touches or stores your card or banking details. All personal data is processed strictly in accordance with GDPR and applicable data protection law."
+        },
+        {
+          "q": "How do I know this QR code is safe?",
+          "a": "All CareTip QR codes lead exclusively to our secured website caretip.de. After scanning, you can always verify the URL in your browser's address bar. Look for the padlock icon and the https connection. This confirms the connection is encrypted and the page is genuine.\n\nBy the way: you don't have to scan the QR code at all. You can simply type the URL shown on the display (e.g. caretip.de/ava) directly into your browser and leave a tip just as easily and securely through the website."
+        },
+        {
+          "q": "Are my card details stored?",
+          "a": "No. CareTip does not store any card details. All payments are processed entirely through Stripe, the same provider trusted by Amazon, Google and Shopify. Your card data never leaves our platform."
+        },
+        {
+          "q": "Is CareTip GDPR compliant?",
+          "a": "Yes, fully. CareTip was built from the ground up with privacy at its core. We comply with all requirements of the GDPR and give users full control over their data at all times, including the right to access and deletion."
+        },
+        {
+          "q": "How does CareTip work – how do customers leave a tip?",
+          "a": "Customers simply scan a QR code or type the URL directly into their browser, with no download, no registration, and no app required. After scanning, they select an amount and pay via credit card, Apple Pay or Google Pay. The tip goes directly and transparently to the team. The whole process takes under 30 seconds."
         },
         {
           "q": "Do my customers need an app?",
           "a": "No, neither customers nor employees need an app. The QR code opens directly in the smartphone's browser. No account, no password, no barriers. As seamless as possible."
         },
         {
-          "q": "Are digital tips tax-free for my team?",
-          "a": "Yes, absolutely. In Germany, voluntary tips for employees are completely free of income tax and social security contributions under Section 3 No. 51 of the German Income Tax Act (EStG). To ensure that this remains legally compliant in the digital world, CareTip fulfills the strict requirements of Section 107 Paragraph 3 of the German Trade Regulation Act (GewO): Payments flow directly and without detours to your employees as a voluntary contribution from the guest.\n\nCareTip is technically designed in such a way that this tax-free character is preserved 100% (no withholding by the employer). Since every operating structure and employment contract can be unique, we still recommend a quick, one-time consultation with your tax advisor."
+          "q": "How quickly can I set up CareTip?",
+          "a": "You're live in just a few minutes. No hardware, no IT department, no long onboarding process. After registration, you receive your personalised QR codes, print them out, place them, done. For larger businesses with multiple locations, we personally guide you through the setup."
         },
         {
           "q": "What does CareTip cost for my business?",
-          "a": "CareTip operates on a transparent model with no hidden fees. There is a small service fee per transaction, meaning you only pay when your team actually receives a tip. You can find all the details about our current conditions on our pricing page or directly by talking to us."
+          "a": "CareTip works on a transparent model with no hidden fees. A small service fee applies per transaction, meaning you only pay when your team actually receives a tip. You can find all details on our pricing page or by speaking directly with us."
         },
         {
-          "q": "How fast can I set up CareTip?",
-          "a": "You are live in just a few minutes. No hardware, no IT department, no long onboarding processes. After registration, you will receive your personalized QR codes, just print them out, set them up, and you're done. For larger businesses with multiple locations or teams, we will personally guide you through the setup."
+          "q": "Does the tip actually reach the employee?",
+          "a": "Yes, and that is our core promise. Every payment is directly assigned to the employee profile linked to the QR code. Business owners and employees can track earnings transparently in the dashboard at any time. No tip is ever lost."
         },
         {
-          "q": "How is the tip distributed among my team?",
-          "a": "You decide. CareTip can be flexibly configured, whether the tip is credited directly to an individual, split across an entire team, or distributed based on your own allocation key. As an operator, you have full insight into all transactions via your dashboard at any time."
-        },
-        {
-          "q": "Which industries is CareTip suitable for?",
-          "a": "CareTip works anywhere people provide a personal service, whether it's a restaurant, hotel, hair salon, spa, delivery service, midwifery practice, or any other service business. If your team deserves appreciation, then CareTip is made for you."
-        },
-        {
-          "q": "Are payments and customer data secure?",
-          "a": "Yes, absolutely. All transactions are processed through our partner Stripe, one of the world's leading and most secure payment service providers. Stripe is certified as a PCI-DSS Level 1 Service Provider, the highest security standard in the credit card industry, and meets all requirements of the European Payment Services Directive (PSD2).\n\nAs a result, CareTip itself never comes into contact with your credit card or bank details, nor do we store them. Data protection is also our top priority: The processing of all personal data is strictly carried out in accordance with the specifications of the EU General Data Protection Regulation (GDPR) and the German Federal Data Protection Act (BDSG). Your customers and your team are in the safest hands with us."
+          "q": "Are digital tips tax-free for my team?",
+          "a": "Yes. In Germany, voluntary tips for employees are completely exempt from income tax and social security contributions under Section 3 No. 51 EStG. CareTip is technically designed to preserve this tax-free status 100%, with payments flowing as voluntary guest contributions directly to employees, with no employer withholding. We still recommend a one-time check with your tax advisor for your specific business structure."
         }
       ],
       "ctaTitle": "Can't find the answer you're looking for?",
@@ -1852,6 +1869,8 @@
       "completionSupporting": "Your support means a lot",
       "tipSentConfirmation": "Your tip was sent",
       "tipAndFeedbackReceived": "Your tip and feedback have been received",
+      "recipientLabel": "Tip sent to",
+      "recipientSummaryAria": "Tip recipient",
       "supportingLabel": "You're supporting",
       "paymentCompleted": "Payment completed",
       "secureTransaction": "Secure transaction",
@@ -1934,6 +1953,9 @@
       "employeeLiveDesc": "Realtime connection active",
       "employeeUpdatingDesc": "Refreshing your analytics",
       "employeeDataUpToDateDesc": "Dashboard reflects your latest analytics",
+      "employeeNoDataDesc": "No tips or ratings in this period yet",
+      "businessNoDataDesc": "No tip activity in this period yet",
+      "adminNoDataDesc": "No platform activity recorded for this period",
       "adminLiveDesc": "Realtime connection active",
       "adminDataUpToDateDesc": "Platform metrics reflect the latest data",
       "adminUpdatingDesc": "Refreshing platform metrics",
@@ -2477,6 +2499,10 @@
       "heroFloatAnalyticsLabel": "Analytics updated",
       "heroHeadline": "More tips for your team. Zero effort for your business.",
       "heroHeadlineHighlight": "tips",
+      "heroHeadlineHighlights": [
+        "tips",
+        "business"
+      ],
       "heroTagline": ""
     },
     "simpleSetup": {
@@ -2593,8 +2619,10 @@
       "title": "Take your team to the next level.",
       "subtitle": "Higher motivation. Lower turnover. Fully staffed shifts. Digital tips via QR code make your business highly attractive to top talent. Your guests reward outstanding service cashless and tax-free, completely hassle-free and with zero extra effort for your business. <bold>Because Caring is Tipping.</bold> Look after your team today, and secure your success tomorrow.",
       "subtitle1": "Higher motivation. Lower turnover. Fully staffed shifts.",
-      "subtitle2": "Digital tips via QR code make your business highly attractive to top talent. Your guests reward outstanding service cashless and tax-free, completely hassle-free and with zero extra effort for your business.",
-      "subtitle3": "<bold>Because Caring is Tipping.</bold> Look after your team today, and secure your success tomorrow.",
+      "subtitle2": "Digital tips via QR code make your business highly attractive to top talent.",
+      "subtitle3": "Your guests reward outstanding service cashless and tax-free, completely hassle-free and with zero extra effort for your business.",
+      "subtitle4": "<bold>Because Caring is Tipping.</bold>",
+      "subtitle5": "Look after your team today, and secure your success tomorrow.",
       "pill": "Empowering excellence, wherever people care.",
       "f1Title": "Reward service instantly",
       "f1Text": "Guests tip in seconds with one quick scan, with table, location, and staff QR ready to print and go.",
@@ -2790,27 +2818,27 @@
       "learnLess": "Show less",
       "s1Headline": "Right at the Doorstep",
       "s1Tag": "Logistics & Delivery",
-      "s1Text": "<bold>Customers scan the QR code on the vehicle, delivery notice, or parcel and tip in seconds. No app downloads, no cash needed.</bold>",
+      "s1Text": "Customers scan the QR code on the vehicle, delivery notice, or parcel and tip in seconds. No app downloads, no cash needed.",
       "s1Detail": "Display your custom QR codes on delivery vans, handheld scanners, missed delivery cards, or as stickers directly on the packages. The customer opens the tipping screen instantly in their mobile browser, picks an amount, and pays securely using their card or preferred digital wallet. Whether the tip is assigned straight to the individual driver or contributed to a depot wide pool, your dashboard updates in real time. Operations managers can track performance and boost driver motivation, even during peak delivery seasons.",
       "s1Alt": "Logistics and delivery tipping at the doorstep with a QR code",
       "s2Headline": "Right at Reception",
       "s2Tag": "Hotels & Front Desk",
-      "s2Text": "<bold>A quick scan at check-in or check-out is the perfect solution for concierge, bell, and housekeeping teams. Seamless and completely cashless.</bold>",
+      "s2Text": "A quick scan at check-in or check-out is the perfect solution for concierge, bell, and housekeeping teams. Seamless and completely cashless.",
       "s2Detail": "Display your branded QR codes as countertop displays at the desk, on key card holders, or via a tablet link at reception. Guests can tip porters, the concierge, or housekeeping effortlessly, without hunting for spare cash or dealing with awkward tip envelopes. Finance sees every single transaction tracked in one central hub, making shift handovers and month end reporting far simpler for hotel management.",
       "s2Alt": "Hotel reception with guest tipping at check-in or check-out",
       "s3Headline": "Right on the Ward",
       "s3Tag": "Hospitals & Healthcare",
-      "s3Text": "<bold>A quick scan at the nurse station or bedside lets patients and families thank nursing teams, ward staff, and support crews in seconds. Dignified, discreet, and completely cashless.</bold>",
+      "s3Text": "A quick scan at the nurse station or bedside lets patients and families thank nursing teams, ward staff, and support crews in seconds. Dignified, discreet, and completely cashless.",
       "s3Detail": "Display your branded QR codes at ward counters, on care cards, or via a tablet at the nurses' station. Families can show gratitude for compassionate care instantly, without awkward cash handoffs or paper envelopes. Ward managers and hospital leadership track every thank-you in one central dashboard, keeping recognition fair, transparent, and motivating for every shift.",
       "s3Alt": "Hospital ward where patients and families thank care teams digitally",
       "s4Headline": "Independent Midwives",
       "s4Tag": "Postpartum Home Visits",
-      "s4Text": "<bold>A quick scan after a postpartum home visit, tipped in seconds. No app required, completely cashless.</bold>",
+      "s4Text": "A quick scan after a postpartum home visit, tipped in seconds. No app required, completely cashless.",
       "s4Detail": "Share your QR code easily after your care session or print it directly on business cards and info brochures. Exhausted new parents can say thank you right from their smartphones, no searching for cash or envelopes needed. Every token of appreciation and digital tip gathers automatically in your personal CareTip dashboard, so you keep a perfect, transparent overview of your freelance earnings while focusing fully on the families.",
       "s4Alt": "Independent midwife after postpartum home visit with digital tipping via QR code",
       "s5Headline": "Right On Site with Customers",
       "s5Tag": "Field & Mobile Services",
-      "s5Text": "<bold>Tip from anywhere via link or QR code, the direct solution for home care, trades, and mobile services.</bold>",
+      "s5Text": "Tip from anywhere via link or QR code, the direct solution for home care, trades, and mobile services.",
       "s5Detail": "Share a personal link via SMS or WhatsApp after the visit, or show the QR code on your business card. Customers reward great service right in their mobile browser via card, Apple Pay, or Google Pay. Appreciation lands in the same system as your in-venue team while your dashboard updates in real time, so your entire field crew feels direct recognition for the work they deliver on site.",
       "s5Alt": "Field and mobile service tipping via link or QR code on site"
     },
@@ -5674,6 +5702,21 @@
       "title": "All businesses",
       "subtitle": "Registered venues on the platform.",
       "colOnboardingVerification": "Onboarding verification",
+      "colOperationalStatus": "Operational status",
+      "btnSuspend": "Suspend",
+      "btnReactivate": "Reactivate",
+      "btnDeactivate": "Deactivate",
+      "suspendConfirm": "Suspend this business? The owner will lose dashboard access until you reactivate them.",
+      "reactivateConfirm": "Reactivate this business and restore owner dashboard access?",
+      "deactivateConfirm": "Deactivate this business? Records are preserved but the owner cannot operate until reactivated.",
+      "toastSuspended": "Business suspended.",
+      "toastReactivated": "Business reactivated.",
+      "toastDeactivated": "Business deactivated.",
+      "operationalStatus": {
+        "active": "Active",
+        "suspended": "Suspended",
+        "inactive": "Inactive"
+      },
       "searchPlaceholder": "Search business name, owner, email, or contact…",
       "searchAria": "Search businesses",
       "emptyList": "No businesses on the platform yet.",
@@ -5688,7 +5731,8 @@
           "submitted": "Showing {{total}} submitted onboarding requests",
           "approved": "Showing {{total}} approved businesses",
           "rejected": "Showing {{total}} rejected onboarding requests",
-          "suspended": "Showing {{total}} suspended businesses"
+          "suspended": "Showing {{total}} suspended businesses",
+          "inactive": "Showing {{total}} inactive businesses"
         },
         "date": {
           "today": "Showing {{total}} businesses registered today",
@@ -5734,6 +5778,10 @@
           "suspended": {
             "title": "No suspended businesses",
             "description": "Suspended accounts will appear here when applicable."
+          },
+          "inactive": {
+            "title": "No inactive businesses",
+            "description": "Deactivated businesses will appear here when applicable."
           }
         },
         "date": {
@@ -6259,7 +6307,8 @@
           "not_started": "Not started",
           "sla_breach": "SLA breach (>48h)",
           "rejected": "Rejected",
-          "suspended": "Suspended"
+          "suspended": "Suspended",
+          "inactive": "Inactive"
         },
         "tips": {
           "all": "All volumes",
@@ -6290,6 +6339,9 @@
       "emptyList": "No businesses on the platform yet.",
       "btnApprove": "Approve access",
       "btnReject": "Reject",
+      "btnDelete": "Remove request",
+      "deleteConfirm": "Remove this onboarding request from the queue? This soft-deletes the record and cannot be undone from this screen.",
+      "toastDeleted": "Onboarding request removed.",
       "statusDraft": "Draft",
       "statusSubmitted": "Submitted",
       "statusApproved": "Approved",
@@ -6309,7 +6361,8 @@
           "submitted": "Showing {{total}} newly submitted onboarding requests",
           "approved": "Showing {{total}} approved businesses",
           "rejected": "Showing {{total}} rejected onboarding requests",
-          "suspended": "Showing {{total}} suspended businesses"
+          "suspended": "Showing {{total}} suspended businesses",
+          "inactive": "Showing {{total}} inactive businesses"
         }
       },
       "empty": {
@@ -6341,6 +6394,10 @@
           "suspended": {
             "title": "No suspended businesses were found",
             "description": "No businesses match the suspended status."
+          },
+          "inactive": {
+            "title": "No inactive businesses were found",
+            "description": "No businesses match the inactive operational status."
           }
         }
       },
@@ -6351,7 +6408,8 @@
           "submitted": "Submitted",
           "approved": "Approved",
           "rejected": "Rejected",
-          "suspended": "Suspended"
+          "suspended": "Suspended",
+          "inactive": "Inactive"
         }
       }
     },

@@ -6,16 +6,15 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { LoadingSpinner } from "../components/ui/loading-spinner";
-import { CareTipLoadingTitle } from "../components/CareTipPageLoader";
+import { CareTipBrandLoader } from "../components/CareTipBrandLoader";
 import { LaunchSplashVisibilityProvider } from "./AppLoadingManager";
 
 /**
- * Launch splash (CareTip + spinner): installed PWA / standalone only — first paint & hydration.
- * Not used for in-app SPA navigations (those use {@link RouteTransitionOverlay}).
+ * Launch splash: first paint through app shell ready (all surfaces).
+ * PWA keeps a short minimum visible time so the mark does not flash.
  */
-const MIN_VISIBLE_MS_PWA = 450;
-const EXIT_TRANSITION_MS = 480;
+const MIN_VISIBLE_MS_PWA = 420;
+const EXIT_TRANSITION_MS = 420;
 /** If layout never signals (e.g. unusual error routes), still dismiss splash. */
 const SHELL_READY_FALLBACK_MS = 8000;
 
@@ -23,7 +22,7 @@ type Phase = "on" | "exit" | "off";
 
 type AppLoadingSplashContextValue = {
   markAppShellReady: () => void;
-  /** Branded overlay during SPA route transitions (hidden while launch splash is active). */
+  /** Branded overlay during SPA route transitions (reserved — global overlay handles transitions). */
   setRouteTransitionPending: (pending: boolean) => void;
 };
 
@@ -60,21 +59,16 @@ function BrandedLoadingSplashOverlay({
   return (
     <div
       className={[
-        "fixed inset-0 z-[10000] flex flex-col items-center justify-center px-6",
-        "bg-gray-50 text-foreground dark:bg-neutral-950",
-        "transition-[opacity,transform,filter] duration-[480ms] ease-out motion-reduce:transition-none",
-        exiting ? "pointer-events-none opacity-0 scale-[0.98]" : "opacity-100 scale-100",
+        "caretip-launch-splash fixed inset-0 z-[10000] flex flex-col items-center justify-center px-6",
+        "bg-background text-foreground",
+        exiting ? "caretip-launch-splash--exiting" : "",
       ].join(" ")}
       aria-busy={!exiting}
       aria-live="polite"
       role="status"
+      aria-label="Loading CareTip"
     >
-      <div className="flex max-w-sm flex-col items-center text-center">
-        <CareTipLoadingTitle />
-        <div className="mt-7 flex justify-center">
-          <LoadingSpinner size="md" />
-        </div>
-      </div>
+      <CareTipBrandLoader showMessage={false} />
     </div>
   );
 }
@@ -93,9 +87,9 @@ export function AppLoadingSplashProvider({
     );
   }, []);
 
-  const [phase, setPhase] = useState<Phase>(isStandalone ? "on" : "off");
+  const [phase, setPhase] = useState<Phase>("on");
   const [minElapsed, setMinElapsed] = useState(!isStandalone);
-  const [shellReady, setShellReady] = useState(!isStandalone);
+  const [shellReady, setShellReady] = useState(false);
 
   const markAppShellReady = useCallback(() => {
     setShellReady(true);
@@ -112,20 +106,18 @@ export function AppLoadingSplashProvider({
   }, [isStandalone]);
 
   useEffect(() => {
-    if (!isStandalone) return;
     const id = window.setTimeout(() => {
       setShellReady((s) => s || true);
     }, SHELL_READY_FALLBACK_MS);
     return () => window.clearTimeout(id);
-  }, [isStandalone]);
+  }, []);
 
   useEffect(() => {
-    if (!isStandalone) return;
     if (!minElapsed || !shellReady) return;
     setPhase("exit");
     const id = window.setTimeout(() => setPhase("off"), EXIT_TRANSITION_MS);
     return () => window.clearTimeout(id);
-  }, [isStandalone, minElapsed, shellReady]);
+  }, [minElapsed, shellReady]);
 
   const value = useMemo(
     () => ({

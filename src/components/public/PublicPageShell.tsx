@@ -5,7 +5,6 @@ import { AuthLikePageBackground } from "@/app/components/AuthLikePageBackground"
 import { cn } from "@/lib/utils";
 import { publicPageUi } from "@/components/public/publicPageUi";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
-import { ViewportDeferred } from "@/lib/publicRouteDefer";
 
 type PublicPageShellProps = {
   children: ReactNode;
@@ -36,9 +35,7 @@ export function PublicPageShell({
         <main className={cn(publicPageUi.main, maxWidthClass[maxWidth], className)}>
           <div className={contentClassName}>{children}</div>
         </main>
-        <ViewportDeferred minHeight="12rem" rootMargin="280px 0px">
-          <Footer />
-        </ViewportDeferred>
+        <Footer />
       </div>
     </div>
   );

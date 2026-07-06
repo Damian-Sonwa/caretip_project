@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import logyImg from "../../../../images/logy.png";
 import repImg from "../../../../images/rep.png";
-import hospitalImg from "../../../../images/hospital002.png";
+import mid001Img from "../../../../images/mid001.png";
 import fieldServicesImg from "../../../../images/trade and home services.webp";
 import { landingStaggerDelay } from "@/lib/landingMotion";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
@@ -38,7 +38,7 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s4Tag"),
           textKey: "landing.realLife.s4Text" as const,
           detail: t("landing.realLife.s4Detail"),
-          img: hospitalImg,
+          img: mid001Img,
           alt: t("landing.realLife.s4Alt"),
         },
         {

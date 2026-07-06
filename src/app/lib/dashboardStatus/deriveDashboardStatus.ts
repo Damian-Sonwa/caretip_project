@@ -31,17 +31,33 @@ function deriveConnectionStatusItem(
 }
 
 function deriveSyncStatusItem(
-  isRefreshing: boolean,
+  input: {
+    isRefreshing: boolean;
+    isSettled: boolean;
+    hasData: boolean;
+  },
   t: TFunction,
   updatingDescKey: string,
   upToDateDescKey: string,
-): DashboardStatusItem {
-  if (isRefreshing) {
+  noDataDescKey: string,
+): DashboardStatusItem | null {
+  if (input.isRefreshing) {
     return {
       id: "sync",
       tone: "updating",
       label: t("dashboard.status.updating"),
       description: t(updatingDescKey),
+    };
+  }
+  if (!input.isSettled) {
+    return null;
+  }
+  if (!input.hasData) {
+    return {
+      id: "sync",
+      tone: "updating",
+      label: t("format.noDataYet"),
+      description: t(noDataDescKey),
     };
   }
   return {
@@ -56,6 +72,8 @@ export function deriveBusinessDashboardStatus(
   input: {
     isInitialLoading: boolean;
     isPeriodRefreshing: boolean;
+    isAnalyticsSettled: boolean;
+    hasPeriodActivity: boolean;
     pendingVerification: boolean;
     statsLoadFailed: string | null;
     socketStatus: SocketConnectionStatus;
@@ -79,14 +97,18 @@ export function deriveBusinessDashboardStatus(
   const connection = deriveConnectionStatusItem(input.socketStatus, t);
   if (connection) items.push(connection);
 
-  items.push(
-    deriveSyncStatusItem(
-      input.isPeriodRefreshing,
-      t,
-      "dashboard.status.businessUpdatingDesc",
-      "dashboard.status.businessLiveDesc",
-    ),
+  const sync = deriveSyncStatusItem(
+    {
+      isRefreshing: input.isPeriodRefreshing,
+      isSettled: input.isAnalyticsSettled,
+      hasData: input.hasPeriodActivity,
+    },
+    t,
+    "dashboard.status.businessUpdatingDesc",
+    "dashboard.status.businessLiveDesc",
+    "dashboard.status.businessNoDataDesc",
   );
+  if (sync) items.push(sync);
 
   return items;
 }
@@ -95,6 +117,9 @@ export function deriveEmployeeDashboardStatus(
   input: {
     isInitialLoading: boolean;
     isPeriodRefreshing: boolean;
+    isAnalyticsSettled: boolean;
+    hasPeriodActivity: boolean;
+    statsLoadFailed: string | null;
     socketStatus: SocketConnectionStatus;
   },
   t: TFunction,
@@ -103,17 +128,31 @@ export function deriveEmployeeDashboardStatus(
 
   const items: DashboardStatusItem[] = [];
 
+  if (input.statsLoadFailed) {
+    items.push({
+      id: "data-action",
+      tone: "action",
+      label: t("dashboard.status.actionRequired"),
+      description: input.statsLoadFailed,
+    });
+    return items;
+  }
+
   const connection = deriveConnectionStatusItem(input.socketStatus, t);
   if (connection) items.push(connection);
 
-  items.push(
-    deriveSyncStatusItem(
-      input.isPeriodRefreshing,
-      t,
-      "dashboard.status.employeeUpdatingDesc",
-      "dashboard.status.employeeDataUpToDateDesc",
-    ),
+  const sync = deriveSyncStatusItem(
+    {
+      isRefreshing: input.isPeriodRefreshing,
+      isSettled: input.isAnalyticsSettled,
+      hasData: input.hasPeriodActivity,
+    },
+    t,
+    "dashboard.status.employeeUpdatingDesc",
+    "dashboard.status.employeeDataUpToDateDesc",
+    "dashboard.status.employeeNoDataDesc",
   );
+  if (sync) items.push(sync);
 
   return items;
 }
@@ -123,6 +162,8 @@ export function derivePlatformAdminDashboardStatus(
     isInitialLoading: boolean;
     isSyncing: boolean;
     analyticsSyncing: boolean;
+    isAnalyticsSettled: boolean;
+    hasPeriodActivity: boolean;
     serviceIssue: string | null;
     socketStatus: SocketConnectionStatus;
     pendingVerificationCount?: number;
@@ -157,14 +198,18 @@ export function derivePlatformAdminDashboardStatus(
   const connection = deriveConnectionStatusItem(input.socketStatus, t);
   if (connection) items.push(connection);
 
-  items.push(
-    deriveSyncStatusItem(
-      input.isSyncing || input.analyticsSyncing,
-      t,
-      "dashboard.status.adminUpdatingDesc",
-      "dashboard.status.adminDataUpToDateDesc",
-    ),
+  const sync = deriveSyncStatusItem(
+    {
+      isRefreshing: input.isSyncing || input.analyticsSyncing,
+      isSettled: input.isAnalyticsSettled,
+      hasData: input.hasPeriodActivity,
+    },
+    t,
+    "dashboard.status.adminUpdatingDesc",
+    "dashboard.status.adminDataUpToDateDesc",
+    "dashboard.status.adminNoDataDesc",
   );
+  if (sync) items.push(sync);
 
   return items;
 }

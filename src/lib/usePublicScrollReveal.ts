@@ -1,4 +1,5 @@
 import { useEffect, useRef, type CSSProperties, type RefObject } from "react";
+import { isNearViewport, PUBLIC_DEFER_ROOT_MARGIN } from "./publicRouteDefer";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
 const REVEAL_CLASS = "caretip-public-scroll-reveal";
@@ -17,19 +18,28 @@ export function usePublicScrollReveal<T extends HTMLElement = HTMLElement>(delay
     const el = ref.current;
     if (!el) return;
 
-    if (reduceMotion) {
+    const show = () => {
       el.classList.add(REVEAL_VISIBLE_CLASS);
+    };
+
+    if (reduceMotion) {
+      show();
+      return;
+    }
+
+    if (isNearViewport(el, PUBLIC_DEFER_ROOT_MARGIN)) {
+      show();
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
-          el.classList.add(REVEAL_VISIBLE_CLASS);
+          show();
           observer.disconnect();
         }
       },
-      { root: null, rootMargin: "0px 0px -8% 0px", threshold: 0.12 },
+      { root: null, rootMargin: "0px 0px 12% 0px", threshold: 0.01 },
     );
 
     observer.observe(el);

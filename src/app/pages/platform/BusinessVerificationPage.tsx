@@ -11,6 +11,8 @@ import {
   updatePlatformBusinessKycStatus,
   updatePlatformBusinessOnboardingStatus,
   updatePlatformBusinessKyc,
+  softDeletePlatformBusiness,
+  updatePlatformBusinessOperationalStatus,
   uploadPlatformBusinessLogo,
   uploadPlatformBusinessVerification,
   fetchAuthedObjectUrl,
@@ -68,7 +70,9 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
     toggleStatusFilter,
     applyKpiStatusFilter,
     hasActiveFilters,
-  } = useBusinessVerificationFilters(workflow);
+  } = useBusinessVerificationFilters(workflow, {
+    defaultStatus: workflow === "onboarding" ? "submitted" : "all",
+  });
   const [rows, setRows] = useState<PlatformBusinessRow[]>([]);
   const [total, setTotal] = useState(0);
   const [kycMetrics, setKycMetrics] = useState<KycQueueMetrics | null>(null);
@@ -77,6 +81,7 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadErrorKind, setLoadErrorKind] = useState<ReturnType<typeof classifyFetchError>>("api");
   const loadGenRef = useRef(0);
+  const [processingIds, setProcessingIds] = useState<Set<string>>(() => new Set());
   const [editing, setEditing] = useState<PlatformBusinessRow | null>(null);
   const [form, setForm] = useState({
     legalContactName: "",
@@ -212,49 +217,81 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
     }
   }, [isKyc]);
 
-  const handleKycStatusUpdate = async (businessId: string, status: PlatformVerificationAction) => {
-    let reviewNote: string | undefined;
-    if (status === "rejected") {
-      reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
-    }
+  const runWithProcessing = useCallback(async (businessId: string, action: () => Promise<void>) => {
+    if (processingIds.has(businessId)) return;
+    setProcessingIds((prev) => new Set(prev).add(businessId));
     try {
-      await updatePlatformBusinessKycStatus(businessId, status, reviewNote);
-      if (status === "verified") {
-        toast.success(t("admin.businessVerificationPage.toastApproved"));
-      } else if (status === "rejected") {
-        toast.success(t("admin.businessVerificationPage.toastRejected"));
-      } else {
-        toast.success(t("admin.businessVerificationPage.toastStatusUpdated"));
-      }
-      await load();
-    } catch (e) {
-      logClientError("BusinessVerificationPage.handleKycStatusUpdate", e);
-      toast.error(toUserFriendlyMessage(e));
+      await action();
+    } finally {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(businessId);
+        return next;
+      });
     }
+  }, [processingIds]);
+
+  const handleKycStatusUpdate = async (businessId: string, status: PlatformVerificationAction) => {
+    await runWithProcessing(businessId, async () => {
+      let reviewNote: string | undefined;
+      if (status === "rejected") {
+        reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
+      }
+      try {
+        await updatePlatformBusinessKycStatus(businessId, status, reviewNote);
+        if (status === "verified") {
+          toast.success(t("admin.businessVerificationPage.toastApproved"));
+        } else if (status === "rejected") {
+          toast.success(t("admin.businessVerificationPage.toastRejected"));
+        } else {
+          toast.success(t("admin.businessVerificationPage.toastStatusUpdated"));
+        }
+        await load();
+      } catch (e) {
+        logClientError("BusinessVerificationPage.handleKycStatusUpdate", e);
+        toast.error(toUserFriendlyMessage(e));
+      }
+    });
   };
 
   const handleOnboardingStatusUpdate = async (
     businessId: string,
     status: PlatformOnboardingVerificationAction,
   ) => {
-    let reviewNote: string | undefined;
-    if (status === "rejected") {
-      reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
-    }
-    try {
-      await updatePlatformBusinessOnboardingStatus(businessId, status, reviewNote);
-      toast.success(
-        status === "approved"
-          ? t("admin.onboardingVerificationPage.toastApproved")
-          : status === "rejected"
-            ? t("admin.onboardingVerificationPage.toastRejected")
-            : t("admin.businessVerificationPage.toastStatusUpdated"),
-      );
-      await load();
-    } catch (e) {
-      logClientError("BusinessVerificationPage.handleOnboardingStatusUpdate", e);
-      toast.error(toUserFriendlyMessage(e));
-    }
+    await runWithProcessing(businessId, async () => {
+      let reviewNote: string | undefined;
+      if (status === "rejected") {
+        reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
+      }
+      try {
+        await updatePlatformBusinessOnboardingStatus(businessId, status, reviewNote);
+        toast.success(
+          status === "approved"
+            ? t("admin.onboardingVerificationPage.toastApproved")
+            : status === "rejected"
+              ? t("admin.onboardingVerificationPage.toastRejected")
+              : t("admin.businessVerificationPage.toastStatusUpdated"),
+        );
+        await load();
+      } catch (e) {
+        logClientError("BusinessVerificationPage.handleOnboardingStatusUpdate", e);
+        toast.error(toUserFriendlyMessage(e));
+      }
+    });
+  };
+
+  const handleSoftDelete = async (businessId: string) => {
+    if (!window.confirm(t("admin.onboardingVerificationPage.deleteConfirm"))) return;
+    await runWithProcessing(businessId, async () => {
+      try {
+        await softDeletePlatformBusiness(businessId);
+        toast.success(t("admin.onboardingVerificationPage.toastDeleted"));
+        await load();
+      } catch (e) {
+        logClientError("BusinessVerificationPage.handleSoftDelete", e);
+        toast.error(toUserFriendlyMessage(e));
+      }
+    });
   };
 
   const openEdit = (b: PlatformBusinessRow) => {
@@ -427,6 +464,15 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
       ? b.kycVerificationStatus === "pending_review"
       : b.onboardingVerificationStatus === "submitted";
 
+  const canDeleteRow = (b: PlatformBusinessRow) => {
+    if (isKyc) return false;
+    const onboarding = b.onboardingVerificationStatus ?? "draft";
+    if (onboarding !== "draft" && onboarding !== "rejected") return false;
+    return (b.totalTipsEur ?? 0) === 0 && (b.successTipCount ?? 0) === 0;
+  };
+
+  const isRowProcessing = (businessId: string) => processingIds.has(businessId);
+
   const tableColCount = isKyc ? 7 : 6;
 
   const paginationFooter =
@@ -549,8 +595,10 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
               <PlatformBusinessVerificationMobileCard
                 key={b.id}
                 business={b}
+                busy={isRowProcessing(b.id)}
                 onApprove={() => approveBusiness(b.id)}
                 onReject={() => rejectBusiness(b.id)}
+                onDelete={canDeleteRow(b) ? () => void handleSoftDelete(b.id) : undefined}
                 onEdit={() => openEdit(b)}
                 onOpenFile={(path) => void openAuthedFile(path)}
               />
@@ -695,8 +743,9 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
                         {canApproveRow(b) ? (
                           <button
                             type="button"
+                            disabled={isRowProcessing(b.id)}
                             onClick={() => approveBusiness(b.id)}
-                            className="rounded bg-primary px-2 py-1 text-xs font-medium text-primary-foreground hover:bg-primary-hover"
+                            className="rounded bg-primary px-2 py-1 text-xs font-medium text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
                           >
                             {isKyc
                               ? t("admin.businessVerificationPage.btnApprove")
@@ -706,12 +755,23 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
                         {canRejectRow(b) ? (
                           <button
                             type="button"
+                            disabled={isRowProcessing(b.id)}
                             onClick={() => rejectBusiness(b.id)}
-                            className="rounded border border-destructive px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
+                            className="rounded border border-destructive px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
                           >
                             {isKyc
                               ? t("admin.businessVerificationPage.btnReject")
                               : t("admin.onboardingVerificationPage.btnReject")}
+                          </button>
+                        ) : null}
+                        {canDeleteRow(b) ? (
+                          <button
+                            type="button"
+                            disabled={isRowProcessing(b.id)}
+                            onClick={() => void handleSoftDelete(b.id)}
+                            className="rounded border border-border px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
+                          >
+                            {t("admin.onboardingVerificationPage.btnDelete")}
                           </button>
                         ) : null}
                       </div>

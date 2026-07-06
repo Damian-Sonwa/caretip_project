@@ -6,7 +6,7 @@ import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CustomerJourneyCareTipAttribution } from "./CustomerJourneyCareTipAttribution";
 import type { CustomerJourneyVenueBrand } from "./customerJourneyBrand";
-import { guestBrandAccentColor, resolveGuestCompletionSupportingText } from "../../lib/businessBranding";
+import { guestBrandAccentColor } from "../../lib/businessBranding";
 import { formatEur } from "../../lib/formatEur";
 import {
   guestSuccessPageStyle,
@@ -70,7 +70,7 @@ function SuccessHeroIcon({ accent, compact }: { accent: string; compact?: boolea
     <motion.div
       className={cn(
         "customer-flow-success-hero relative mx-auto flex items-center justify-center",
-        compact ? "mb-4 size-[4.5rem] sm:mb-5 sm:size-[5rem]" : "mb-5 size-[5.5rem] sm:mb-6 sm:size-[6rem]",
+        compact ? "mb-3 size-[4.5rem] sm:mb-4 sm:size-[5rem]" : "mb-4 size-[6rem] sm:mb-5 sm:size-[6.5rem]",
       )}
       initial={reduceMotion ? false : { scale: 0.82, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
@@ -86,14 +86,14 @@ function SuccessHeroIcon({ accent, compact }: { accent: string; compact?: boolea
       <span
         className={cn(
           "customer-flow-success-hero__icon flex items-center justify-center rounded-full",
-          compact ? "size-[3.5rem] sm:size-[3.75rem]" : "size-[4.25rem] sm:size-[4.5rem]",
+          compact ? "size-[3.5rem] sm:size-[3.75rem]" : "size-[4.75rem] sm:size-[5.25rem]",
         )}
         style={{
           background: `linear-gradient(145deg, ${accent} 0%, ${accent}dd 100%)`,
           boxShadow: `0 18px 40px -14px ${accent}88, 0 0 0 10px ${accent}14`,
         }}
       >
-        <Check className={cn("text-white", compact ? "size-7 sm:size-8" : "size-9 sm:size-10")} strokeWidth={2.75} />
+        <Check className={cn("text-white", compact ? "size-7 sm:size-8" : "size-10 sm:size-11")} strokeWidth={2.75} />
       </span>
     </motion.div>
   );
@@ -103,7 +103,7 @@ export function TipSuccessExperience({
   venue,
   employee,
   thankYouMessage,
-  supportingText: supportingTextProp,
+  supportingText: _supportingText,
   headline,
   tipAmount,
   receiptNumber,
@@ -120,11 +120,7 @@ export function TipSuccessExperience({
   const reduceMotion = useReducedMotion();
   const branding = venue.branding;
   const accent = guestBrandAccentColor(branding);
-  const displaySupportingText =
-    supportingTextProp?.trim() ||
-    resolveGuestCompletionSupportingText(branding, t("tipFlow.success.completionSupporting"));
   const displayHeadline = headline ?? t("tipFlow.success.celebrationHeadline");
-  const hasBio = Boolean(employee.bio?.trim());
   const fadeUp = reduceMotion
     ? {}
     : {
@@ -164,64 +160,51 @@ export function TipSuccessExperience({
               logoPathOrUrl={venue.logo ?? null}
               businessName={venue.name}
               size="header"
-              className={cn("mx-auto", embedded ? "mb-3" : "mb-4")}
+              className={cn("mx-auto", embedded ? "mb-2" : "mb-2.5")}
             />
             <h1 className="customer-flow-success-card__venue">{venue.name}</h1>
-            {displaySupportingText ? (
-              <p className="customer-flow-success-card__supporting">{displaySupportingText}</p>
-            ) : null}
           </header>
 
-          <motion.div
-            className={cn("customer-flow-success-appreciation", embedded ? "mt-4 sm:mt-5" : "mt-5 sm:mt-6")}
+          <motion.section
+            className={cn("customer-flow-success-confirmation text-center", embedded ? "mt-4" : "mt-4 sm:mt-5")}
+            aria-labelledby="tip-success-headline"
             {...fadeUp}
-            transition={{ delay: 0.16, duration: 0.4 }}
+            transition={{ delay: 0.14, duration: 0.4 }}
           >
-            <p className="customer-flow-success-appreciation__label">
-              {t("tipFlow.success.supportingLabel")}
+            <SuccessHeroIcon accent={accent} compact={embedded} />
+            <h2 id="tip-success-headline" className="customer-flow-success-card__headline">
+              {displayHeadline}
+            </h2>
+            <p className="customer-flow-success-card__thankyou">{thankYouMessage}</p>
+          </motion.section>
+
+          <motion.section
+            className={cn("customer-flow-success-recipient", embedded ? "mt-4" : "mt-5 sm:mt-6")}
+            aria-label={t("tipFlow.success.recipientSummaryAria")}
+            {...fadeUp}
+            transition={{ delay: 0.22, duration: 0.4 }}
+          >
+            <p className="customer-flow-success-recipient__label">
+              {t("tipFlow.success.recipientLabel")}
             </p>
-            <div className="mt-3 flex flex-col items-center gap-2.5 sm:mt-4 sm:gap-3">
+            <div className="customer-flow-success-recipient__row">
               <ProfileAvatar
                 src={employee.avatar}
                 displayName={employee.name}
                 className={cn(
-                  "customer-flow-success-appreciation__avatar ring-[3px]",
-                  embedded
-                    ? "h-[4.25rem] w-[4.25rem] sm:h-[4.5rem] sm:w-[4.5rem]"
-                    : "h-[4.75rem] w-[4.75rem] sm:h-20 sm:w-20",
+                  "customer-flow-success-recipient__avatar shrink-0 ring-2",
+                  embedded ? "h-10 w-10" : "h-11 w-11 sm:h-12 sm:w-12",
                 )}
                 lightbox={false}
               />
-              <div className="min-w-0 text-center">
-                <p className="customer-flow-success-appreciation__name">{employee.name}</p>
+              <div className="min-w-0 text-left">
+                <p className="customer-flow-success-recipient__name">{employee.name}</p>
                 {employee.role ? (
-                  <p className="customer-flow-success-appreciation__role">{employee.role}</p>
+                  <p className="customer-flow-success-recipient__role">{employee.role}</p>
                 ) : null}
               </div>
             </div>
-            {hasBio ? (
-              <p className="customer-flow-success-appreciation__quote">&ldquo;{employee.bio}&rdquo;</p>
-            ) : null}
-          </motion.div>
-
-          <SuccessHeroIcon accent={accent} compact={embedded} />
-
-          <div className="text-center">
-            <motion.h2
-              className="customer-flow-success-card__headline"
-              {...fadeUp}
-              transition={{ delay: 0.24, duration: 0.4 }}
-            >
-              {displayHeadline}
-            </motion.h2>
-            <motion.p
-              className="customer-flow-success-card__thankyou"
-              {...fadeUp}
-              transition={{ delay: 0.32, duration: 0.4 }}
-            >
-              {thankYouMessage}
-            </motion.p>
-          </div>
+          </motion.section>
 
           {(tipAmount != null && tipAmount > 0) || showReceipt ? (
             <motion.div
@@ -244,7 +227,7 @@ export function TipSuccessExperience({
                 </li>
                 <li>
                   <Lock className="size-4 shrink-0 text-emerald-600/80 dark:text-emerald-400/90" aria-hidden />
-                  {t("tipFlow.success.secureTransaction")}
+                  {t("tipFlow.success.trustPoweredBy")}
                 </li>
                 {showReceipt && receiptNumber ? (
                   <li>

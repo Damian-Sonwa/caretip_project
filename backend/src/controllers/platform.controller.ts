@@ -63,7 +63,10 @@ export async function verifyBusinessOnboarding(req: Request, res: Response) {
     const { updateOnboardingVerificationStatus } = await import(
       "../services/businessVerificationWorkflow.service.js"
     );
-    await updateOnboardingVerificationStatus(id, action, { reviewNote: body?.reviewNote });
+    await updateOnboardingVerificationStatus(id, action, {
+      reviewNote: body?.reviewNote,
+      adminUserId: req.user?.userId ?? req.user?.id,
+    });
     return res.json({ success: true });
   } catch (err) {
     logServerError("platform.verifyBusinessOnboarding", err);
@@ -394,6 +397,71 @@ export async function deleteBusiness(req: Request, res: Response) {
     logServerError("platform.deleteBusiness", err);
     return res.status(500).json({
       message: clientSafeMessage(err, "We couldn't delete that business. Try again."),
+    });
+  }
+}
+
+/** Soft-delete draft/rejected onboarding requests with no production data. */
+export async function softDeleteBusiness(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const body = req.body as { reason?: string } | undefined;
+    const { softDeleteBusinessForAdmin } = await import(
+      "../services/businessOperationalLifecycle.service.js"
+    );
+    await softDeleteBusinessForAdmin(id, {
+      reason: body?.reason,
+      adminUserId: req.user?.userId ?? req.user?.id,
+    });
+    return res.json({ success: true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg === "Business not found") {
+      return res.status(404).json({ message: msg });
+    }
+    if (msg.startsWith("Cannot") || msg.startsWith("Only")) {
+      return res.status(400).json({ message: msg });
+    }
+    logServerError("platform.softDeleteBusiness", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't remove that business request. Try again."),
+    });
+  }
+}
+
+export async function updateBusinessOperationalStatus(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const body = req.body as { status?: string; reviewNote?: string } | undefined;
+    const raw = body?.status;
+    const action =
+      raw === "suspended" || raw === "inactive" || raw === "active" ? raw : null;
+    if (!action) {
+      return res.status(400).json({
+        message: "status must be one of: active, suspended, inactive",
+      });
+    }
+    const { updateBusinessOperationalStatus: applyOperationalStatus } = await import(
+      "../services/businessOperationalLifecycle.service.js"
+    );
+    await applyOperationalStatus(id, action, {
+      reviewNote: body?.reviewNote,
+      adminUserId: req.user?.userId ?? req.user?.id,
+    });
+    return res.json({ success: true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg === "Business not found") {
+      return res.status(404).json({ message: msg });
+    }
+    if (msg.startsWith("Cannot")) {
+      return res.status(400).json({ message: msg });
+    }
+    logServerError("platform.updateBusinessOperationalStatus", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't update business status. Try again."),
     });
   }
 }

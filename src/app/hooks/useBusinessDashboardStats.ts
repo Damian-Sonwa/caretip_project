@@ -8,6 +8,7 @@ import { createDashboardSwrStore, DASHBOARD_SWR_METRICS_TTL_MS } from "../lib/da
 import {
   canUseDashboardSwrCache,
   canUsePeriodSwitchCache,
+  deriveDashboardMetricLoading,
   markDashboardLiveSettled,
 } from "../lib/dashboardHydration";
 import { isAbortError, toUserFriendlyMessage } from "../lib/errorMessages";
@@ -23,7 +24,9 @@ import {
   hasBusinessKpiValues,
   hasBusinessSecondaryContent,
   hasBusinessAnalyticsPayload,
+  hasBusinessPeriodActivity,
   isBusinessGoalsPayloadSettled,
+  isBusinessSummaryFetched,
 } from "../lib/dashboardVisibleContent";
 import { shouldRefetchOnAnalyticsCapabilityUpgrade } from "../lib/dashboardAnalyticsLifecycle";
 import {
@@ -72,7 +75,7 @@ export function useBusinessDashboardStats(
   sessionValidated: boolean,
   advancedAnalyticsEnabled = true,
 ) {
-  const [analyticsTimeframe, setAnalyticsTimeframeState] = useState<AnalyticsTimeframe>("month");
+  const [analyticsTimeframe, setAnalyticsTimeframeState] = useState<AnalyticsTimeframe>("week");
   const [heroStats, setHeroStats] = useState<BusinessDashboardStats | null>(null);
   const [stats, setStats] = useState<BusinessDashboardStats | null>(null);
   const [statsTimeframe, setStatsTimeframe] = useState<AnalyticsTimeframe | null>(null);
@@ -176,6 +179,7 @@ export function useBusinessDashboardStats(
       analyticsPartialRef.current.get(tf),
     );
     if (!merged) return;
+    if (!isBusinessSummaryFetched(merged)) return;
     persistSwr(tf);
     setStats(merged);
     setStatsTimeframe(tf);
@@ -184,13 +188,11 @@ export function useBusinessDashboardStats(
     setStatsLoadFailed(null);
     setLastUpdatedAt(Date.now());
     if (fromNetwork) setDataRevision((n) => n + 1);
-    if (hasMetricValues(merged)) {
-      setLastKnownGoodMetrics({
-        totalTips: typeof merged.totalTips === "number" ? merged.totalTips : 0,
-        tipCount: typeof merged.tipCount === "number" ? merged.tipCount : 0,
-        employeeCount: typeof merged.employeeCount === "number" ? merged.employeeCount : 0,
-      });
-    }
+    setLastKnownGoodMetrics({
+      totalTips: typeof merged.totalTips === "number" ? merged.totalTips : 0,
+      tipCount: typeof merged.tipCount === "number" ? merged.tipCount : 0,
+      employeeCount: typeof merged.employeeCount === "number" ? merged.employeeCount : 0,
+    });
   }, [persistSwr]);
 
   const applyHeroFromMonth = useCallback((tf: AnalyticsTimeframe) => {
@@ -568,9 +570,9 @@ export function useBusinessDashboardStats(
         }
       } finally {
         if (affectsUi && uiRequestSeqRef.current === seq) {
-          if (!summarySettled) setSummaryLoading(false);
-          if (!analyticsSettled) setAnalyticsLoading(false);
-          setIsRevalidating(false);
+          if (summarySettled) setSummaryLoading(false);
+          if (analyticsSettled) setAnalyticsLoading(false);
+          if (summarySettled || analyticsSettled) setIsRevalidating(false);
         }
         if (abortByTfRef.current.get(tf) === controller) {
           abortByTfRef.current.delete(tf);
@@ -719,6 +721,8 @@ export function useBusinessDashboardStats(
       cancelDeferredAnalytics();
       tfRef.current = tf;
       setAnalyticsTimeframeState(tf);
+      const seq = ++uiRequestSeqRef.current;
+      setStatsTimeframe(null);
 
       if (canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) {
         const bundle = getBusinessAnalyticsBundle(tf);
@@ -730,7 +734,6 @@ export function useBusinessDashboardStats(
       hydratePeriodSessionCache(tf);
 
       if (isPeriodSessionReady(tf)) {
-        const seq = uiRequestSeqRef.current;
         setSummaryLoading(false);
         setAnalyticsLoading(false);
         setIsRevalidating(false);
@@ -742,7 +745,6 @@ export function useBusinessDashboardStats(
       } else {
         const summaryPartial = summaryPartialRef.current.get(tf);
         if (summaryPartial && hasMetricValues(summaryPartial as BusinessDashboardStats)) {
-          const seq = uiRequestSeqRef.current;
           setSummaryLoading(false);
           devSetHydrationPhase("metrics", "ready");
           const analyticsSlice = analyticsPartialRef.current.get(tf);
@@ -759,7 +761,7 @@ export function useBusinessDashboardStats(
           commitUiStats(tf, seq, false);
         } else {
           setIsRevalidating(true);
-          setSummaryLoading(!hasMetricValues(statsRef.current));
+          setSummaryLoading(true);
           setAnalyticsLoading(true);
         }
       }
@@ -991,14 +993,11 @@ export function useBusinessDashboardStats(
         : null;
     if (
       cached &&
-      (hasBusinessDashboardVisibleContent(cached) || hasMetricValues(cached))
+      isBusinessSummaryFetched(cached)
     ) {
       return cached as BusinessDashboardStats;
     }
 
-    if (!stats) return null;
-    if (hasBusinessDashboardVisibleContent(stats)) return stats;
-    if (hasMetricValues(stats)) return stats;
     return null;
   }, [
     pendingVerification,
@@ -1011,43 +1010,22 @@ export function useBusinessDashboardStats(
   ]);
 
   const displayMetrics = useMemo(() => {
-    if (!displayStats || !hasMetricValues(displayStats)) return null;
+    if (!displayStats || !valuesMatchAnalyticsPeriod) return null;
+    if (!isBusinessSummaryFetched(displayStats)) return null;
     return {
       totalTips: displayStats.totalTips ?? 0,
       tipCount: displayStats.tipCount ?? 0,
       employeeCount: displayStats.employeeCount ?? 0,
     };
-  }, [displayStats?.totalTips, displayStats?.tipCount, displayStats?.employeeCount]);
-
-  const displayMetricsStable = useMemo(() => {
-    if (displayMetrics) return displayMetrics;
-    // During fast period switches, keep last known good values visible instead of flashing zeros.
-    if (!enabled || !sessionValidated || pendingVerification) return null;
-    if (
-      !valuesMatchAnalyticsPeriod ||
-      summaryLoading ||
-      analyticsLoading ||
-      isRevalidating
-    ) {
-      return lastKnownGoodMetrics;
-    }
-    return null;
   }, [
-    analyticsLoading,
-    displayMetrics,
-    enabled,
-    isRevalidating,
-    lastKnownGoodMetrics,
-    pendingVerification,
-    sessionValidated,
-    summaryLoading,
+    displayStats,
     valuesMatchAnalyticsPeriod,
+    displayStats?.totalTips,
+    displayStats?.tipCount,
+    displayStats?.employeeCount,
   ]);
 
-  const hasVisibleKpisOnScreen =
-    Boolean(displayMetricsStable) ||
-    hasBusinessKpiValues(stats) ||
-    Boolean(lastKnownGoodMetrics);
+  const hasMetricsData = displayMetrics != null;
 
   const chartsPayloadPending =
     advancedAnalyticsEnabled &&
@@ -1055,32 +1033,54 @@ export function useBusinessDashboardStats(
     !hasBusinessAnalyticsPayload(displayStats) &&
     !hasBusinessAnalyticsPayload(stats);
 
-  const isMetricsInitialLoad =
+  const displayMetricsResolved = useMemo(() => {
+    if (displayMetrics) return displayMetrics;
+    if (!enabled || !sessionValidated || pendingVerification) return null;
+    if (!valuesMatchAnalyticsPeriod) return null;
+    if (isRevalidating && lastKnownGoodMetrics) return lastKnownGoodMetrics;
+    return null;
+  }, [
+    displayMetrics,
+    enabled,
+    isRevalidating,
+    lastKnownGoodMetrics,
+    pendingVerification,
+    sessionValidated,
+    valuesMatchAnalyticsPeriod,
+  ]);
+
+  const isAnalyticsSettled =
     enabled &&
     sessionValidated &&
     !pendingVerification &&
-    !hasVisibleKpisOnScreen &&
-    summaryLoading &&
-    !isRevalidating;
+    valuesMatchAnalyticsPeriod &&
+    hasMetricsData &&
+    lastUpdatedAt != null &&
+    !summaryLoading &&
+    !analyticsLoading &&
+    !isRevalidating &&
+    !chartsPayloadPending;
+
+  const hasPeriodActivity = useMemo(
+    () => hasBusinessPeriodActivity(displayStats),
+    [displayStats?.tipCount, displayStats?.totalTips],
+  );
+
+  const { showMetricsSkeleton, isPeriodRefreshing } = deriveDashboardMetricLoading({
+    enabled: enabled && sessionValidated && !pendingVerification,
+    hasMetricsData,
+    valuesMatchPeriod: valuesMatchAnalyticsPeriod,
+    summaryLoading,
+    isRevalidating,
+  });
 
   const isAnalyticsSectionLoading =
     enabled &&
     sessionValidated &&
     !pendingVerification &&
-    !isRevalidating &&
+    !hasBusinessAnalyticsPayload(displayStats) &&
+    !hasBusinessAnalyticsPayload(stats) &&
     (analyticsLoading || chartsPayloadPending);
-
-  /** Status strip: stay on Updating until KPIs, charts/goals, and period alignment have all settled. */
-  const isPeriodRefreshing =
-    enabled &&
-    sessionValidated &&
-    !pendingVerification &&
-    !isMetricsInitialLoad &&
-    (isRevalidating ||
-      summaryLoading ||
-      analyticsLoading ||
-      chartsPayloadPending ||
-      !valuesMatchAnalyticsPeriod);
 
   const isGoalsInitialLoad =
     enabled &&
@@ -1097,28 +1097,30 @@ export function useBusinessDashboardStats(
     heroStats,
     stats,
     displayStats,
-    displayMetrics: displayMetricsStable,
+    displayMetrics: displayMetricsResolved,
+    hasMetricsData,
     statsTimeframe,
     valuesMatchAnalyticsPeriod,
-    statsLoading: isMetricsInitialLoad,
-    summaryLoading: isMetricsInitialLoad,
+    statsLoading: showMetricsSkeleton,
+    summaryLoading: showMetricsSkeleton,
     analyticsLoading: isAnalyticsSectionLoading,
-    analyticsTimeframeLoading:
-      isRevalidating && (summaryLoading || analyticsLoading) ? analyticsTimeframe : null,
+    analyticsTimeframeLoading: isPeriodRefreshing ? analyticsTimeframe : null,
     statsLoadFailed,
     pendingVerification,
-    isInitialLoad: isMetricsInitialLoad,
-    isMetricsInitialLoad,
+    isInitialLoad: showMetricsSkeleton,
+    isMetricsInitialLoad: showMetricsSkeleton,
     isAnalyticsSectionLoading,
     isAnalyticsInitialLoad: isAnalyticsSectionLoading,
     isGoalsInitialLoad,
     isSecondarySectionLoading: isAnalyticsSectionLoading,
     isPeriodRefreshing,
-    isDashboardHydrating: isMetricsInitialLoad,
+    isAnalyticsSettled,
+    hasPeriodActivity,
+    isDashboardHydrating: showMetricsSkeleton,
     isRevalidating,
     dataRevision,
     lastUpdatedAt,
-    showStatsSkeleton: isMetricsInitialLoad,
+    showStatsSkeleton: showMetricsSkeleton,
     refreshStatsQuiet,
     retryStats,
     refetchLive,

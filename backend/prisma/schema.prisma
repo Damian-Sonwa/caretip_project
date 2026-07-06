@@ -56,6 +56,13 @@ enum BusinessSubscriptionTier {
   enterprise
 }
 
+/// Post-onboarding operational state — separate from onboarding/KYC verification.
+enum BusinessOperationalStatus {
+  active
+  suspended
+  inactive
+}
+
 /// Platform billing plan key — aligns 1:1 with BusinessSubscriptionTier (Phase A).
 enum SubscriptionPlanKey {
   basic
@@ -524,6 +531,10 @@ model Business {
    * Null when the business has no active subscription (Option A).
    */
   subscriptionTier         BusinessSubscriptionTier?  @map("subscription_tier")
+  operationalStatus        BusinessOperationalStatus  @default(active) @map("operational_status")
+  operationalStatusChangedAt DateTime?                @map("operational_status_changed_at")
+  operationalReviewHistory Json?                      @map("operational_review_history")
+  deletedAt                DateTime?                  @map("deleted_at")
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   employees      Employee[]
@@ -540,6 +551,8 @@ model Business {
   @@index([verificationStatus], map: "businesses_verification_status_idx")
   @@index([onboardingVerificationStatus], map: "businesses_onboarding_verification_status_idx")
   @@index([kycVerificationStatus], map: "businesses_kyc_verification_status_idx")
+  @@index([operationalStatus], map: "businesses_operational_status_idx")
+  @@index([deletedAt], map: "businesses_deleted_at_idx")
   @@map("businesses")
 }
 

@@ -2,9 +2,7 @@ import { useMemo } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import paymentInfrastructureImg from "../../../../images/payment-infrastructure.png";
-
-import paymentInfrastructureImgWebp from "../../../../images/payment-infrastructure.webp";
+import paymentInfrastructureImg from "../../../../images/payment002.png";
 
 import { MarketingPicture } from "@/lib/marketingPicture";
 
@@ -154,8 +152,6 @@ export function PaymentsSection() {
               <MarketingPicture
 
                 src={paymentInfrastructureImg}
-
-                webpSrc={paymentInfrastructureImgWebp}
 
                 alt={t("landing.paymentsTrust.visualAlt")}
 

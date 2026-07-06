@@ -828,11 +828,11 @@ export type LogoutAPIResult = {
   apiStartMs: number;
 };
 
-const LOGOUT_API_TIMEOUT_MS = 3_000;
+const LOGOUT_API_TIMEOUT_MS = 8_000;
 
 /**
  * POST /api/auth/logout with HttpOnly cookie + optional Bearer token.
- * Non-blocking for UX — call after local cleanup; times out after 3s and logs failure.
+ * Non-blocking for UX — call after local cleanup; times out after 8s and logs failure.
  * Server-side refresh invalidation / audit still attempted when the request completes in time.
  */
 export async function logoutAPIWithTimeout(options?: {
@@ -871,13 +871,16 @@ export async function logoutAPIWithTimeout(options?: {
         logoutHeaders.Authorization = `Bearer ${token.trim()}`;
       }
 
-      await fetch(apiPath("/api/auth/logout"), {
+      const response = await fetch(apiPath("/api/auth/logout"), {
         method: "POST",
         headers: logoutHeaders,
         body: EMPTY_JSON_BODY,
         credentials: "include",
         signal: controller.signal,
       });
+      if (!response.ok) {
+        logClientError("api.logoutAPI.status", new Error(`logout HTTP ${response.status}`));
+      }
     } finally {
       window.clearTimeout(timeoutId);
     }
@@ -3375,6 +3378,8 @@ export async function fetchPlatformTransactions(params: {
   );
 }
 
+export type PlatformBusinessOperationalStatus = "active" | "suspended" | "inactive";
+
 export interface PlatformBusinessRow {
   id: string;
   name: string;
@@ -3420,6 +3425,7 @@ export interface PlatformBusinessRow {
   registeredAt?: string | null;
   /** When false, the owner account is suspended */
   ownerIsActive?: boolean;
+  operationalStatus?: PlatformBusinessOperationalStatus;
 }
 
 export type PlatformBusinessStatusFilter =
@@ -3430,6 +3436,7 @@ export type PlatformBusinessStatusFilter =
   | "sla_breach"
   | "rejected"
   | "suspended"
+  | "inactive"
   | "draft"
   | "submitted"
   | "approved"
@@ -3578,6 +3585,42 @@ export async function updatePlatformBusinessOnboardingStatus(
     body: JSON.stringify({ status, ...(reviewNote?.trim() ? { reviewNote: reviewNote.trim() } : {}) }),
     credentials: "include",
   });
+  clearPlatformDashboardClientCache();
+}
+
+export type PlatformBusinessOperationalAction = "active" | "suspended" | "inactive";
+
+export async function updatePlatformBusinessOperationalStatus(
+  businessId: string,
+  status: PlatformBusinessOperationalAction,
+  reviewNote?: string,
+): Promise<void> {
+  await apiRequest(
+    apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/operational-status`),
+    {
+      method: "PATCH",
+      headers: getHeaders(),
+      body: JSON.stringify({
+        status,
+        ...(reviewNote?.trim() ? { reviewNote: reviewNote.trim() } : {}),
+      }),
+      credentials: "include",
+    },
+  );
+  clearPlatformDashboardClientCache();
+}
+
+export async function softDeletePlatformBusiness(
+  businessId: string,
+  reason?: string,
+): Promise<void> {
+  await apiRequest(apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/soft-delete`), {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ ...(reason?.trim() ? { reason: reason.trim() } : {}) }),
+    credentials: "include",
+  });
+  clearPlatformDashboardClientCache();
 }
 
 export async function updatePlatformBusinessKycStatus(

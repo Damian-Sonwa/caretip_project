@@ -1,55 +1,18 @@
 import { Link, useSearchParams } from "react-router";
-import { Plus, Minus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
-import { PublicPageHeader } from "@/components/public/PublicPageHeader";
-import { PublicTrustChips } from "@/components/public/PublicTrustChips";
-import { publicPageUi } from "@/components/public/publicPageUi";
+import { FaqPageHero } from "@/components/public/faq/FaqPageHero";
+import { FaqAccordionItem } from "@/components/public/faq/FaqAccordionItem";
+import { publicPagesBrandUi } from "@/components/public/publicPagesBrandUi";
 import { cn } from "@/lib/utils";
-
-interface FAQItemProps {
-  question: string;
-  questionContent?: React.ReactNode;
-  answer: string;
-  answerContent?: React.ReactNode;
-  isOpen: boolean;
-  onToggle: () => void;
-}
 
 function FaqAnswerWithLead({ lead, body }: { lead: string; body: string }) {
   return (
-    <p className="text-sm leading-relaxed text-muted-foreground">
+    <p className="caretip-faq-item-wise__answer">
       <strong className="font-semibold text-foreground">{lead}</strong> {body}
     </p>
-  );
-}
-
-function FAQItem({ question, questionContent, answer, answerContent, isOpen, onToggle }: FAQItemProps) {
-  return (
-    <div className={cn(publicPageUi.card, publicPageUi.cardInteractive, "caretip-faq-item overflow-hidden p-0")}>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="caretip-faq-trigger flex w-full items-center justify-between text-left transition-colors hover:bg-muted/50"
-      >
-        <span className="caretip-faq-question pr-4 text-foreground">
-          {questionContent ?? question}
-        </span>
-        {isOpen ? (
-          <Minus className="h-5 w-5 shrink-0 text-primary" />
-        ) : (
-          <Plus className="h-5 w-5 shrink-0 text-muted-foreground" />
-        )}
-      </button>
-      {isOpen ? (
-        <div className="caretip-faq-answer-wrap border-t border-border/80">
-          {answerContent ?? (
-            <p className="caretip-faq-answer whitespace-pre-line">{answer}</p>
-          )}
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -122,66 +85,67 @@ export function FAQPage() {
   };
 
   return (
-    <PublicPageShell>
-      <PublicPageHeader
-        title={t("staticPages.faq.pageTitle")}
-        subtitle={t("staticPages.faq.pageSubtitle")}
-        showTrustChips={false}
-      />
+    <PublicPageShell maxWidth="full" contentClassName="pb-0">
+      <main
+        id="faq"
+        className={cn("caretip-faq-page caretip-faq-page--wise", publicPagesBrandUi.pageAccent)}
+        aria-label={t("staticPages.faq.pageTitle")}
+      >
+        <FaqPageHero />
 
-      <div className={cn(publicPageUi.sectionGap, "flex justify-center")}>
-        <PublicTrustChips variant="faq" className="justify-center" />
-      </div>
+        <section className="caretip-faq-content" aria-label={t("faq.searchAria")}>
+          <div className="caretip-faq-page__inner caretip-faq-content__inner">
+            <div className="caretip-faq-search">
+              <Search className="caretip-faq-search__icon" aria-hidden />
+              <input
+                id="faq-search"
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("faq.searchPlaceholder")}
+                autoComplete="off"
+                aria-label={t("faq.searchAria")}
+                className="caretip-faq-search__input"
+              />
+            </div>
 
-      <div className={cn(publicPageUi.sectionGap, "relative max-w-xl")}>
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-        <input
-          type="search"
-          value={searchQuery}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t("faq.searchPlaceholder")}
-          autoComplete="off"
-          aria-label={t("faq.searchAria")}
-          className="w-full rounded-xl border border-border/90 bg-card py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
-      </div>
+            <div className="caretip-faq-list">
+              {filteredFaqs.length === 0 ? (
+                <p className="caretip-faq-empty">
+                  {t("faq.noMatch")}{" "}
+                  <button type="button" className="caretip-faq-empty__clear" onClick={() => setQuery("")}>
+                    {t("faq.clearSearch")}
+                  </button>
+                </p>
+              ) : (
+                filteredFaqs.map((faq, index) => (
+                  <FaqAccordionItem
+                    key={faq.question}
+                    question={faq.question}
+                    questionContent={"questionContent" in faq ? faq.questionContent : undefined}
+                    answer={faq.answer}
+                    answerContent={"answerContent" in faq ? faq.answerContent : undefined}
+                    isOpen={openIndex === index}
+                    onToggle={() => setOpenIndex(openIndex === index ? null : index)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </section>
 
-      <div className={cn(publicPageUi.sectionGap, "space-y-3")}>
-        {filteredFaqs.length === 0 ? (
-          <p className="py-8 text-center text-muted-foreground">
-            {t("faq.noMatch")}{" "}
-            <button
-              type="button"
-              className="font-medium text-primary underline underline-offset-2"
-              onClick={() => setQuery("")}
-            >
-              {t("faq.clearSearch")}
-            </button>
-          </p>
-        ) : (
-          filteredFaqs.map((faq, index) => (
-            <FAQItem
-              key={faq.question}
-              question={faq.question}
-              questionContent={"questionContent" in faq ? faq.questionContent : undefined}
-              answer={faq.answer}
-              answerContent={"answerContent" in faq ? faq.answerContent : undefined}
-              isOpen={openIndex === index}
-              onToggle={() => setOpenIndex(openIndex === index ? null : index)}
-            />
-          ))
-        )}
-      </div>
-
-      <section className={cn(publicPageUi.sectionGap, publicPageUi.ctaPanel)}>
-        <h3 className="mb-2 text-2xl font-semibold text-foreground">
-          {t("staticPages.faq.ctaTitle")}
-        </h3>
-        <p className="mx-auto mb-6 max-w-lg text-muted-foreground">{t("staticPages.faq.ctaBody")}</p>
-        <Link to="/contact" className={publicPageUi.ctaPrimary}>
-          {t("staticPages.faq.ctaButton")}
-        </Link>
-      </section>
+        <section className="caretip-faq-cta-wise" aria-labelledby="faq-cta-title">
+          <div className="caretip-faq-page__inner caretip-faq-cta-wise__inner">
+            <h2 id="faq-cta-title" className="caretip-faq-cta-wise__title">
+              {t("staticPages.faq.ctaTitle")}
+            </h2>
+            <p className="caretip-faq-cta-wise__body">{t("staticPages.faq.ctaBody")}</p>
+            <Link to="/contact" className={publicPagesBrandUi.ctaButtonPrimary}>
+              {t("staticPages.faq.ctaButton")}
+            </Link>
+          </div>
+        </section>
+      </main>
     </PublicPageShell>
   );
 }

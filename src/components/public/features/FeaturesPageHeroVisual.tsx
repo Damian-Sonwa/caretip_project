@@ -18,16 +18,21 @@ export function FeaturesPageHeroVisual({ className }: FeaturesPageHeroVisualProp
       )}
       style={{ animationDelay: "110ms" }}
     >
-      <div className="caretip-features-hero-v2__visual-glow" aria-hidden />
-      <div className="caretip-features-hero-v2__visual-main-wrap caretip-features-hero-v2__float-y">
-        <img
-          src={featureHeroImg}
-          alt={t("staticPages.features.title")}
-          className="caretip-features-hero-v2__visual-main"
-          loading="eager"
-          {...({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)}
-          decoding="async"
-        />
+      <div className="caretip-features-hero-v2__visual-stage">
+        <div className="caretip-features-hero-v2__visual-glow caretip-features-hero-v2__visual-glow--core" aria-hidden />
+        <div className="caretip-features-hero-v2__visual-glow caretip-features-hero-v2__visual-glow--halo" aria-hidden />
+        <div className="caretip-features-hero-v2__visual-ring" aria-hidden />
+
+        <div className="caretip-features-hero-v2__visual-main-wrap caretip-features-hero-v2__float-y">
+          <img
+            src={featureHeroImg}
+            alt={t("staticPages.features.title")}
+            className="caretip-features-hero-v2__visual-main"
+            loading="eager"
+            {...({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)}
+            decoding="async"
+          />
+        </div>
       </div>
     </div>
   );

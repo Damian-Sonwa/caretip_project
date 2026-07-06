@@ -1,4 +1,4 @@
-import type { ImgHTMLAttributes } from "react";
+import { useEffect, useRef, useState, type ImgHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export type MarketingPictureProps = {
@@ -9,6 +9,12 @@ export type MarketingPictureProps = {
   style?: ImgHTMLAttributes<HTMLImageElement>["style"];
   /** Maps to DOM `fetchpriority` (lowercase) for React 18 compatibility. */
   fetchPriority?: "high" | "low" | "auto";
+  /** Above-the-fold: eager load + high fetch priority. */
+  priority?: boolean;
+  /** Smooth opacity fade once decoded (default true for lazy images). */
+  fadeIn?: boolean;
+  width?: number;
+  height?: number;
 } & Pick<ImgHTMLAttributes<HTMLImageElement>, "loading" | "decoding" | "sizes">;
 
 /** PNG/JPEG fallback with optional WebP source for marketing imagery. */
@@ -17,21 +23,46 @@ export function MarketingPicture({
   webpSrc,
   alt,
   className,
-  loading = "lazy",
+  loading,
   decoding = "async",
   sizes,
   fetchPriority,
+  priority = false,
+  fadeIn,
+  width,
+  height,
   style,
 }: MarketingPictureProps) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [ready, setReady] = useState(false);
+  const shouldFade = fadeIn ?? !priority;
+  const resolvedLoading = loading ?? (priority ? "eager" : "lazy");
+  const resolvedFetchPriority = fetchPriority ?? (priority ? "high" : undefined);
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      setReady(true);
+    }
+  }, [src]);
+
   const imgProps = {
+    ref: imgRef,
     alt,
-    className: cn(className),
-    loading,
+    className: cn(
+      className,
+      shouldFade && "caretip-marketing-img",
+      shouldFade && ready && "caretip-marketing-img--ready",
+    ),
+    loading: resolvedLoading,
     decoding,
     sizes,
+    width,
+    height,
     style,
-    ...(fetchPriority
-      ? ({ fetchpriority: fetchPriority } as ImgHTMLAttributes<HTMLImageElement>)
+    onLoad: () => setReady(true),
+    ...(resolvedFetchPriority
+      ? ({ fetchpriority: resolvedFetchPriority } as ImgHTMLAttributes<HTMLImageElement>)
       : {}),
   };
 

@@ -34,7 +34,10 @@
 }
 
 .caretip-how-it-works-page > *,
-.caretip-features-page > * {
+.caretip-features-page > *,
+.caretip-about-page > *,
+.caretip-faq-page > *,
+.caretip-pricing-page--wise > * {
   position: relative;
   z-index: 1;
 }

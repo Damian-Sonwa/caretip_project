@@ -290,29 +290,14 @@
         "validation": "Bitte füllen Sie alle Pflichtfelder aus, bevor Sie absenden."
       }
     },
-    "features": {
-      "title": "Caring is Tipping",
-      "subtitleLead": "Weil großartiger Einsatz echte Anerkennung verdient.",
-      "subtitleBody": "Eine Plattform, maßgeschneidert für Service, Pflege und Dienstleistung. Mit CareTip sagen Ihre Gäste, Kunden oder Patienten so einfach und intuitiv wie nie zuvor digital Danke. Bringen Sie echte Wertschätzung direkt in Ihr Team!",
-      "f1Title": "Trinkgeld per QR-Code",
-      "f1Desc": "Ob im Salon, bei der Dienstleistung vor Ort oder zur Wertschätzung für deine Hebamme: Kunden scannen einfach den Code und geben in Sekundenschnelle Trinkgeld. Komplett ohne App-Installation.",
-      "f1Tag": "Gästeflow",
-      "f2Title": "Team-Übersicht",
-      "f2Desc": "Verfolge Trinkgelder, Bewertungen und gemeinsame Ziele an einem zentralen Ort, für ein dauerhaft motiviertes Team.",
-      "f2Tag": "Teamansicht",
-      "f3Title": "Analysen & Auswertungen",
-      "f3Desc": "Behalte den Überblick: Schichttrends, Team-Leistungen und Live-Aktivitäten für alle deine Standorte und Bereiche, übersichtlich vereint in einem einzigen Echtzeit-Dashboard.",
-      "f3Tag": "Analysen",
-      "f4Title": "Abgesichert durch Stripe",
-      "f4Desc": "Ein weltweit vertrauenswürdiger Bezahlprozess und modernste Sicherheitsstandards sorgen dafür, dass alle Zahlungen absolut verlässlich und geschützt ablaufen.",
-      "f4Tag": "Stripe gesichert",
-      "f5Title": "Live-Benachrichtigungen",
-      "f5Desc": "Echtzeit-Aktivitäten und direkte Benachrichtigungen sorgen dafür, dass du dein Team optimal unterstützen und jederzeit schnell reagieren kannst.",
-      "f5Tag": "Live Hinweise",
-      "f6Title": "Standortübergreifend flexibel",
-      "f6Desc": "Verwalte verschiedene Betriebe, Standorte und Bereiche spielend leicht, ohne dabei jemals den Überblick zu verlieren.",
-      "f6Tag": "Multi Standort",
-      "about": {
+    "about": {
+      "pageAria": "Über CareTip",
+      "hero": {
+        "badge": "Über CareTip",
+        "title": "Über CareTip",
+        "mission": "Wir machen Trinkgeld einfacher, fairer und transparenter für Hospitality-Teams, damit großartiger Service genau dann ankommt, wenn er passiert."
+      },
+      "story": {
         "eyebrow": "Über uns",
         "title": "Zwei Städte. Eine Mission: Wertschätzung, die ankommt.",
         "intro": "Hinter CareTip stehen wir, [Name 1] & [Name 2], zwei Gründerinnen aus Berlin, verbunden durch eine gemeinsame Vision und zwei der dynamischsten Metropolen Europas.",
@@ -326,6 +311,50 @@
         "driveBody": "CareTip ist für uns kein reines Tech-Projekt. Es ist ein Werkzeug für fairen Erfolg, stärkere Teams und zukunftsfähige Betriebe. Wir schlagen die Brücke zwischen modernem, digitalem Komfort, einer 100 % zuverlässigen Infrastruktur, höchster Datensicherheit und echter, menschlicher Anerkennung.",
         "driveClosing": "Denn Caring is Tipping: Kontaktlos, direkt und steuerfrei."
       },
+      "missionSection": {
+        "title": "Wofür wir stehen",
+        "m1Title": "Teams werden belohnt",
+        "m1Body": "Service- und Hospitality-Mitarbeitende verdienen Anerkennung, die sie direkt erreicht, nicht verloren in bargeldlosen Momenten oder Admin-Hürden.",
+        "m2Title": "Digitales Trinkgeld leicht gemacht",
+        "m2Body": "Gäste scannen, geben Trinkgeld und sind fertig. Keine App, kein umständlicher Bargeldtausch, ein Flow, der für echte Betriebe gebaut ist.",
+        "m3Title": "Transparente Teamführung",
+        "m3Body": "Führungskräfte sehen klare Aufzeichnungen, faire Verteilung und Live-Aktivität, damit Vertrauen in jeder Schicht bleibt."
+      },
+      "trustSection": {
+        "title": "Auf Vertrauen gebaut",
+        "t1Title": "Stripe-gesicherte Zahlungen",
+        "t1Body": "Jedes Trinkgeld läuft über den vertrauten Stripe-Checkout, verschlüsselt, bewährt und für europäische Betriebe gemacht.",
+        "t2Title": "Transparenz von Anfang an",
+        "t2Body": "Klare Belege für Teams und Management. Keine Blackbox, nachvollziehbares Trinkgeld vom Scan bis zur Auszahlung.",
+        "t3Title": "Für modernes Hospitality",
+        "t3Body": "Von Restaurants und Hotels bis zum Außendienst, CareTip passt zu europäischen Teams von heute."
+      },
+      "ctaTitle": "Bereit für faires Trinkgeld in deinem Team?",
+      "ctaPrimary": "Jetzt starten",
+      "ctaSecondary": "Preise ansehen"
+    },
+    "features": {
+      "title": "Caring is Tipping",
+      "subtitleLead": "Weil großartiger Einsatz echte Anerkennung verdient.",
+      "subtitleBody": "Eine Plattform, maßgeschneidert für den Service- und Dienstleistungsbereich. Mit CareTip sagen Ihre Gäste oder Kunden so einfach und intuitiv wie nie zuvor digital Danke. Bringen Sie echte Wertschätzung direkt in Ihr Team!",
+      "f1Title": "Trinkgeld per QR-Code",
+      "f1Desc": "Ein Scan, ein Klick, ein Dankeschön. Für jeden, der täglich großartigen Service im Hospitality-Bereich leistet. Kunden scannen den QR-Code oder tippen die URL direkt ein und geben in Sekunden Trinkgeld. Keine App, keine Registrierung.",
+      "f1Tag": "Caring Journey",
+      "f2Title": "Team Dashboard",
+      "f2Desc": "Verfolge Trinkgelder, Bewertungen und gemeinsame Ziele an einem zentralen Ort, für ein dauerhaft motiviertes Team.",
+      "f2Tag": "Teamansicht",
+      "f3Title": "Analysen & Auswertungen",
+      "f3Desc": "Behalte den Überblick: Schichttrends, Team-Leistungen und Live-Aktivitäten für alle deine Standorte und Bereiche, übersichtlich vereint in einem einzigen Echtzeit-Dashboard.",
+      "f3Tag": "Analysen",
+      "f4Title": "Zahlungen gesichert durch Stripe",
+      "f4Desc": "Stripe gehört zu den sichersten Zahlungsanbietern weltweit. Deine Kunden zahlen geschützt, verlässlich und ohne Umwege, du musst dir keine Gedanken machen.",
+      "f4Tag": "Stripe gesichert",
+      "f5Title": "Live-Benachrichtigungen",
+      "f5Desc": "Behalte dein Team entspannt im Blick. Echtzeit-Updates zeigen dir, was gerade passiert, ganz ohne Aufwand.",
+      "f5Tag": "Live Hinweise",
+      "f6Title": "Standortübergreifend flexibel",
+      "f6Desc": "Verwalte verschiedene Betriebe, Standorte und Bereiche spielend leicht, ohne dabei jemals den Überblick zu verlieren.",
+      "f6Tag": "Multi Standort",
       "momentsTitle": "Das Beste für alle Beteiligten",
       "momentsSubtitle": "Maßgeschneiderte Ansichten für Ihr gesamtes Umfeld. Erfahren Sie, wie CareTip den Alltag für Kunden, Teams, Führungskräfte und die Buchhaltung spürbar erleichtert.",
       "moments": {
@@ -355,7 +384,8 @@
         "tipAmount": "24,00 €"
       },
       "ctaTitle": "Bereit, dein Team aufs nächste Level zu bringen?",
-      "ctaBody": "",
+      "ctaBody": "Digitale Trinkgelder annehmen, dein Team belohnen und alles transparent mit CareTip verwalten.",
+      "ctaButton": "Jetzt unverbindlich starten",
       "ctaPrimary": "Jetzt unverbindlich starten / Business Account erstellen",
       "ctaPricing": ""
     },
@@ -471,28 +501,6 @@
         "transparent": "Transparente Preise",
         "stripe": "Sichere Stripe-Zahlungen",
         "setup": "Einrichtung in Minuten"
-      },
-      "faq": {
-        "title": "Häufig gestellte Fragen",
-        "subtitle": "Klare Antworten zu Gebühren, Abrechnung und dem Start mit CareTip.",
-        "items": [
-          {
-            "q": "Gibt es monatliche Plattformgebühren?",
-            "a": "Starter kostet 29 €/Monat (oder 290 €/Jahr) für zentrale Trinkgeld- und Team-Funktionen. Business kostet 79 €/Monat (oder 790 €/Jahr) für erweiterte Analysen, Mehrstandort-Support und Branding. Enterprise-Preise auf Anfrage für Gruppen und Ketten."
-          },
-          {
-            "q": "Was bedeutet Preis pro Trinkgeld?",
-            "a": "CareTip berechnet einen kleinen Prozentsatz plus die feste Stripe-Gebühr pro erfolgreichem Trinkgeld. Fehlgeschlagene Zahlungen werden nie berechnet. Die Sätze hängen vom Tarif ab."
-          },
-          {
-            "q": "Kann ich den Tarif wechseln, wenn mein Team wächst?",
-            "a": "Ja. Upgrades sind jederzeit möglich, wenn Sie Standorte oder Mitarbeitende hinzufügen. Unser Team unterstützt Sie beim Wechsel, damit Auswertungen und Auszahlungen konsistent bleiben."
-          },
-          {
-            "q": "Wie funktioniert die Jahresabrechnung?",
-            "a": "Wählen Sie die Jahresabrechnung und sparen Sie 20 % gegenüber monatlicher Zahlung. Abgerechnet wird einmal alle 12 Monate. Jahresabos verlängern sich automatisch, sofern Sie nicht vor Ende der Laufzeit kündigen."
-          }
-        ]
       },
       "contractModels": {
         "title": "Vertragsmodelle",
@@ -1093,40 +1101,49 @@
       "footerContact": "Fragen? legal@caretip.com"
     },
     "faq": {
-      "pageTitle": "FAQ",
-      "pageSubtitle": "Häufig gestellte Fragen",
+      "pageEyebrow": "HILFE-CENTER",
+      "pageTitle": "Fragen? Wir haben Antworten.",
+      "pageSubtitle": "Alles, was Sie über CareTip, digitales Trinkgeld, Teammanagement und sichere Auszahlungen wissen müssen.",
       "items": [
         {
-          "q": "Wie funktioniert CareTip: wie geben Kunden Trinkgeld?",
-          "a": "Kunden scannen einfach einen QR-Code, kein Download, keine Registrierung, keine App nötig. Nach dem Scan wählen sie einen Betrag und bezahlen per Kreditkarte, Apple Pay oder Google Pay. Das Trinkgeld landet direkt und transparent beim Team. Der ganze Vorgang dauert unter 30 Sekunden."
+          "q": "Sind Zahlungen und Kundendaten sicher?",
+          "a": "Ja, absolut. Alle Transaktionen laufen über Stripe, einen der weltweit führenden Zahlungsanbieter, zertifiziert nach PCI-DSS Level 1 (höchster Sicherheitsstandard der Kreditkartenindustrie) und konform mit der europäischen PSD2-Richtlinie. CareTip selbst kommt zu keinem Zeitpunkt mit deinen Karten- oder Bankdaten in Berührung und speichert diese nicht. Alle personenbezogenen Daten werden streng nach DSGVO und BDSG verarbeitet."
+        },
+        {
+          "q": "Woher weiß ich, dass dieser QR-Code sicher ist?",
+          "a": "Alle CareTip-QR-Codes führen ausschließlich zu unserer gesicherten Website caretip.de. Nach dem Scannen kannst du die URL jederzeit in der Adressleiste deines Browsers prüfen. Achte auf das Schloss-Symbol und die https-Verbindung. Das bestätigt dir, dass die Verbindung verschlüsselt und die Seite echt ist.\n\nÜbrigens: Du musst den QR-Code gar nicht zwingend scannen. Du kannst die URL, die direkt auf dem Aufsteller steht (z. B. caretip.de/ava), einfach manuell in deinen Browser eingeben und das Trinkgeld genauso bequem und sicher über die Website geben."
+        },
+        {
+          "q": "Werden meine Kartendaten gespeichert?",
+          "a": "Nein. CareTip speichert keinerlei Kartendaten. Alle Zahlungen werden vollständig über Stripe abgewickelt, denselben Anbieter, dem auch Amazon, Google und Shopify vertrauen. Deine Kartendaten verlassen niemals unsere Plattform."
+        },
+        {
+          "q": "Ist CareTip DSGVO-konform?",
+          "a": "Ja, vollständig. CareTip wurde von Grund auf mit Datenschutz im Mittelpunkt entwickelt. Wir erfüllen alle Anforderungen der DSGVO und des BDSG und geben unseren Nutzern jederzeit volle Kontrolle über ihre Daten, inklusive Auskunfts- und Löschrecht."
+        },
+        {
+          "q": "Wie funktioniert CareTip – wie geben Kunden Trinkgeld?",
+          "a": "Kunden scannen einfach einen QR-Code oder geben die URL einfach manuell in den Browser ein, ohne Download, Registrierung oder App. Nach dem die Seite aufgerufen ist, wählen sie einen Betrag und zahlen per Kreditkarte, Apple Pay oder Google Pay. Das Trinkgeld landet direkt und transparent beim Team. Der ganze Vorgang dauert unter 30 Sekunden."
         },
         {
           "q": "Brauchen meine Kunden eine App?",
           "a": "Nein, weder Kunden noch Mitarbeiter benötigen eine App. Der QR-Code öffnet sich direkt im Browser des Smartphones. Kein Account, kein Passwort, keine Hürde. So reibungslos wie möglich."
         },
         {
-          "q": "Ist digitales Trinkgeld für mein Team steuerfrei?",
-          "a": "Ja, absolut. In Deutschland ist freiwilliges Trinkgeld für Arbeitnehmer nach § 3 Nr. 51 des Einkommensteuergesetzes (EStG) komplett lohnsteuer- und sozialversicherungsfrei. Damit das auch digital rechtssicher bleibt, erfüllt CareTip die strengen Vorgaben des § 107 Abs. 3 der Gewerbeordnung (GewO): Die Zahlungen fließen als freiwillige Leistung des Gastes direkt und ohne Umwege an eure Mitarbeiter.\n\nCareTip ist technisch genau so konzipiert, dass dieser steuerfreie Charakter zu 100 % erhalten bleibt (kein Einbehalt durch den Arbeitgeber). Da jede Betriebsstruktur und Arbeitsverträge individuell sein können, empfehlen wir dennoch eine kurze, einmalige Abstimmung mit eurem Steuerberater."
+          "q": "Wie schnell ist CareTip bei mir eingerichtet?",
+          "a": "Ihr seid in wenigen Minuten live. Keine Hardware, keine IT-Abteilung, kein langer Onboarding-Prozess. Nach der Registrierung erhaltet ihr eure personalisierten QR-Codes, ausdrucken, aufstellen, fertig. Für größere Betriebe mit mehreren Standorten begleiten wir euch persönlich durch das Setup."
         },
         {
           "q": "Was kostet CareTip für meinen Betrieb?",
-          "a": "CareTip arbeitet mit einem transparenten Modell ohne versteckte Gebühren. Es fällt eine kleine Servicepauschale pro Transaktion an, so zahlt ihr nur dann, wenn euer Team auch tatsächlich Trinkgeld erhält. Alle Details zu unseren aktuellen Konditionen findet ihr auf unserer Preisseite oder direkt im Gespräch mit uns."
+          "a": "CareTip arbeitet mit einem transparenten Modell ohne versteckte Gebühren. Es fällt eine kleine Servicepauschale pro Transaktion an, sodass ihr nur dann zahlt, wenn euer Team auch tatsächlich Trinkgeld erhält. Alle Details findet ihr auf unserer Preisseite oder direkt im Gespräch mit uns."
         },
         {
-          "q": "Wie schnell ist CareTip bei mir eingerichtet?",
-          "a": "Ihr seid in wenigen Minuten live. Keine Hardware, keine IT-Abteilung, keine langen Onboarding-Prozesse. Nach der Registrierung erhaltet ihr eure personalisierten QR-Codes, ausdrucken, aufstellen, fertig. Für größere Betriebe mit mehreren Standorten oder Teams begleiten wir euch persönlich durch das Setup."
+          "q": "Kommt das Trinkgeld wirklich beim Mitarbeiter an?",
+          "a": "Ja, und das ist unser Kernversprechen. Jede Zahlung wird direkt dem Mitarbeiterprofil zugeordnet, das mit dem QR-Code verknüpft ist. Betreiber und Mitarbeiter können Einnahmen jederzeit transparent im Dashboard einsehen. Kein Trinkgeld geht verloren."
         },
         {
-          "q": "Wie wird das Trinkgeld auf mein Team aufgeteilt?",
-          "a": "Ihr entscheidet. CareTip lässt sich flexibel konfigurieren, ob das Trinkgeld direkt einer einzelnen Person gutgeschrieben wird, auf ein ganzes Team aufgeteilt wird oder nach einem eigenen Verteilungsschlüssel fließt. Als Betreiber habt ihr jederzeit Einblick in alle Transaktionen über euer Dashboard."
-        },
-        {
-          "q": "Für welche Branchen ist CareTip geeignet?",
-          "a": "CareTip funktioniert überall dort, wo Menschen einen persönlichen Service leisten, egal ob Restaurant, Hotel, Friseursalon, Spa, Lieferservice, Hebammenpraxis oder ein anderer Dienstleistungsbetrieb. Wenn euer Team Wertschätzung verdient, dann ist CareTip für euch gemacht."
-        },
-        {
-          "q": "Sind Zahlungen und Kundendaten sicher?",
-          "a": "Ja, absolut. Alle Transaktionen werden über unseren Partner Stripe abgewickelt, einen der weltweit führenden und sichersten Zahlungsdienstleister. Stripe ist als PCI-DSS Level 1 Service Provider nach dem höchsten Sicherheitsstandard der Kreditkartenindustrie zertifiziert und erfüllt alle Vorgaben der europäischen Zahlungsdiensterichtlinie (PSD2).\n\nCareTip selbst kommt dadurch zu keinem Zeitpunkt mit euren Kreditkarten- oder Bankdaten in Berührung und speichert diese auch nicht. Auch der Datenschutz hat oberste Priorität: Die Verarbeitung aller personenbezogenen Daten erfolgt streng nach den Vorgaben der EU-Datenschutz-Grundverordnung (DSGVO) sowie dem Bundesdatenschutzgesetz (BDSG). Eure Kunden und euer Team sind bei uns in den sichersten Händen."
+          "q": "Ist digitales Trinkgeld für mein Team steuerfrei?",
+          "a": "Ja. In Deutschland ist freiwilliges Trinkgeld für Arbeitnehmer nach § 3 Nr. 51 EStG vollständig lohnsteuer- und sozialversicherungsfrei. CareTip ist technisch so konzipiert, dass dieser steuerfreie Charakter zu 100 % erhalten bleibt, wobei die Zahlungen als freiwillige Leistung des Gastes direkt an eure Mitarbeiter fließen, ohne Einbehalt durch den Arbeitgeber. Wir empfehlen dennoch eine einmalige Abstimmung mit eurem Steuerberater."
         }
       ],
       "ctaTitle": "Nicht die passende Antwort gefunden?",
@@ -1852,6 +1869,8 @@
       "completionSupporting": "Ihre Unterstützung bedeutet uns viel",
       "tipSentConfirmation": "Ihr Trinkgeld wurde gesendet",
       "tipAndFeedbackReceived": "Ihr Trinkgeld und Ihr Feedback sind eingegangen",
+      "recipientLabel": "Trinkgeld an",
+      "recipientSummaryAria": "Trinkgeld-Empfänger",
       "supportingLabel": "Sie unterstützen",
       "paymentCompleted": "Zahlung abgeschlossen",
       "secureTransaction": "Sichere Transaktion",
@@ -1934,6 +1953,9 @@
       "employeeLiveDesc": "Echtzeit-Verbindung aktiv",
       "employeeUpdatingDesc": "Analysen werden aktualisiert",
       "employeeDataUpToDateDesc": "Dashboard zeigt Ihre neuesten Analysen",
+      "employeeNoDataDesc": "In diesem Zeitraum noch keine Trinkgelder oder Bewertungen",
+      "businessNoDataDesc": "In diesem Zeitraum noch keine Trinkgeld-Aktivität",
+      "adminNoDataDesc": "Für diesen Zeitraum keine Plattform-Aktivität erfasst",
       "adminLiveDesc": "Echtzeit-Verbindung aktiv",
       "adminDataUpToDateDesc": "Plattform-Kennzahlen sind auf dem neuesten Stand",
       "adminUpdatingDesc": "Plattform-Kennzahlen werden aktualisiert",
@@ -2477,6 +2499,7 @@
       "heroFloatAnalyticsLabel": "Analysen aktualisiert",
       "heroHeadline": "Mehr Trinkgeld für dein Team. Null Aufwand für dein Business.",
       "heroHeadlineHighlight": "Trinkgeld",
+      "heroHeadlineHighlights": ["Trinkgeld", "Business"],
       "heroTagline": ""
     },
     "simpleSetup": {
@@ -2593,8 +2616,10 @@
       "title": "Bring dein Team aufs nächste Level.",
       "subtitle": "Mehr Motivation. Weniger Fluktuation. Volle Schichten. Digitales Trinkgeld per QR-Code macht deinen Betrieb maximal attraktiv für Top-Talente. Deine Gäste belohnen herausragenden Service bargeldlos und steuerfrei, ganz ohne Extra-Aufwand für dein Business. <bold>Denn Caring is Tipping.</bold> Wer sich heute um sein Team kümmert, sorgt für den Erfolg von morgen.",
       "subtitle1": "Mehr Motivation. Weniger Fluktuation. Volle Schichten.",
-      "subtitle2": "Digitales Trinkgeld per QR-Code macht deinen Betrieb maximal attraktiv für Top-Talente. Deine Gäste belohnen herausragenden Service bargeldlos und steuerfrei, ganz ohne Extra-Aufwand für dein Business.",
-      "subtitle3": "<bold>Denn Caring is Tipping.</bold> Wer sich heute um sein Team kümmert, sorgt für den Erfolg von morgen.",
+      "subtitle2": "Digitales Trinkgeld per QR-Code macht deinen Betrieb maximal attraktiv für Top-Talente.",
+      "subtitle3": "Deine Gäste belohnen herausragenden Service bargeldlos und steuerfrei, ganz ohne Extra-Aufwand für dein Business.",
+      "subtitle4": "<bold>Denn Caring is Tipping.</bold>",
+      "subtitle5": "Wer sich heute um sein Team kümmert, sorgt für den Erfolg von morgen.",
       "pill": "Überall dort im Einsatz, wo Menschen Großartiges leisten",
       "f1Title": "QR-Codes, die sich Ihrem Alltag anpassen",
       "f1Text": "Ob am Tisch, auf Station oder direkt auf der Tour: Ausdrucken, aufstellen und Gäste belohnen mit einem schnellen Scan.",
@@ -2790,27 +2815,27 @@
       "learnLess": "Weniger anzeigen",
       "s1Headline": "Direkt an der Haustür",
       "s1Tag": "Logistik & Paketdienstleistung",
-      "s1Text": "<bold>Ein Scan auf dem Paket, dem Beleg oder dem Fahrzeug, und das Trinkgeld ist in Sekundenschnelle da. Ohne App, komplett bargeldlos.</bold>",
+      "s1Text": "Ein Scan auf dem Paket, dem Beleg oder dem Fahrzeug, und das Trinkgeld ist in Sekundenschnelle da. Ohne App, komplett bargeldlos.",
       "s1Detail": "QR-Codes flexibel auf Zustellfahrzeugen, Handscannern, Benachrichtigungskarten oder direkt als Paket-Aufkleber anbringen. Der Kunde scannt, wählt den Wunschbetrag und zahlt sicher per Karte, Apple Pay oder Google Pay im Smartphone-Browser. Ob direkt für den Fahrer oder im gemeinsamen Pool für das gesamte Depot, dein Dashboard aktualisiert sich live in Echtzeit. Die Betriebsleitung behält selbst bei extrem hohem Paketaufkommen den perfekten Überblick über Eingänge und Team-Motivation.",
       "s1Alt": "Trinkgeld per QR-Code bei Logistik und Zustellung an der Haustür",
       "s2Headline": "Direkt am Front Desk",
       "s2Tag": "Hotellerie & Rezeption",
-      "s2Text": "<bold>Kurzer Scan beim Check-in oder Check-out, die diskrete, bargeldlose Lösung für Concierge, Gepäckservice und das gesamte Team.</bold>",
+      "s2Text": "Kurzer Scan beim Check-in oder Check-out, die diskrete, bargeldlose Lösung für Concierge, Gepäckservice und das gesamte Team.",
       "s2Detail": "QR-Codes als Aufsteller am Empfang, auf Zimmerkarten-Hüllen oder als digitaler Link auf dem Tablet am Desk platzieren. Gäste belohnen Rezeption, Zimmerreinigung oder Koffer-Crew direkt, ganz ohne die lästige Suche nach passendem Bargeld oder Briefumschlägen. Alle Transaktionen laufen an einem zentralen Ort zusammen, das macht Schichtübergaben transparent und den Monatsabschluss im Hotel-Management massiv leichter.",
       "s2Alt": "Hotelrezeption mit Tippen beim Check-in oder Check-out",
       "s3Headline": "Direkt auf der Station",
       "s3Tag": "Krankenhaus & Gesundheitswesen",
-      "s3Text": "<bold>Ein kurzer Scan an der Pflegestation oder am Bett, damit Patienten und Angehörige Pflege-Teams, Stationspersonal und Betreuungskräfte in Sekunden wertschätzen können. Würdevoll, diskret und ganz ohne Bargeld.</bold>",
+      "s3Text": "Ein kurzer Scan an der Pflegestation oder am Bett, damit Patienten und Angehörige Pflege-Teams, Stationspersonal und Betreuungskräfte in Sekunden wertschätzen können. Würdevoll, diskret und ganz ohne Bargeld.",
       "s3Detail": "Platzieren Sie Ihre individuellen QR-Codes an Stationscountern, auf Informationskarten oder als digitalen Link auf dem Tablet an der Station. Angehörige bedanken sich für einfühlsame Betreuung sofort, ohne unangenehme Bargeldübergaben oder Umschläge. Stationsleitung und Krankenhausverwaltung sehen jede Wertschätzung gesammelt im Dashboard. So bleibt Anerkennung fair, transparent und motivierend, Schicht für Schicht.",
       "s3Alt": "Krankenhausstation, auf der Patienten und Angehörige Pflegeteams digital wertschätzen",
       "s4Headline": "Hebammen-Betreuung",
       "s4Tag": "Wochenbett & Hausbesuche",
-      "s4Text": "<bold>Ein kurzer Scan nach dem Wochenbett-Hausbesuch, und das Trinkgeld ist in Sekundenschnelle da. Ohne App, komplett bargeldlos.</bold>",
+      "s4Text": "Ein kurzer Scan nach dem Wochenbett-Hausbesuch, und das Trinkgeld ist in Sekundenschnelle da. Ohne App, komplett bargeldlos.",
       "s4Detail": "QR-Codes ganz unkompliziert nach dem Besuch zeigen oder fest auf Visitenkarten und Informationsbroschüren integrieren. Erschöpfte junge Familien bedanken sich per Smartphone vom Sofa aus, ohne Stress oder die Suche nach Bargeld und Umschlägen. Alle digitalen Aufmerksamkeiten laufen übersichtlich in deinem persönlichen CareTip-Dashboard zusammen, sodass du den perfekten und fairen Überblick über deine zusätzlichen Einnahmen und die Wertschätzung der Familien behältst.",
       "s4Alt": "Hebamme nach Wochenbett-Hausbesuch mit digitalem Trinkgeld per QR-Code",
       "s5Headline": "Direkt beim Kunden vor Ort",
       "s5Tag": "Außendienst & Hausbesuche",
-      "s5Text": "<bold>Trinkgeld von überall per Link oder QR-Code, die perfekte, direkte Lösung für Pflegekräfte, Handwerk und mobile Dienstleistungen.</bold>",
+      "s5Text": "Trinkgeld von überall per Link oder QR-Code, die perfekte, direkte Lösung für Pflegekräfte, Handwerk und mobile Dienstleistungen.",
       "s5Detail": "Nach dem Termin einfach einen persönlichen Link per SMS/WhatsApp teilen oder den QR-Code auf der Visitenkarte zeigen. Kunden belohnen erstklassigen Service direkt im Smartphone-Browser via Karte, Apple Pay oder Google Pay. Die Wertschätzung landet im selben System wie bei den Kollegen im Betrieb, während sich dein Dashboard in Echtzeit aktualisiert, sodass dein gesamtes Team im Außendienst die direkte Anerkennung für die geleistete Arbeit vor Ort spürt.",
       "s5Alt": "Trinkgeld per Link oder QR-Code bei mobilem Außendienst und Hausbesuchen"
     },
@@ -5674,6 +5699,21 @@
       "title": "Alle Unternehmen",
       "subtitle": "Registrierte Lokale auf der Plattform.",
       "colOnboardingVerification": "Onboarding-Verifizierung",
+      "colOperationalStatus": "Betriebsstatus",
+      "btnSuspend": "Sperren",
+      "btnReactivate": "Reaktivieren",
+      "btnDeactivate": "Deaktivieren",
+      "suspendConfirm": "Dieses Unternehmen sperren? Der Inhaber verliert den Dashboard-Zugang, bis Sie es reaktivieren.",
+      "reactivateConfirm": "Dieses Unternehmen reaktivieren und Dashboard-Zugang wiederherstellen?",
+      "deactivateConfirm": "Dieses Unternehmen deaktivieren? Daten bleiben erhalten, der Betrieb ist bis zur Reaktivierung gesperrt.",
+      "toastSuspended": "Unternehmen gesperrt.",
+      "toastReactivated": "Unternehmen reaktiviert.",
+      "toastDeactivated": "Unternehmen deaktiviert.",
+      "operationalStatus": {
+        "active": "Aktiv",
+        "suspended": "Gesperrt",
+        "inactive": "Inaktiv"
+      },
       "searchPlaceholder": "Betriebsname, Inhaber, E-Mail oder Kontakt suchen…",
       "searchAria": "Unternehmen durchsuchen",
       "emptyList": "Noch keine Unternehmen auf der Plattform.",
@@ -5688,7 +5728,8 @@
           "submitted": "{{total}} eingereichte Onboarding-Anfragen",
           "approved": "{{total}} freigegebene Unternehmen",
           "rejected": "{{total}} abgelehnte Onboarding-Anfragen",
-          "suspended": "{{total}} gesperrte Unternehmen"
+          "suspended": "{{total}} gesperrte Unternehmen",
+          "inactive": "{{total}} inaktive Unternehmen"
         },
         "date": {
           "today": "{{total}} Unternehmen heute registriert",
@@ -5719,7 +5760,8 @@
           "submitted": { "title": "Keine eingereichten Anfragen", "description": "Neue Einreichungen erscheinen hier." },
           "approved": { "title": "Keine freigegebenen Unternehmen", "description": "Filter erweitern für mehr Ergebnisse." },
           "rejected": { "title": "Keine abgelehnten Anfragen", "description": "" },
-          "suspended": { "title": "Keine gesperrten Unternehmen", "description": "" }
+          "suspended": { "title": "Keine gesperrten Unternehmen", "description": "" },
+          "inactive": { "title": "Keine inaktiven Unternehmen", "description": "" }
         },
         "date": {
           "today": { "title": "Heute keine Registrierungen", "description": "Zeitraum erweitern." },
@@ -6214,7 +6256,8 @@
           "not_started": "Nicht begonnen",
           "sla_breach": "SLA-Verstoß (>48h)",
           "rejected": "Abgelehnt",
-          "suspended": "Gesperrt"
+          "suspended": "Gesperrt",
+          "inactive": "Inaktiv"
         },
         "tips": {
           "all": "Alle Volumina",
@@ -6245,6 +6288,9 @@
       "emptyList": "Noch keine Unternehmen auf der Plattform.",
       "btnApprove": "Zugang freigeben",
       "btnReject": "Ablehnen",
+      "btnDelete": "Anfrage entfernen",
+      "deleteConfirm": "Diese Onboarding-Anfrage aus der Warteschlange entfernen? Der Datensatz wird soft-gelöscht.",
+      "toastDeleted": "Onboarding-Anfrage entfernt.",
       "statusDraft": "Entwurf",
       "statusSubmitted": "Eingereicht",
       "statusApproved": "Freigegeben",
@@ -6296,6 +6342,10 @@
           "suspended": {
             "title": "Keine gesperrten Unternehmen gefunden",
             "description": "Keine Unternehmen mit gesperrtem Status."
+          },
+          "inactive": {
+            "title": "Keine inaktiven Unternehmen gefunden",
+            "description": "Keine Unternehmen mit inaktivem Betriebsstatus."
           }
         }
       },
@@ -6306,7 +6356,8 @@
           "submitted": "Eingereicht",
           "approved": "Freigegeben",
           "rejected": "Abgelehnt",
-          "suspended": "Gesperrt"
+          "suspended": "Gesperrt",
+          "inactive": "Inaktiv"
         }
       }
     },

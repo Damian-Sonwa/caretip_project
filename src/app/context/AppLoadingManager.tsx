@@ -22,7 +22,7 @@ import {
 import { isPublicShellPath } from "../lib/publicRoutes";
 import { traceLoaderRegistration, warnLoaderDiagDeadlock } from "../lib/loaderDiagFlags";
 
-const OVERLAY_FADE_MS = 180;
+const OVERLAY_FADE_MS = 340;
 /** Absorb one-frame registration gaps between auth, route guard, and layout paint. */
 const OVERLAY_EXIT_DEBOUNCE_MS = 120;
 /** Block APP_INIT from re-opening the overlay shortly after a full dismiss (paint-ready race). */

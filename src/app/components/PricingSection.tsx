@@ -7,7 +7,6 @@ import type { BillingCycle, Industry } from "../data/pricingTypes";
 import type { PricingCopyScope } from "../data/pricingCopy";
 import { pricingPageUi } from "@/components/pricing/pricingPageUi";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
-import { PricingTrialCta } from "@/components/pricing/PricingTrialCta";
 import { PricingTierCard } from "@/components/pricing/PricingTierCard";
 import { buildPricingTierCatalog } from "../data/pricingPlanCatalog";
 import {
@@ -64,27 +63,18 @@ export function PricingSection({
               copyScope={copyScope}
               deferFeatureSkeleton
               footer={
-                <>
-                  <Link
-                    to={tierSignupHref(tier.tierKey, billingCycle)}
-                    className={cn(
-                      isEnterprise
-                        ? pricingPageUi.cardCtaEnterprise
-                        : tier.isPopular
-                          ? pricingPageUi.cardCtaPrimary
-                          : pricingPageUi.cardCtaSecondary,
-                    )}
-                  >
-                    {tier.buttonText}
-                  </Link>
-                  {!isEnterprise ? (
-                    <PricingTrialCta
-                      variant="inline"
-                      marketingPlan={tier.tierKey}
-                      billingCycle={billingCycle}
-                    />
-                  ) : null}
-                </>
+                <Link
+                  to={tierSignupHref(tier.tierKey, billingCycle)}
+                  className={cn(
+                    isEnterprise
+                      ? pricingPageUi.cardCtaEnterprise
+                      : tier.isPopular
+                        ? pricingPageUi.cardCtaPrimary
+                        : pricingPageUi.cardCtaSecondary,
+                  )}
+                >
+                  {tier.buttonText}
+                </Link>
               }
             />
           );

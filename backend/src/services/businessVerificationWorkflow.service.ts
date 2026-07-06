@@ -124,6 +124,21 @@ export async function updateOnboardingVerificationStatus(
     },
   });
 
+  if (opts?.adminUserId) {
+    const { writeAuditLog } = await import("./audit.service.js");
+    await writeAuditLog({
+      userId: opts.adminUserId,
+      action: `business.onboarding.${nextStatus}`,
+      metadata: JSON.stringify({
+        businessId,
+        businessName: previous.name,
+        previousStatus: previous.onboardingVerificationStatus,
+        nextStatus,
+        note,
+      }),
+    });
+  }
+
   invalidatePlatformDashboardCache();
   emitPlatformDataUpdated("onboarding_verification_status");
 

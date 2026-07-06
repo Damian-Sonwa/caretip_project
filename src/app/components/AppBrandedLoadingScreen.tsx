@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isLogoutPending } from "../lib/api";
 import { traceGlobalOverlayMounted } from "../lib/globalAppLoadingTrace";
-import { LoadingSpinner } from "./ui/loading-spinner";
+import { CareTipBrandLoader } from "./CareTipBrandLoader";
 
 export type AppBrandedLoadingScreenProps = {
   className?: string;
@@ -15,7 +15,7 @@ export type AppBrandedLoadingScreenProps = {
 };
 
 /**
- * Global setup loader — spinner + copy only (no logo; branding lives in app chrome).
+ * Global setup loader — CareTip wordmark + orange glow track (auth bootstrap, route gates).
  */
 export function AppBrandedLoadingScreen({
   className,
@@ -35,7 +35,7 @@ export function AppBrandedLoadingScreen({
   return (
     <div
       className={cn(
-        "app-setup-loading flex flex-col items-center justify-center gap-4 bg-background px-6",
+        "app-setup-loading flex flex-col items-center justify-center bg-background px-6",
         fixed ? "fixed inset-0 z-[9998]" : "min-h-[100dvh] w-full",
         exiting && "app-setup-loading--exiting",
         className,
@@ -43,12 +43,9 @@ export function AppBrandedLoadingScreen({
       role="status"
       aria-busy={!exiting}
       aria-live="polite"
+      aria-label={resolvedMessage}
     >
-      <LoadingSpinner size="lg" />
-      <div className="flex max-w-sm flex-col items-center gap-1 text-center">
-        <p className="text-sm font-medium text-foreground">{resolvedMessage}</p>
-        <p className="text-xs text-muted-foreground">{t("common.onlyAMoment")}</p>
-      </div>
+      <CareTipBrandLoader message={resolvedMessage} />
     </div>
   );
 }

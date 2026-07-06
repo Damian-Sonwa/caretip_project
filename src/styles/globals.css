@@ -54,34 +54,6 @@ textarea::placeholder {
   background-color: hsl(var(--background));
 }
 
-/* Global setup overlay (auth bootstrap, route gates) — spinner + copy only */
-.app-setup-loading {
-  animation: app-setup-fade-in 0.2s ease-out;
-}
-
-.app-setup-loading--exiting {
-  animation: app-setup-fade-out 0.2s ease-in forwards;
-  pointer-events: none;
-}
-
-@keyframes app-setup-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes app-setup-fade-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
 /**
  * Global layout grid
  * - Single max-width container shared across pages (desktop + mobile)

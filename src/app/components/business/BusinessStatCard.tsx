@@ -10,6 +10,7 @@ type BusinessStatCardProps = {
   featured?: boolean;
   className?: string;
   loading?: boolean;
+  showSpinner?: boolean;
   loadingVariant?: "currency" | "count" | "pulse";
 };
 

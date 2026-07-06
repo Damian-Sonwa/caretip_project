@@ -14,7 +14,7 @@ export function BusinessAwaitingApprovalPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12">
-      <CareTipLogo size="auth" className="mb-8" />
+      <CareTipLogo size="auth" className="mb-5" />
       <div className="max-w-md w-full rounded-xl border border-border bg-card p-8 text-center space-y-4 shadow-sm">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/40">
           <Clock className="h-7 w-7 text-amber-600 dark:text-amber-400" />

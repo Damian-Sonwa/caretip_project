@@ -82,7 +82,7 @@ export default function HospitalityBusinessesMarquee() {
       <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white via-white/90 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
 
       <Marquee className="[--gap:1rem]" pauseOnHover durationSeconds={65} gapPx={16}>
-        {businesses.map((b) => (
+        {businesses.map((b, index) => (
           <div
             className="caretip-hospitality-marquee-item group flex w-[17.5rem] shrink-0 flex-col transition-transform duration-300 ease-out sm:w-[19rem]"
             key={b.id}
@@ -97,7 +97,7 @@ export default function HospitalityBusinessesMarquee() {
                 alt={b.name}
                 className="h-full w-full object-cover object-center transition-opacity duration-300 ease-out group-hover:opacity-[0.97]"
                 src={b.image}
-                loading="lazy"
+                loading={index < 3 ? "eager" : "lazy"}
                 decoding="async"
                 referrerPolicy="no-referrer"
               />

@@ -16,6 +16,7 @@ export type PlatformBusinessStatusFilter =
   | "sla_breach"
   | "rejected"
   | "suspended"
+  | "inactive"
   | "draft"
   | "submitted"
   | "approved"
@@ -83,6 +84,7 @@ type PlatformBusinessActivityRow = {
   owner_email: string;
   owner_created_at: Date;
   owner_is_active: boolean;
+  operational_status: string;
   staff_count: number;
   location_count: number;
   total_tips_eur: number;
@@ -128,6 +130,7 @@ function mapBusinessRow(b: PlatformBusinessActivityRow) {
     ownerEmail: b.owner_email,
     registeredAt: b.owner_created_at.toISOString(),
     ownerIsActive: Boolean(b.owner_is_active),
+    operationalStatus: b.operational_status as "active" | "suspended" | "inactive",
     staffCount: Number(b.staff_count ?? 0),
     locationCount: Number(b.location_count ?? 0),
     logoPath: b.logo_path,
@@ -196,6 +199,7 @@ const BUSINESS_LIST_SELECT = Prisma.sql`
     u.email AS owner_email,
     u.created_at AS owner_created_at,
     u.is_active AS owner_is_active,
+    b.operational_status,
     COALESCE(sc.staff_count, 0)::int AS staff_count,
     COALESCE(lc.location_count, 0)::int AS location_count,
     COALESCE(ts.total_tips_eur, 0)::float AS total_tips_eur,
@@ -259,7 +263,7 @@ function resolveDateRange(
 }
 
 function buildWhereClause(params: ListPlatformBusinessesParams): Prisma.Sql {
-  const parts: Prisma.Sql[] = [];
+  const parts: Prisma.Sql[] = [Prisma.sql`b.deleted_at IS NULL`];
 
   const q = sanitizeLikeContainsSearch(params.q);
   if (q) {
@@ -288,7 +292,9 @@ function buildWhereClause(params: ListPlatformBusinessesParams): Prisma.Sql {
     } else if (status === "rejected") {
       parts.push(Prisma.sql`b.onboarding_verification_status = 'rejected'`);
     } else if (status === "suspended") {
-      parts.push(Prisma.sql`u.is_active = false`);
+      parts.push(Prisma.sql`b.operational_status = 'suspended'`);
+    } else if (status === "inactive") {
+      parts.push(Prisma.sql`b.operational_status = 'inactive'`);
     }
   } else if (status === "verified") {
     parts.push(Prisma.sql`b.kyc_verification_status = 'verified'`);
@@ -307,7 +313,9 @@ function buildWhereClause(params: ListPlatformBusinessesParams): Prisma.Sql {
       AND b.kyc_submitted_at < NOW() - (48::int * INTERVAL '1 hour')
     `);
   } else if (status === "suspended") {
-    parts.push(Prisma.sql`u.is_active = false`);
+    parts.push(Prisma.sql`b.operational_status = 'suspended'`);
+  } else if (status === "inactive") {
+    parts.push(Prisma.sql`b.operational_status = 'inactive'`);
   }
 
   const datePreset = params.datePreset ?? "all";
@@ -379,6 +387,7 @@ export function parseBusinessListQuery(query: Record<string, unknown>): ListPlat
     "sla_breach",
     "rejected",
     "suspended",
+    "inactive",
     "draft",
     "submitted",
     "approved",
@@ -585,7 +594,8 @@ export async function getFullyVerifiedBusinessCount(): Promise<number> {
   const countRows = await prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
     SELECT COUNT(*)::bigint AS count
     ${BUSINESS_LIST_FROM}
-    WHERE b.onboarding_verification_status = 'approved'
+    WHERE b.deleted_at IS NULL
+      AND b.onboarding_verification_status = 'approved'
       AND b.kyc_verification_status = 'verified'
   `);
   return Number(countRows[0]?.count ?? 0);

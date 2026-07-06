@@ -11,8 +11,12 @@ export const CARETIP_LOGO_WIDTH_PX = {
   sidebar: 120,
   /** Dashboard mobile drawer / compact header bar */
   drawer: 96,
-  /** Auth cards and auth escape links */
-  auth: 100,
+  /** Auth cards — logo mark (not container) */
+  authMobile: 62,
+  authDesktop: 80,
+  /** Auth logo capsule / surface container */
+  authContainerMobile: 88,
+  authContainerDesktop: 108,
   /** Customer QR / tip / feedback / success journey */
   customer: 90,
   /** Footer “powered by” and platform badges */
@@ -35,7 +39,8 @@ export const CARETIP_LOGO_SIZE_CLASS = {
   nav: "w-[96px] lg:w-[128px] h-auto max-w-full",
   sidebar: "w-[120px] h-auto max-w-full",
   drawer: "w-[96px] h-auto max-w-full",
-  auth: "w-[100px] h-auto max-w-full",
+  /** Form-supporting wordmark — smaller on mobile so the card stays primary */
+  auth: "w-[62px] max-w-[70px] md:w-[80px] md:max-w-[90px] h-auto",
   customer: "w-[90px] h-auto max-w-full",
   badge: "w-[60px] max-w-[64px] h-auto",
 } as const;

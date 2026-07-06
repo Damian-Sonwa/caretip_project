@@ -28,14 +28,7 @@ export function FeaturesHeroTrustChips({ className, style }: FeaturesHeroTrustCh
   const ns = "staticPages.common.trustChipsFeatures";
 
   return (
-    <div
-      className={cn("caretip-features-hero-v2__quick-start", className)}
-      style={style}
-      aria-labelledby="features-hero-quick-start-title"
-    >
-      <h2 id="features-hero-quick-start-title" className="caretip-features-hero-v2__quick-start-title">
-        {t(`${ns}.liveMinutes`)}
-      </h2>
+    <div className={cn("caretip-features-hero-v2__quick-start", className)} style={style}>
       <ul className="caretip-features-hero-v2__quick-start-list" aria-label={t("staticPages.common.trustChipsAria")}>
         {QUICK_START_ITEM_KEYS.map((key) => {
           const Icon = QUICK_START_ICONS[key];

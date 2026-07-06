@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  resolveGuestCompletionSupportingText,
   resolveGuestThankYouMessage,
   type PublicGuestBranding,
 } from "../../../lib/businessBranding";
@@ -36,10 +35,6 @@ export function BrandedGuestSuccessPreview({
     [businessName, branding, logoPath],
   );
 
-  const supportingText = resolveGuestCompletionSupportingText(
-    branding,
-    t("tipFlow.success.completionSupporting"),
-  );
   const confirmationMessage = resolveGuestThankYouMessage(
     { premium: branding.premium, thankYouMessage: thankYouMessage ?? branding.thankYouMessage },
     t("tipFlow.success.tipAndFeedbackReceived"),
@@ -59,7 +54,6 @@ export function BrandedGuestSuccessPreview({
           role: t("business.branding.successPreviewStaffRole"),
           bio: null,
         }}
-        supportingText={supportingText}
         headline={t("tipFlow.success.celebrationHeadline")}
         thankYouMessage={confirmationMessage}
         tipAmount={12}

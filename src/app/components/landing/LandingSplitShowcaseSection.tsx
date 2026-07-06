@@ -155,6 +155,7 @@ export function LandingShowcaseCoverImage({
   objectPosition = "center",
   className,
   floatHint,
+  priority = false,
 }: {
   src: string;
   webpSrc?: string;
@@ -162,6 +163,7 @@ export function LandingShowcaseCoverImage({
   objectPosition?: string;
   className?: string;
   floatHint?: string;
+  priority?: boolean;
 }) {
   return (
     <LandingShowcaseVisualFrame>
@@ -172,7 +174,7 @@ export function LandingShowcaseCoverImage({
           alt={alt}
           className={cn(landingUi.showcaseVisualImg, className)}
           style={{ objectPosition }}
-          loading="lazy"
+          priority={priority}
           decoding="async"
         />
       </div>

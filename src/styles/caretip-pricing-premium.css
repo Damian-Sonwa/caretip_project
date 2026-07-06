@@ -1189,8 +1189,6 @@ html.dark .caretip-pricing-trust--subtle .caretip-pricing-trust__icon {
     border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  content-visibility: auto;
-  contain-intrinsic-size: auto 26rem;
 }
 
 .caretip-pricing-tier-card:hover {

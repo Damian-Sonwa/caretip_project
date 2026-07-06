@@ -1,0 +1,282 @@
+/**
+ * Pricing page — Wise-inspired editorial layout (aligned with About & FAQ pages).
+ */
+
+.caretip-pricing-page--wise {
+  --caretip-pricing-accent: #eb992c;
+  --caretip-pricing-accent-rgb: 235 153 44;
+  --caretip-pricing-accent-muted: #f5d9b3;
+  --caretip-pricing-dark: #161412;
+  --caretip-pricing-dark-rgb: 22 20 18;
+  --caretip-pricing-inner-max: min(100%, 48rem);
+  --caretip-pricing-plans-inner-max: min(100%, 72rem);
+  background: hsl(var(--background));
+}
+
+.caretip-pricing-page--wise::before {
+  display: none;
+}
+
+.caretip-pricing-page--wise > * {
+  position: relative;
+  z-index: 1;
+}
+
+.caretip-pricing-page__inner {
+  width: 100%;
+  max-width: var(--caretip-pricing-inner-max);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.caretip-pricing-page__inner--plans {
+  max-width: var(--caretip-pricing-plans-inner-max);
+}
+
+/* —— Hero band —— */
+.caretip-pricing-hero-wise__back {
+  max-width: var(--caretip-pricing-inner-max);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+  margin-bottom: 1rem;
+}
+
+.caretip-pricing-hero-wise__band {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--caretip-pricing-accent-rgb) / 0.22) 0%,
+    rgb(var(--caretip-pricing-accent-rgb) / 0.14) 100%
+  );
+}
+
+html.dark .caretip-pricing-hero-wise__band {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--caretip-pricing-accent-rgb) / 0.18) 0%,
+    rgb(var(--caretip-pricing-dark-rgb) / 0.85) 100%
+  );
+}
+
+.caretip-pricing-hero-wise__inner {
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  text-align: center;
+}
+
+.caretip-pricing-hero-wise__title {
+  margin: 0;
+  margin-inline: auto;
+  max-width: min(100%, 18ch);
+  font-size: clamp(2.125rem, 5.2vw, 3.375rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .caretip-pricing-hero-wise__title {
+    font-size: var(--caretip-section-size);
+    line-height: 1.1;
+    letter-spacing: -0.028em;
+  }
+}
+
+.caretip-pricing-hero-wise__subtitle {
+  margin: clamp(0.75rem, 2vw, 1.125rem) auto 0;
+  max-width: min(100%, 36rem);
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  font-weight: 500;
+  line-height: 1.65;
+  text-wrap: pretty;
+  color: hsl(var(--foreground) / 0.82);
+}
+
+/* —— Trust chips strip —— */
+.caretip-pricing-trust {
+  padding-block: clamp(1.5rem, 4vw, 2.25rem);
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border) / 0.55);
+}
+
+.caretip-pricing-trust__inner {
+  display: flex;
+  justify-content: center;
+}
+
+/* —— Hero highlights (feature grid) —— */
+.caretip-pricing-highlights {
+  padding-block: clamp(2rem, 5vw, 3rem);
+  background: hsl(var(--background));
+}
+
+.caretip-pricing-highlights__grid {
+  display: grid;
+  gap: clamp(1rem, 2.5vw, 1.25rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .caretip-pricing-highlights__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-pricing-highlights__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.caretip-pricing-highlights__item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem 1.125rem;
+  border-radius: 0.25rem;
+  border: 1px solid hsl(var(--border) / 0.75);
+  background: hsl(var(--card));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.caretip-pricing-highlights__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: rgb(var(--caretip-pricing-accent-rgb) / 0.12);
+  color: var(--caretip-pricing-accent);
+}
+
+.caretip-pricing-highlights__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: hsl(var(--foreground));
+}
+
+.caretip-pricing-highlights__body {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+}
+
+/* —— Plans section —— */
+.caretip-pricing-plans-wise {
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  background: hsl(var(--secondary) / 0.32);
+  scroll-margin-top: 6rem;
+}
+
+html.dark .caretip-pricing-plans-wise {
+  background: hsl(var(--secondary) / 0.18);
+}
+
+.caretip-pricing-plans-wise__inner {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 4vw, 2rem);
+}
+
+.caretip-pricing-page--wise .caretip-pricing-controls-wrap {
+  margin-inline: auto;
+  max-width: 100%;
+}
+
+.caretip-pricing-page--wise .caretip-pricing-cards-stage {
+  margin-top: 0;
+}
+
+/* —— FAQ section —— */
+.caretip-pricing-faq-wise {
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  background: hsl(var(--background));
+}
+
+.caretip-pricing-faq-wise__header {
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+  text-align: center;
+}
+
+.caretip-pricing-faq-wise__title {
+  margin: 0;
+  font-family: var(--font-hero-display, inherit);
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  color: hsl(var(--foreground));
+}
+
+.caretip-pricing-faq-wise__subtitle {
+  margin: 0.75rem auto 0;
+  max-width: min(100%, 32rem);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-pricing-faq-wise__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Reuse FAQ accordion tokens on pricing page */
+.caretip-pricing-page--wise .caretip-faq-item-wise {
+  --caretip-faq-accent-rgb: var(--caretip-pricing-accent-rgb);
+}
+
+/* —— Dark CTA band —— */
+.caretip-pricing-cta-wise {
+  background: var(--caretip-pricing-dark);
+  color: rgb(250 250 250);
+}
+
+.caretip-pricing-cta-wise__inner {
+  padding-block: clamp(3.5rem, 8vw, 5rem);
+  text-align: center;
+}
+
+.caretip-pricing-cta-wise__title {
+  margin: 0 auto;
+  max-width: min(100%, 32rem);
+  font-family: var(--font-hero-display, inherit);
+  font-size: clamp(1.375rem, 3.5vw, 2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  color: var(--caretip-pricing-accent-muted);
+}
+
+.caretip-pricing-cta-wise__body {
+  margin: clamp(0.875rem, 2vw, 1.125rem) auto clamp(1.5rem, 3vw, 1.75rem);
+  max-width: min(100%, 28rem);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: rgb(250 250 250 / 0.78);
+}
+
+.caretip-pricing-cta-wise__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-pricing-cta-wise__actions {
+    flex-direction: row;
+    gap: 0.875rem;
+  }
+}

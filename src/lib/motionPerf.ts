@@ -57,7 +57,7 @@ export function useInViewActive<T extends HTMLElement = HTMLDivElement>(options?
         const ratio = entry?.intersectionRatio ?? 0;
         setActive(entry.isIntersecting && ratio >= 0.08);
       },
-      { root: null, rootMargin: "48px 0px", threshold: [0, 0.08, 0.2], ...options },
+      { root: null, rootMargin: "200px 0px", threshold: [0, 0.08, 0.2], ...options },
     );
     observer.observe(node);
     return () => observer.disconnect();

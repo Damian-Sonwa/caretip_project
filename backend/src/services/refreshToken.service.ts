@@ -173,6 +173,28 @@ export async function revokeRefreshToken(token: string): Promise<void> {
   });
 }
 
+/**
+ * Revokes a refresh session and returns the owning user id in one round-trip when possible.
+ * Used by logout so push-token cleanup can run after the HTTP response is sent.
+ */
+export async function revokeRefreshTokenAndGetUserId(token: string): Promise<string | null> {
+  const raw = String(token ?? "").trim();
+  if (!raw) return null;
+  const tokenHash = sha256Hex(raw);
+  const row = await prisma.refreshToken.findUnique({
+    where: { tokenHash },
+    select: { userId: true, revokedAt: true },
+  });
+  if (!row) return null;
+  if (!row.revokedAt) {
+    await prisma.refreshToken.update({
+      where: { tokenHash },
+      data: { revokedAt: new Date() },
+    });
+  }
+  return row.userId;
+}
+
 /** Resolve user id for logout when only the raw refresh cookie value is available. */
 export async function userIdForRefreshToken(token: string): Promise<string | null> {
   const raw = String(token ?? "").trim();

@@ -62,8 +62,8 @@ function FilterFields({
   const stacked = layout === "stacked";
   const statusOptions: PlatformBusinessStatusFilter[] =
     workflow === "onboarding" || workflow === "all"
-      ? ["all", "draft", "submitted", "approved", "rejected", "suspended"]
-      : ["all", "verified", "pending_review", "awaiting_upload", "not_started", "sla_breach", "rejected", "suspended"];
+      ? ["all", "draft", "submitted", "approved", "rejected", "suspended", "inactive"]
+      : ["all", "verified", "pending_review", "awaiting_upload", "not_started", "sla_breach", "rejected", "suspended", "inactive"];
 
   const statusLabelKey =
     workflow === "all"

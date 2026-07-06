@@ -54,7 +54,7 @@ export async function assertEmployeeEligibleForTipPayment(
       isDeleted: true,
       activationStatus: true,
       user: { select: { emailVerified: true, isActive: true } },
-      business: { select: { id: true, kycVerificationStatus: true } },
+      business: { select: { id: true, kycVerificationStatus: true, operationalStatus: true } },
     },
   });
 
@@ -94,6 +94,10 @@ export async function assertEmployeeEligibleForTipPayment(
 
   if (emp.user.isActive === false) {
     throw new TipPaymentEligibilityError(EMPLOYEE_UNAVAILABLE_MSG, "EMPLOYEE_USER_INACTIVE");
+  }
+
+  if (emp.business.operationalStatus !== "active") {
+    throw new TipPaymentEligibilityError(EMPLOYEE_UNAVAILABLE_MSG, "BUSINESS_NOT_OPERATIONAL");
   }
 
   if (

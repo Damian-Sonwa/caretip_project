@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import { AppBrandedLoadingScreen } from "./AppBrandedLoadingScreen";
+import { CareTipBrandLoader } from "./CareTipBrandLoader";
 import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
 import { useGlobalAppLoadingActive } from "../lib/globalAppLoading";
-import { LoadingSpinner } from "./ui/loading-spinner";
 
 /** Text-only “CareTip” mark for loading states (no logo image). */
 export function CareTipLoadingTitle({
@@ -51,7 +51,6 @@ export function CareTipPageLoader({
   variant = "fullscreen",
 }: CareTipPageLoaderProps) {
   const globalLoadingActive = useGlobalAppLoadingActive();
-  const spinnerSize = variant === "compact" ? "md" : "lg";
 
   const variantClass =
     variant === "fullscreen"
@@ -76,15 +75,10 @@ export function CareTipPageLoader({
       aria-busy="true"
       aria-live="polite"
     >
-      <CareTipLoadingTitle compact={variant === "compact"} />
-      <div className="flex flex-col items-center gap-3">
-        <LoadingSpinner size={spinnerSize} />
-        {message ? (
-          <p className="max-w-sm text-center text-sm text-muted-foreground">
-            {message}
-          </p>
-        ) : null}
-      </div>
+      <CareTipBrandLoader
+        message={message}
+        className={variant === "compact" ? "gap-5" : undefined}
+      />
     </div>
   );
 }

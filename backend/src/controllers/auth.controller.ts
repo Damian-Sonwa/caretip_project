@@ -18,7 +18,7 @@ import {
   refreshCookieMaxAgeMs,
   refreshCookieName,
   rotateRefreshToken,
-  revokeRefreshToken,
+  revokeRefreshTokenAndGetUserId,
   revokeAllRefreshTokensForUser,
   setRefreshCookie,
 } from "../services/refreshToken.service.js";
@@ -905,23 +905,22 @@ export async function logout(req: Request, res: Response) {
   try {
     const cookieHeader = req.headers.cookie;
     const refreshCookie = parseCookie(cookieHeader, refreshCookieName());
-    if (refreshCookie) {
-      await revokeRefreshToken(refreshCookie);
-    }
+    let logoutUserId: string | null = null;
 
     if (refreshCookie) {
-      const { userIdForRefreshToken } = await import("../services/refreshToken.service.js");
-      const { removeAllPushDeviceTokensForUser } = await import(
-        "../services/push/pushNotification.service.js"
-      );
-      const logoutUserId = await userIdForRefreshToken(refreshCookie);
-      if (logoutUserId) {
-        await removeAllPushDeviceTokensForUser(logoutUserId);
-      }
+      logoutUserId = await revokeRefreshTokenAndGetUserId(refreshCookie);
     }
 
     clearRefreshCookie(res);
-    return res.json({ ok: true });
+    res.json({ ok: true });
+
+    if (logoutUserId) {
+      void import("../services/push/pushNotification.service.js")
+        .then(({ removeAllPushDeviceTokensForUser }) =>
+          removeAllPushDeviceTokensForUser(logoutUserId!),
+        )
+        .catch((err) => logServerError("auth.logout.pushTokens", err));
+    }
   } catch (err) {
     logServerError("auth.logout", err);
     clearRefreshCookie(res);

@@ -2,7 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Building2 } from "lucide-react";
 import { Link } from "react-router";
-import { fetchPlatformBusinesses, type PlatformBusinessRow } from "../../lib/api";
+import { toast } from "sonner";
+import {
+  fetchPlatformBusinesses,
+  updatePlatformBusinessOperationalStatus,
+  type PlatformBusinessOperationalAction,
+  type PlatformBusinessRow,
+} from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { PlatformPage, PlatformPageHeader, PlatformResponsiveData } from "../../components/platform/PlatformPageChrome";
@@ -13,7 +19,10 @@ import {
   DashboardListSkeleton,
   PlatformAdminTableSkeleton,
 } from "../../components/dashboard/DashboardSectionLoading";
-import { OnboardingVerificationStatusChip } from "../../components/verification/VerificationWorkflowStatusChip";
+import {
+  BusinessOperationalStatusChip,
+  OnboardingVerificationStatusChip,
+} from "../../components/verification/VerificationWorkflowStatusChip";
 import { PlatformBusinessMobileCard } from "../../components/platform/PlatformBusinessMobileCard";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { ListFilterLoadError } from "../../components/shared/ListFilterLoadError";
@@ -42,6 +51,7 @@ export function PlatformAllBusinessesPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadErrorKind, setLoadErrorKind] = useState<ReturnType<typeof classifyFetchError>>("api");
+  const [processingIds, setProcessingIds] = useState<Set<string>>(() => new Set());
   const loadGenRef = useRef(0);
 
   const listParams = useMemo(
@@ -88,7 +98,58 @@ export function PlatformAllBusinessesPage() {
     void load();
   }, [load]);
 
-  const colCount = 5;
+  const runWithProcessing = useCallback(
+    async (businessId: string, action: () => Promise<void>) => {
+      if (processingIds.has(businessId)) return;
+      setProcessingIds((prev) => new Set(prev).add(businessId));
+      try {
+        await action();
+      } finally {
+        setProcessingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(businessId);
+          return next;
+        });
+      }
+    },
+    [processingIds],
+  );
+
+  const handleOperationalStatus = async (
+    businessId: string,
+    status: PlatformBusinessOperationalAction,
+    confirmKey: string,
+    toastKey: string,
+  ) => {
+    if (!window.confirm(t(confirmKey))) return;
+    await runWithProcessing(businessId, async () => {
+      try {
+        await updatePlatformBusinessOperationalStatus(businessId, status);
+        toast.success(t(toastKey));
+        await load();
+      } catch (e) {
+        logClientError("PlatformAllBusinessesPage.handleOperationalStatus", e);
+        toast.error(toUserFriendlyMessage(e));
+      }
+    });
+  };
+
+  const isRowProcessing = (businessId: string) => processingIds.has(businessId);
+
+  const canSuspend = (b: PlatformBusinessRow) =>
+    b.onboardingVerificationStatus === "approved" &&
+    (b.operationalStatus ?? "active") === "active";
+
+  const canReactivate = (b: PlatformBusinessRow) =>
+    b.onboardingVerificationStatus === "approved" &&
+    ((b.operationalStatus ?? "active") === "suspended" ||
+      (b.operationalStatus ?? "active") === "inactive");
+
+  const canDeactivate = (b: PlatformBusinessRow) =>
+    b.onboardingVerificationStatus === "approved" &&
+    (b.operationalStatus ?? "active") !== "inactive";
+
+  const colCount = 6;
   const pageCount = Math.max(1, Math.ceil(total / BUSINESS_VERIFICATION_PAGE_SIZE));
   const showTableLoading = loading;
 
@@ -101,6 +162,68 @@ export function PlatformAllBusinessesPage() {
     () => resolveBusinessVerificationEmptyState(filters, debouncedQ, t, "all"),
     [debouncedQ, filters, t],
   );
+
+  const renderOperationalActions = (b: PlatformBusinessRow) => {
+    const busy = isRowProcessing(b.id);
+    return (
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <Link to={`/platform-admin/businesses/${b.id}`} className="text-xs text-accent hover:underline">
+          {t("admin.view")}
+        </Link>
+        {canSuspend(b) ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() =>
+              void handleOperationalStatus(
+                b.id,
+                "suspended",
+                "admin.allBusinessesPage.suspendConfirm",
+                "admin.allBusinessesPage.toastSuspended",
+              )
+            }
+            className="rounded border border-amber-600 px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-50 dark:text-amber-400 dark:hover:bg-amber-950/40"
+          >
+            {t("admin.allBusinessesPage.btnSuspend")}
+          </button>
+        ) : null}
+        {canReactivate(b) ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() =>
+              void handleOperationalStatus(
+                b.id,
+                "active",
+                "admin.allBusinessesPage.reactivateConfirm",
+                "admin.allBusinessesPage.toastReactivated",
+              )
+            }
+            className="rounded bg-primary px-2 py-1 text-xs font-medium text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
+          >
+            {t("admin.allBusinessesPage.btnReactivate")}
+          </button>
+        ) : null}
+        {canDeactivate(b) ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() =>
+              void handleOperationalStatus(
+                b.id,
+                "inactive",
+                "admin.allBusinessesPage.deactivateConfirm",
+                "admin.allBusinessesPage.toastDeactivated",
+              )
+            }
+            className="rounded border border-destructive px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
+          >
+            {t("admin.allBusinessesPage.btnDeactivate")}
+          </button>
+        ) : null}
+      </div>
+    );
+  };
 
   const paginationFooter =
     total > BUSINESS_VERIFICATION_PAGE_SIZE ? (
@@ -194,7 +317,23 @@ export function PlatformAllBusinessesPage() {
               }
             />
           ) : (
-            rows.map((b) => <PlatformBusinessMobileCard key={b.id} business={b} />)
+            rows.map((b) => (
+              <article key={b.id} className={platformUi.mobileCard}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="font-semibold text-foreground">{b.name}</h4>
+                    <p className="font-mono text-xs text-muted-foreground">{b.slug}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{b.ownerEmail}</p>
+                  </div>
+                  <BusinessOperationalStatusChip status={b.operationalStatus} />
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <OnboardingVerificationStatusChip status={b.onboardingVerificationStatus} />
+                  <span className="text-xs text-muted-foreground">{formatEur(b.totalTipsEur ?? 0)}</span>
+                </div>
+                <div className="mt-4">{renderOperationalActions(b)}</div>
+              </article>
+            ))
           )
         }
         desktop={
@@ -204,6 +343,7 @@ export function PlatformAllBusinessesPage() {
                 <th className={platformUi.tableTh}>{t("admin.colBusiness")}</th>
                 <th className={platformUi.tableTh}>{t("admin.colOwner")}</th>
                 <th className={platformUi.tableTh}>{t("admin.allBusinessesPage.colOnboardingVerification")}</th>
+                <th className={platformUi.tableTh}>{t("admin.allBusinessesPage.colOperationalStatus")}</th>
                 <th className={platformUi.tableTh}>{t("admin.colTipsEur")}</th>
                 <th className={platformUi.tableTh}>{t("admin.colActions")}</th>
               </tr>
@@ -254,12 +394,11 @@ export function PlatformAllBusinessesPage() {
                     <td className={platformUi.tableTd}>
                       <OnboardingVerificationStatusChip status={b.onboardingVerificationStatus} />
                     </td>
-                    <td className={platformUi.tableTd}>{formatEur(b.totalTipsEur ?? 0)}</td>
                     <td className={platformUi.tableTd}>
-                      <Link to={`/platform-admin/businesses/${b.id}`} className="text-sm text-accent hover:underline">
-                        {t("admin.view")}
-                      </Link>
+                      <BusinessOperationalStatusChip status={b.operationalStatus} />
                     </td>
+                    <td className={platformUi.tableTd}>{formatEur(b.totalTipsEur ?? 0)}</td>
+                    <td className={platformUi.tableTd}>{renderOperationalActions(b)}</td>
                   </tr>
                 ))
               )}

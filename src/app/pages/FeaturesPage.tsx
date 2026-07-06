@@ -1,13 +1,12 @@
-import { useMemo, type ComponentType } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { FeaturesPageHero } from "@/components/public/features/FeaturesPageHero";
+import { FeaturesPageFinalCta } from "@/components/public/features/FeaturesPageFinalCta";
 import { FeatureShowcaseCard } from "@/components/public/features/FeatureShowcaseCard";
 import { FEATURES_PAGE_ITEMS } from "@/components/public/features/featuresPageConfig";
-import { publicPageUi } from "@/components/public/publicPageUi";
 import { publicPagesBrandUi } from "@/components/public/publicPagesBrandUi";
 import { cn } from "@/lib/utils";
-import { DeferredBelowFold, LazyBelowFold } from "@/lib/publicRouteDefer";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
 function FeaturesStandardGrid({
@@ -16,19 +15,21 @@ function FeaturesStandardGrid({
   items: Array<(typeof FEATURES_PAGE_ITEMS)[number] & { title: string; description: string; tag: string }>;
 }) {
   return (
-    <section className={cn("caretip-features-standard-band relative mt-8 px-1 py-6 sm:mt-10 sm:px-2 sm:py-8", publicPageUi.mutedBand)}>
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-2 xl:grid-cols-4">
-        {items.map((f, idx) => (
-          <FeatureShowcaseCard
-            key={f.id}
-            title={f.title}
-            description={f.description}
-            tag={f.tag}
-            Icon={f.Icon}
-            visual={f.visual}
-            index={idx + 2}
-          />
-        ))}
+    <section className="caretip-features-grid-wise caretip-features-grid-wise--standard" aria-label="More features">
+      <div className="caretip-features-page__inner">
+        <div className="caretip-features-grid-wise__grid">
+          {items.map((f, idx) => (
+            <FeatureShowcaseCard
+              key={f.id}
+              title={f.title}
+              description={f.description}
+              tag={f.tag}
+              Icon={f.Icon}
+              visual={f.visual}
+              index={idx + 2}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -53,45 +54,36 @@ export function FeaturesPage() {
   const standard = items.filter((f) => !f.featured);
 
   return (
-    <PublicPageShell maxWidth="wide" contentClassName="pb-4">
+    <PublicPageShell maxWidth="full" contentClassName="pb-0">
       <main
         id="features"
-        className={cn("caretip-features-page", publicPagesBrandUi.pageAccent)}
+        className={cn("caretip-features-page caretip-features-page--wise", publicPagesBrandUi.pageAccent)}
         aria-label={t("nav.features")}
       >
-      <FeaturesPageHero />
+        <FeaturesPageHero />
 
-      <section className="caretip-features-featured relative">
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
-          {featured.map((f, idx) => (
-            <FeatureShowcaseCard
-              key={f.id}
-              title={f.title}
-              description={f.description}
-              tag={f.tag}
-              Icon={f.Icon}
-              visual={f.visual}
-              featured
-              index={idx}
-            />
-          ))}
-        </div>
-      </section>
+        <section className="caretip-features-grid-wise caretip-features-grid-wise--featured" aria-label="Featured features">
+          <div className="caretip-features-page__inner">
+            <div className="caretip-features-grid-wise__grid">
+              {featured.map((f, idx) => (
+                <FeatureShowcaseCard
+                  key={f.id}
+                  title={f.title}
+                  description={f.description}
+                  tag={f.tag}
+                  Icon={f.Icon}
+                  visual={f.visual}
+                  featured
+                  index={idx}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
 
-      <DeferredBelowFold minHeight="22rem" rootMargin="320px 0px">
         <FeaturesStandardGrid items={standard} />
-      </DeferredBelowFold>
 
-      <LazyBelowFold
-        load={(): Promise<{ default: ComponentType<Record<string, never>> }> =>
-          import("@/components/public/features/FeaturesAboutSection").then((m) => ({
-            default: m.FeaturesAboutSection as ComponentType<Record<string, never>>,
-          }))
-        }
-        props={{}}
-        minHeight="18rem"
-        rootMargin="280px 0px"
-      />
+        <FeaturesPageFinalCta />
       </main>
     </PublicPageShell>
   );

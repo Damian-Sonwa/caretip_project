@@ -95,7 +95,7 @@ export function EmployeeDashboard() {
     role: user?.role === "employee" ? "employee" : null,
   });
 
-  const dashboardDataReady = dashboardEnabled && entitlementsReady && sessionValidated && Boolean(user?.employeeId);
+  const dashboardDataReady = dashboardEnabled && entitlementsReady && sessionValidated;
 
   const {
     analyticsTimeframe,
@@ -107,8 +107,11 @@ export function EmployeeDashboard() {
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
     isPeriodRefreshing: analyticsPeriodRefreshing,
+    isAnalyticsSettled,
+    hasPeriodActivity,
     analyticsTimeframeLoading,
     showMetricsSkeleton,
+    hasMetricsData,
     error: analyticsError,
     refreshQuiet: refreshDashboardQuiet,
     applyLiveTip,
@@ -123,7 +126,7 @@ export function EmployeeDashboard() {
   const showMetricsLoading = showMetricsSkeleton;
   const showChartLoading = isAnalyticsInitialLoad;
   const metricsSettledForPeriod =
-    valuesMatchAnalyticsPeriod && !analyticsPeriodRefreshing && Boolean(displayMetrics);
+    isAnalyticsSettled && valuesMatchAnalyticsPeriod && hasMetricsData;
 
   const [error, setError] = useState<string | null>(null);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
@@ -238,13 +241,9 @@ export function EmployeeDashboard() {
       : { totalEarningsEur: 0, totalSupporters: 0, loaded: false };
 
   const showHeroMetricsLoading =
-    !useDevDemo &&
-    (!displayAccountSummary.loaded || analyticsPeriodRefreshing) &&
-    (showMetricsLoading || isMetricsInitialLoad);
+    !useDevDemo && !displayAccountSummary.loaded && isMetricsInitialLoad;
 
   const chartPayload = displayPayload ?? displayPayloadOrLatest;
-  const displayPeriodTipCount = devPeriodSummary?.tips ?? displayMetrics?.periodTipCount ?? 0;
-  const displayPeriodAmountEur = devPeriodSummary?.amount ?? displayMetrics?.periodAmountEur ?? 0;
   const displayChartSeries = useDevDemo
     ? devMockEmployeeChartSeries(analyticsTimeframe)
     : (chartPayload?.chartSeries ?? []);
@@ -256,9 +255,9 @@ export function EmployeeDashboard() {
 
   const periodMetrics = useMemo(() => {
     const periodTipCount =
-      devPeriodSummary?.tips ?? displayMetrics?.periodTipCount ?? displayPeriodTipCount;
+      devPeriodSummary?.tips ?? displayMetrics?.periodTipCount ?? 0;
     const periodAmountEur =
-      devPeriodSummary?.amount ?? displayMetrics?.periodAmountEur ?? displayPeriodAmountEur;
+      devPeriodSummary?.amount ?? displayMetrics?.periodAmountEur ?? 0;
     const rating = useDevDemo
       ? devMockEmployeeRating()
       : (displayPayload?.averageRating ?? displayMetrics?.averageRating ?? null);
@@ -280,8 +279,6 @@ export function EmployeeDashboard() {
   }, [
     devPeriodSummary,
     displayMetrics,
-    displayPeriodTipCount,
-    displayPeriodAmountEur,
     useDevDemo,
     displayGoalProgress,
     displayMonthlyGoal,
@@ -314,6 +311,9 @@ export function EmployeeDashboard() {
         {
           isInitialLoading: showMetricsLoading,
           isPeriodRefreshing: analyticsPeriodRefreshing,
+          isAnalyticsSettled,
+          hasPeriodActivity,
+          statsLoadFailed: analyticsError,
           socketStatus: connectionStatus,
         },
         t,
@@ -321,6 +321,9 @@ export function EmployeeDashboard() {
     [
       showMetricsLoading,
       analyticsPeriodRefreshing,
+      isAnalyticsSettled,
+      hasPeriodActivity,
+      analyticsError,
       connectionStatus,
       t,
     ],

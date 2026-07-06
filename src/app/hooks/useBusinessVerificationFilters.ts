@@ -52,6 +52,7 @@ function parseStatus(
     "approved",
     "rejected",
     "suspended",
+    "inactive",
   ];
   const allowed = workflow === "onboarding" ? onboardingAllowed : kycAllowed;
   return allowed.includes(raw as PlatformBusinessStatusFilter)
@@ -104,11 +105,13 @@ function parseSort(raw: string | null): PlatformBusinessSort {
 function readFiltersFromSearchParams(
   sp: URLSearchParams,
   workflow: "kyc" | "onboarding",
+  defaultStatus: PlatformBusinessStatusFilter = "all",
 ): BusinessVerificationFilterState {
   const pageRaw = Number(sp.get("page") ?? "0");
+  const hasStatusParam = sp.has("status");
   return {
     q: sp.get("q") ?? "",
-    status: parseStatus(sp.get("status"), workflow),
+    status: hasStatusParam ? parseStatus(sp.get("status"), workflow) : defaultStatus,
     date: parseDate(sp.get("date")),
     dateFrom: sp.get("dateFrom") ?? "",
     dateTo: sp.get("dateTo") ?? "",
@@ -118,10 +121,17 @@ function readFiltersFromSearchParams(
   };
 }
 
-function filtersToSearchParams(filters: BusinessVerificationFilterState): URLSearchParams {
+function filtersToSearchParams(
+  filters: BusinessVerificationFilterState,
+  defaultStatus: PlatformBusinessStatusFilter = "all",
+): URLSearchParams {
   const sp = new URLSearchParams();
   if (filters.q.trim()) sp.set("q", filters.q.trim());
-  if (filters.status !== "all") sp.set("status", filters.status);
+  if (filters.status !== "all") {
+    sp.set("status", filters.status);
+  } else if (defaultStatus !== "all") {
+    sp.set("status", "all");
+  }
   if (filters.date !== "all") sp.set("date", filters.date);
   if (filters.date === "custom") {
     if (filters.dateFrom) sp.set("dateFrom", filters.dateFrom);
@@ -136,10 +146,12 @@ function filtersToSearchParams(filters: BusinessVerificationFilterState): URLSea
 export function hasActiveBusinessVerificationFilters(
   filters: BusinessVerificationFilterState,
   debouncedQ: string,
+  defaultStatus: PlatformBusinessStatusFilter = "all",
 ): boolean {
+  const statusActive = filters.status !== "all" && filters.status !== defaultStatus;
   return (
     debouncedQ.trim() !== "" ||
-    filters.status !== "all" ||
+    statusActive ||
     filters.date !== "all" ||
     filters.tips !== "all" ||
     filters.sort !== "newest"
@@ -150,23 +162,29 @@ export function hasActiveBusinessVerificationFilters(
 export function hasRestrictiveBusinessVerificationFilters(
   filters: BusinessVerificationFilterState,
   debouncedQ: string,
+  defaultStatus: PlatformBusinessStatusFilter = "all",
 ): boolean {
   const tipsRestrictive =
     filters.tips !== "all" && filters.tips !== "highest" && filters.tips !== "lowest";
+  const statusRestrictive = filters.status !== "all" && filters.status !== defaultStatus;
   return (
     debouncedQ.trim() !== "" ||
-    filters.status !== "all" ||
+    statusRestrictive ||
     filters.date !== "all" ||
     tipsRestrictive
   );
 }
 
-export function useBusinessVerificationFilters(workflow: "kyc" | "onboarding" | "all" = "kyc") {
+export function useBusinessVerificationFilters(
+  workflow: "kyc" | "onboarding" | "all" = "kyc",
+  options?: { defaultStatus?: PlatformBusinessStatusFilter },
+) {
   const statusWorkflow = workflow === "all" ? "onboarding" : workflow;
+  const defaultStatus = options?.defaultStatus ?? "all";
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = useMemo(
-    () => readFiltersFromSearchParams(searchParams, statusWorkflow),
-    [searchParams, statusWorkflow],
+    () => readFiltersFromSearchParams(searchParams, statusWorkflow, defaultStatus),
+    [searchParams, statusWorkflow, defaultStatus],
   );
   const [debouncedQ, setDebouncedQ] = useState(filters.q);
 
@@ -182,15 +200,21 @@ export function useBusinessVerificationFilters(workflow: "kyc" | "onboarding" | 
         ...patch,
         ...(opts?.resetPage !== false && patch.page === undefined ? { page: 0 } : {}),
       };
-      setSearchParams(filtersToSearchParams(next), { replace: true });
+      setSearchParams(filtersToSearchParams(next, defaultStatus), { replace: true });
     },
-    [filters, setSearchParams],
+    [filters, setSearchParams, defaultStatus],
   );
 
   const clearAllFilters = useCallback(() => {
-    setSearchParams(new URLSearchParams(), { replace: true });
+    if (defaultStatus !== "all") {
+      setSearchParams(filtersToSearchParams({ ...DEFAULT_BUSINESS_VERIFICATION_FILTERS, status: defaultStatus }, defaultStatus), {
+        replace: true,
+      });
+    } else {
+      setSearchParams(new URLSearchParams(), { replace: true });
+    }
     setDebouncedQ("");
-  }, [setSearchParams]);
+  }, [setSearchParams, defaultStatus]);
 
   const removeFilter = useCallback(
     (key: keyof BusinessVerificationFilterState) => {
@@ -258,7 +282,7 @@ export function useBusinessVerificationFilters(workflow: "kyc" | "onboarding" | 
     removeFilter,
     toggleStatusFilter,
     applyKpiStatusFilter,
-    hasActiveFilters: hasActiveBusinessVerificationFilters(filters, debouncedQ),
-    hasRestrictiveFilters: hasRestrictiveBusinessVerificationFilters(filters, debouncedQ),
+    hasActiveFilters: hasActiveBusinessVerificationFilters(filters, debouncedQ, defaultStatus),
+    hasRestrictiveFilters: hasRestrictiveBusinessVerificationFilters(filters, debouncedQ, defaultStatus),
   };
 }

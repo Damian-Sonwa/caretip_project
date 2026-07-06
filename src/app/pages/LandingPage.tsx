@@ -1,26 +1,16 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isAiAssistantEnabled } from "../lib/featureFlags";
 import { Navigation } from "../components/Navigation";
 import { CareTipLandingHero } from "@/components/landing/CareTipLandingHero";
 import { Footer } from "../components/Footer";
-import { DeferredBelowFold, scheduleIdleWork, ViewportDeferred } from "@/lib/publicRouteDefer";
-
-const LandingPageBelowFold = lazy(() =>
-  import("./LandingPageBelowFold").then((mod) => ({ default: mod.LandingPageBelowFold })),
-);
+import { LandingPageBelowFold } from "./LandingPageBelowFold";
 
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
   const { t, i18n } = useTranslation();
   const [landingRoot, setLandingRoot] = useState<HTMLDivElement | null>(null);
   const isDe = i18n.language?.toLowerCase().startsWith("de");
-
-  useEffect(() => {
-    scheduleIdleWork(() => {
-      void import("./LandingPageBelowFold");
-    }, 600);
-  }, []);
 
   return (
     <div
@@ -41,15 +31,9 @@ export function LandingPage() {
             imageAlt={t("landing.showcase.tabQrAlt")}
             isDe={isDe}
           />
-          <DeferredBelowFold rootMargin="520px 0px" minHeight="1px">
-            <Suspense fallback={null}>
-              <LandingPageBelowFold />
-            </Suspense>
-          </DeferredBelowFold>
+          <LandingPageBelowFold />
         </main>
-        <ViewportDeferred minHeight="14rem" rootMargin="320px 0px">
-          <Footer className="caretip-landing-footer" />
-        </ViewportDeferred>
+        <Footer className="caretip-landing-footer" />
       </div>
       <LandingAiAssistantHost rootEl={landingRoot} />
     </div>

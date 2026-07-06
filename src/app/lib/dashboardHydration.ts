@@ -28,3 +28,28 @@ export function canUsePeriodSwitchCache(hasSettledLiveUi: boolean): boolean {
 export function markDashboardLiveSettled(ref: { current: boolean }): void {
   ref.current = true;
 }
+
+/** KPI cards: skeleton until summary scope commits; subtle refresh when data exists. */
+export function deriveDashboardMetricLoading(opts: {
+  enabled: boolean;
+  hasMetricsData: boolean;
+  valuesMatchPeriod: boolean;
+  summaryLoading: boolean;
+  isRevalidating: boolean;
+}): {
+  showMetricsSkeleton: boolean;
+  isPeriodRefreshing: boolean;
+} {
+  const { enabled, hasMetricsData, valuesMatchPeriod, summaryLoading, isRevalidating } = opts;
+  if (!enabled) {
+    return { showMetricsSkeleton: false, isPeriodRefreshing: false };
+  }
+
+  const awaitingSummaryCommit =
+    summaryLoading || !valuesMatchPeriod || (isRevalidating && !hasMetricsData);
+
+  return {
+    showMetricsSkeleton: !hasMetricsData && awaitingSummaryCommit,
+    isPeriodRefreshing: hasMetricsData && isRevalidating,
+  };
+}

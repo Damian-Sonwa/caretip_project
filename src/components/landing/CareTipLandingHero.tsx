@@ -38,6 +38,14 @@ export function CareTipLandingHero({
   const heroDescription = t("landing.showcase.description");
   const heroHeadline = t("landing.showcase.heroHeadline");
   const heroHeadlineHighlight = t("landing.showcase.heroHeadlineHighlight");
+  const heroHeadlineHighlightsRaw = t("landing.showcase.heroHeadlineHighlights", { returnObjects: true });
+  const heroHeadlineHighlights =
+    Array.isArray(heroHeadlineHighlightsRaw) &&
+    heroHeadlineHighlightsRaw.every((word) => typeof word === "string")
+      ? (heroHeadlineHighlightsRaw as string[])
+      : heroHeadlineHighlight
+        ? [heroHeadlineHighlight]
+        : [];
   const useStaticHeadline = landingCopyVisible(heroHeadline);
   const headlineMode = useStaticHeadline ? "static" : "composed";
 
@@ -77,7 +85,7 @@ export function CareTipLandingHero({
               <span className={cn(landingUi.heroHeadlineLine, "caretip-hero-headline-line--static")}>
                 {landingHeroHeadlineWithHighlight(
                   heroHeadline,
-                  heroHeadlineHighlight,
+                  heroHeadlineHighlights,
                   landingUi.heroHeadlineEmphasis,
                 )}
               </span>

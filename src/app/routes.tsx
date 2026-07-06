@@ -12,6 +12,7 @@ import {
 } from "react-router";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthBootstrapLoadingRegistrar } from "./components/AuthBootstrapLoadingRegistrar";
+import { PageEnterTransition } from "./components/PageEnterTransition";
 import {
   useAppLoadingCoordinator,
   useMarkAppShellReadyOptional,
@@ -111,9 +112,11 @@ function RootLayout() {
       {import.meta.env.DEV ? <LoaderDiagRuntime /> : null}
       <ScrollToTop />
       <AuthBootstrapLoadingRegistrar>
-        <RouteChunkBoundary variant="minimal" registrationKey="root-route">
-          <Outlet />
-        </RouteChunkBoundary>
+        <PageEnterTransition>
+          <RouteChunkBoundary variant="minimal" registrationKey="root-route">
+            <Outlet />
+          </RouteChunkBoundary>
+        </PageEnterTransition>
       </AuthBootstrapLoadingRegistrar>
     </>
   );
@@ -510,6 +513,11 @@ const routes: RouteObject[] = [
   {
     path: '/cookies',
     lazy: routeLazy(() => import('./pages/CookiesPage'), 'CookiesPage'),
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/about',
+    lazy: routeLazy(() => import('./pages/AboutPage'), 'AboutPage'),
     errorElement: <ErrorBoundary />,
   },
   {

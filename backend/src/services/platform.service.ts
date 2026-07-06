@@ -246,7 +246,7 @@ export async function getBusinessForAdmin(businessId: string) {
     prisma.business.findUnique({
       where: { id: businessId },
       include: {
-        user: { select: { id: true, email: true } },
+        user: { select: { id: true, email: true, isActive: true } },
         _count: { select: { employees: true, locations: true } },
       },
     }),
@@ -257,6 +257,7 @@ export async function getBusinessForAdmin(businessId: string) {
     prisma.transaction.count({ where: { businessId, status: "success" } }),
   ]);
   if (!b) return null;
+  if (b.deletedAt) return null;
   return {
     id: b.id,
     name: b.name,
@@ -264,6 +265,8 @@ export async function getBusinessForAdmin(businessId: string) {
     verificationStatus: b.verificationStatus,
     onboardingVerificationStatus: b.onboardingVerificationStatus,
     kycVerificationStatus: b.kycVerificationStatus,
+    operationalStatus: b.operationalStatus,
+    ownerIsActive: b.user.isActive,
     onboardingSubmittedAt: b.onboardingSubmittedAt?.toISOString() ?? null,
     onboardingReviewNotes: b.onboardingReviewNotes,
     onboardingReviewHistory: parseKycReviewHistory(b.onboardingReviewHistory),

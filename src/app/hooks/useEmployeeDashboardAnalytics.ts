@@ -13,6 +13,7 @@ import {
 } from "../lib/dashboardSwrCache";
 import {
   canUsePeriodSwitchCache,
+  deriveDashboardMetricLoading,
   markDashboardLiveSettled,
 } from "../lib/dashboardHydration";
 import { DASHBOARD_INACTIVE_PREFETCH_DELAY_MS } from "../lib/dashboardTimeframeOrchestration";
@@ -32,6 +33,8 @@ import {
   hasEmployeeChartOrTipsContent,
   hasEmployeeMetricValues,
   hasEmployeePayloadVisibleContent,
+  hasEmployeePeriodActivity,
+  isEmployeeSummaryFetched,
 } from "../lib/dashboardVisibleContent";
 import { shouldRefetchOnAnalyticsCapabilityUpgrade } from "../lib/dashboardAnalyticsLifecycle";
 
@@ -175,7 +178,7 @@ export function useEmployeeDashboardAnalytics(
   const scheduleInactivePrefetchRef = useRef<(activeTf: EmployeeAnalyticsTimeframe) => void>(() => {});
   const prevAdvancedAnalyticsRef = useRef<boolean | null>(null);
 
-  const isActive = enabled && sessionValidated && Boolean(employeeId);
+  const isActive = enabled && sessionValidated;
   const isActiveRef = useRef(isActive);
   isActiveRef.current = isActive;
 
@@ -255,6 +258,7 @@ export function useEmployeeDashboardAnalytics(
       );
       if (!merged) return;
       const next = payloadFromResponse(merged);
+      if (!isEmployeeSummaryFetched(next)) return;
       persistSwr(tf);
       setPayload(next);
       setDataTimeframe(tf);
@@ -286,11 +290,12 @@ export function useEmployeeDashboardAnalytics(
       }
       tfRef.current = tf;
       setAnalyticsTimeframe(tf);
+      const seq = ++uiRequestSeqRef.current;
+      setDataTimeframe(null);
 
       hydratePeriodSessionCache(tf);
 
       if (isPeriodSessionReady(tf)) {
-        const seq = uiRequestSeqRef.current;
         setSummaryLoading(false);
         setAnalyticsLoading(false);
         setIsRevalidating(false);
@@ -305,7 +310,6 @@ export function useEmployeeDashboardAnalytics(
           canUsePeriodSwitchCache(hasSettledLiveUiRef.current) &&
           hasEmployeeMetricValues(summaryPartial)
         ) {
-          const seq = uiRequestSeqRef.current;
           setSummaryLoading(false);
           devSetHydrationPhase("metrics", "ready");
           const chartsReady =
@@ -324,7 +328,7 @@ export function useEmployeeDashboardAnalytics(
           commitUiPayload(tf, seq, false);
         } else {
           setIsRevalidating(true);
-          setSummaryLoading(!payloadRef.current);
+          setSummaryLoading(true);
           setAnalyticsLoading(true);
         }
       }
@@ -554,20 +558,23 @@ export function useEmployeeDashboardAnalytics(
         }
       } finally {
         const isCurrentRequest = affectsUi && uiRequestSeqRef.current === seq;
+        const stillTargetPeriod = tf === tfRef.current;
+        const noReplacementInflight = abortRef.current.get(tf) == null;
 
-        if (isCurrentRequest) {
-          if (summarySettled) {
-            commitUiPayload(tf, seq, true);
-          }
-          if (!summarySettled) setSummaryLoading(false);
-          if (!analyticsSettled) setAnalyticsLoading(false);
-          setIsRevalidating(false);
-        } else if (affectsUi && controller.signal.aborted) {
+        if (stillTargetPeriod && summarySettled && (isCurrentRequest || noReplacementInflight)) {
+          commitUiPayload(tf, uiRequestSeqRef.current, isCurrentRequest);
+        }
+
+        if (stillTargetPeriod && (isCurrentRequest || noReplacementInflight)) {
+          if (summarySettled) setSummaryLoading(false);
+          if (analyticsSettled) setAnalyticsLoading(false);
+          if (summarySettled || analyticsSettled) setIsRevalidating(false);
+        } else if (affectsUi && controller.signal.aborted && stillTargetPeriod) {
           const inflight = abortRef.current.get(tf);
           if (inflight == null || inflight === controller) {
             setIsRevalidating(false);
-            if (!summarySettled) setSummaryLoading(false);
-            if (!analyticsSettled) setAnalyticsLoading(false);
+            if (summarySettled) setSummaryLoading(false);
+            if (analyticsSettled) setAnalyticsLoading(false);
           }
         }
 
@@ -669,7 +676,7 @@ export function useEmployeeDashboardAnalytics(
       window.clearTimeout(timer);
       mountGenerationRef.current += 1;
     };
-  }, [isActive, analyticsTimeframe, isPeriodSessionReady]);
+  }, [isActive]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -793,17 +800,20 @@ export function useEmployeeDashboardAnalytics(
   }, [displayPayload, hasLivePeriodSnapshot, payload]);
 
   const displayMetrics = useMemo(() => {
-    if (!displayPayload) return null;
+    if (!displayPayload || !valuesMatchAnalyticsPeriod) return null;
+    if (!isEmployeeSummaryFetched(displayPayload)) return null;
     return {
-      periodTipCount: displayPayload.periodTipCount,
-      periodAmountEur: displayPayload.periodAmountEur,
+      periodTipCount: displayPayload.periodTipCount ?? 0,
+      periodAmountEur: displayPayload.periodAmountEur ?? 0,
       monthlyGoal: displayPayload.monthlyGoal,
-      currentMonthTotal: displayPayload.currentMonthTotal,
+      currentMonthTotal: displayPayload.currentMonthTotal ?? 0,
       goalProgress: displayPayload.goalProgress,
       averageRating: displayPayload.averageRating,
-      ratingCount: displayPayload.ratingCount,
+      ratingCount: displayPayload.ratingCount ?? 0,
     };
   }, [
+    displayPayload,
+    valuesMatchAnalyticsPeriod,
     displayPayload?.periodTipCount,
     displayPayload?.periodAmountEur,
     displayPayload?.monthlyGoal,
@@ -813,36 +823,7 @@ export function useEmployeeDashboardAnalytics(
     displayPayload?.ratingCount,
   ]);
 
-  const displayMetricsStable = useMemo(() => {
-    if (displayMetrics) return displayMetrics;
-    if (!isActive) return null;
-    // Preserve tip totals during soft refresh for the same period (avoid zero flashes).
-    if (
-      hasLivePeriodSnapshot &&
-      (summaryLoading || analyticsLoading || isRevalidating)
-    ) {
-      return lastKnownGoodMetrics;
-    }
-    return null;
-  }, [
-    analyticsLoading,
-    displayMetrics,
-    hasLivePeriodSnapshot,
-    isActive,
-    isRevalidating,
-    lastKnownGoodMetrics,
-    summaryLoading,
-  ]);
-
-  const hasVisibleKpisOnScreen =
-    hasLivePeriodSnapshot &&
-    (Boolean(displayMetricsStable) ||
-      hasEmployeePayloadVisibleContent(displayPayload) ||
-      Boolean(lastKnownGoodMetrics));
-
-  const hasVisibleSecondaryOnScreen =
-    hasEmployeeChartOrTipsContent(displayPayloadOrLatest) ||
-    hasEmployeeChartOrTipsContent(payload);
+  const hasMetricsData = displayMetrics != null;
 
   const chartPayloadPending =
     advancedAnalyticsEnabled &&
@@ -850,52 +831,76 @@ export function useEmployeeDashboardAnalytics(
     !hasEmployeeAnalyticsPayload(displayPayload) &&
     !hasEmployeeAnalyticsPayload(payload);
 
-  const isMetricsInitialLoad =
-    isActive && !hasVisibleKpisOnScreen && (summaryLoading || isRevalidating);
+  const displayMetricsResolved = useMemo(() => {
+    if (displayMetrics) return displayMetrics;
+    if (!isActive || !valuesMatchAnalyticsPeriod) return null;
+    if (isRevalidating && lastKnownGoodMetrics) return lastKnownGoodMetrics;
+    return null;
+  }, [
+    displayMetrics,
+    isActive,
+    isRevalidating,
+    lastKnownGoodMetrics,
+    valuesMatchAnalyticsPeriod,
+  ]);
+
+  const isAnalyticsSettled =
+    isActive &&
+    valuesMatchAnalyticsPeriod &&
+    hasMetricsData &&
+    lastUpdatedAt != null &&
+    !summaryLoading &&
+    !analyticsLoading &&
+    !isRevalidating &&
+    !chartPayloadPending;
+
+  const hasPeriodActivity = useMemo(
+    () => hasEmployeePeriodActivity(displayPayload),
+    [
+      displayPayload?.periodAmountEur,
+      displayPayload?.periodTipCount,
+      displayPayload?.ratingCount,
+    ],
+  );
+
+  const { showMetricsSkeleton, isPeriodRefreshing } = deriveDashboardMetricLoading({
+    enabled: isActive,
+    hasMetricsData,
+    valuesMatchPeriod: valuesMatchAnalyticsPeriod,
+    summaryLoading,
+    isRevalidating,
+  });
 
   const isAnalyticsInitialLoad =
     isActive &&
-    !isRevalidating &&
+    !hasEmployeeAnalyticsPayload(displayPayload) &&
+    !hasEmployeeAnalyticsPayload(payload) &&
     (analyticsLoading || chartPayloadPending);
 
-  const isMetricsPeriodLoading =
-    isActive &&
-    !valuesMatchAnalyticsPeriod &&
-    (summaryLoading || analyticsLoading || isRevalidating);
+  const analyticsTimeframeLoading = isPeriodRefreshing ? analyticsTimeframe : null;
 
-  const hasActivePeriodFetch =
-    isRevalidating || summaryLoading || analyticsLoading;
-
-  /**
-   * Status strip — only during active fetch or pending analytics payload (not stale period drift).
-   */
-  const isPeriodRefreshing =
-    isActive &&
-    !isMetricsInitialLoad &&
-    (chartPayloadPending || hasActivePeriodFetch);
-
-  const analyticsTimeframeLoading =
-    isPeriodRefreshing && !isMetricsInitialLoad ? analyticsTimeframe : null;
-
-  const showMetricsSkeleton = isMetricsInitialLoad || isMetricsPeriodLoading;
+  const isMetricsInitialLoad = showMetricsSkeleton;
 
   return {
     analyticsTimeframe,
     setAnalyticsTimeframe: setAnalyticsTimeframeControlled,
     displayPayload,
     displayPayloadOrLatest,
-    displayMetrics: displayMetricsStable,
+    displayMetrics: displayMetricsResolved,
+    hasMetricsData,
     payload,
     valuesMatchAnalyticsPeriod,
-    summaryLoading: isMetricsInitialLoad,
+    summaryLoading: showMetricsSkeleton,
     analyticsLoading: isAnalyticsInitialLoad,
-    isInitialLoad: isMetricsInitialLoad,
+    isInitialLoad: showMetricsSkeleton,
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
     isPeriodRefreshing,
+    isAnalyticsSettled,
+    hasPeriodActivity,
     analyticsTimeframeLoading,
     showMetricsSkeleton,
-    isDashboardHydrating: isMetricsInitialLoad,
+    isDashboardHydrating: showMetricsSkeleton,
     isRevalidating,
     dataRevision,
     lastUpdatedAt,
