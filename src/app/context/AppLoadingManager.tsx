@@ -19,10 +19,10 @@ import {
   traceGlobalLoaderReady,
   traceGlobalOverlayDismissed,
 } from "../lib/globalAppLoadingTrace";
+import { CARETIP_LOADER_FADE_MS } from "../lib/appLoaderTransition";
 import { isPublicShellPath } from "../lib/publicRoutes";
 import { traceLoaderRegistration, warnLoaderDiagDeadlock } from "../lib/loaderDiagFlags";
 
-const OVERLAY_FADE_MS = 340;
 /** Absorb one-frame registration gaps between auth, route guard, and layout paint. */
 const OVERLAY_EXIT_DEBOUNCE_MS = 120;
 /** Block APP_INIT from re-opening the overlay shortly after a full dismiss (paint-ready race). */
@@ -246,20 +246,6 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
 
     if (overlayPhase === "hidden") return;
 
-    const publicShellPath = isPublicShellPath(
-      window.location.pathname.split("?")[0]?.split("#")[0] ?? "/",
-    );
-    if (publicShellPath) {
-      if (exitDebounceRef.current !== null) {
-        window.clearTimeout(exitDebounceRef.current);
-        exitDebounceRef.current = null;
-      }
-      overlayDismissedAtRef.current = Date.now();
-      setOverlayPhase("hidden");
-      traceGlobalOverlayDismissed();
-      return;
-    }
-
     if (exitDebounceRef.current !== null) {
       window.clearTimeout(exitDebounceRef.current);
     }
@@ -284,7 +270,7 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
     const id = window.setTimeout(() => {
       setOverlayPhase("hidden");
       lastWinnerKeyRef.current = null;
-    }, OVERLAY_FADE_MS);
+    }, CARETIP_LOADER_FADE_MS);
     return () => window.clearTimeout(id);
   }, [overlayPhase]);
 

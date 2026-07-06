@@ -15,6 +15,7 @@ html {
   /* Fixed marketing nav: keep in-page anchors (#sections) from hiding under the bar */
   scroll-padding-top: 4.75rem;
   color-scheme: light dark;
+  background-color: hsl(var(--background));
 }
 
 html.theme-transition,
@@ -252,7 +253,7 @@ textarea::placeholder {
   /* White text on orange (buttons, tags on primary) */
   --primary-foreground: 0 0% 100%;
 
-  --background: 0 0% 100%;
+  --background: 45 29% 97%;
   --foreground: 0 0% 0%;
   --card: 0 0% 100%;
   --card-foreground: 0 0% 0%;

@@ -76,26 +76,38 @@ html.dark .caretip-brand-loader__wordmark-tip {
   animation: caretip-brand-loader-message-enter 0.45s ease-out 0.2s both;
 }
 
-/* Global setup overlay shell */
-.app-setup-loading {
+/* Steady handoff — keep glow track running, skip one-shot entrance animations */
+.caretip-brand-loader--steady .caretip-brand-loader__logo-wrap,
+.caretip-brand-loader--steady .caretip-brand-loader__indicator,
+.caretip-brand-loader--steady .caretip-brand-loader__message {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* Fixed loader overlay — page mounts underneath at full opacity */
+.caretip-loading-overlay {
+  opacity: 1;
   animation: caretip-app-loader-fade-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.app-setup-loading--exiting {
-  animation: caretip-app-loader-fade-out 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  pointer-events: none;
+.caretip-loading-overlay--seamless {
+  animation: none;
+  opacity: 1;
 }
 
-.caretip-launch-splash {
-  animation: caretip-app-loader-fade-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.caretip-launch-splash--exiting {
+.caretip-loading-overlay--exiting {
   animation: caretip-app-loader-fade-out 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   pointer-events: none;
 }
 
-/* Page content entrance after loader dismisses */
+/* App shell stays painted while launch overlay is up */
+.caretip-app-shell--behind-loader {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Page content entrance after in-app navigation */
 .caretip-page-enter {
   animation: caretip-page-enter 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -180,10 +192,8 @@ html.dark .caretip-brand-loader__wordmark-tip {
   .caretip-brand-loader__logo-wrap,
   .caretip-brand-loader__indicator,
   .caretip-brand-loader__message,
-  .app-setup-loading,
-  .app-setup-loading--exiting,
-  .caretip-launch-splash,
-  .caretip-launch-splash--exiting,
+  .caretip-loading-overlay,
+  .caretip-loading-overlay--exiting,
   .caretip-page-enter {
     animation: none !important;
   }

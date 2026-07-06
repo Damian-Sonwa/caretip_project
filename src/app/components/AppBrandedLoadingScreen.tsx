@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { isLogoutPending } from "../lib/api";
 import { traceGlobalOverlayMounted } from "../lib/globalAppLoadingTrace";
 import { CareTipBrandLoader } from "./CareTipBrandLoader";
+import { CareTipLoadingOverlay } from "./CareTipLoadingOverlay";
 
 export type AppBrandedLoadingScreenProps = {
   className?: string;
@@ -32,16 +33,28 @@ export function AppBrandedLoadingScreen({
     traceGlobalOverlayMounted();
   }, [fixed, exiting]);
 
+  if (fixed) {
+    return (
+      <CareTipLoadingOverlay
+        className={cn("z-[9998]", className)}
+        exiting={exiting}
+        seamless
+        steady
+        message={resolvedMessage}
+        showMessage
+        aria-label={resolvedMessage}
+      />
+    );
+  }
+
   return (
     <div
       className={cn(
-        "app-setup-loading flex flex-col items-center justify-center bg-background px-6",
-        fixed ? "fixed inset-0 z-[9998]" : "min-h-[100dvh] w-full",
-        exiting && "app-setup-loading--exiting",
+        "flex min-h-[100dvh] w-full flex-col items-center justify-center bg-background px-6",
         className,
       )}
       role="status"
-      aria-busy={!exiting}
+      aria-busy="true"
       aria-live="polite"
       aria-label={resolvedMessage}
     >

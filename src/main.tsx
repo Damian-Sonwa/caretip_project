@@ -11,6 +11,13 @@ import { initSentry } from "./app/lib/sentry";
 import { initGoogleAdsConversion } from "./app/lib/googleAdsConversion";
 import "./styles/index.css";
 
+declare global {
+  interface Window {
+    /** Set in main before React mounts — seamless handoff from index.html splash. */
+    __caretipHtmlSplash?: boolean;
+  }
+}
+
 /** Manrope display font — marketing headings only; skip on auth/admin shells. */
 function scheduleHeroDisplayFont(): void {
   if (typeof window === "undefined") return;
@@ -48,7 +55,11 @@ const updateSW = registerSW({
 });
 
 void ensureI18nReady().then(() => {
-  createRoot(document.getElementById("root")!).render(
+  const rootEl = document.getElementById("root");
+  if (rootEl) {
+    window.__caretipHtmlSplash = Boolean(rootEl.querySelector(".caretip-initial-splash"));
+  }
+  createRoot(rootEl!).render(
     <GlobalErrorBoundary>
       <App />
     </GlobalErrorBoundary>,

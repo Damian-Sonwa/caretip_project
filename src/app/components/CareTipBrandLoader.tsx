@@ -6,6 +6,8 @@ export type CareTipBrandLoaderProps = {
   message?: string;
   /** Hide message slot entirely. */
   showMessage?: boolean;
+  /** Skip one-shot entrance animations (overlay handoff / exit phase). */
+  steady?: boolean;
 };
 
 /**
@@ -15,9 +17,10 @@ export function CareTipBrandLoader({
   className,
   message,
   showMessage = true,
+  steady = false,
 }: CareTipBrandLoaderProps) {
   return (
-    <div className={cn("caretip-brand-loader", className)}>
+    <div className={cn("caretip-brand-loader", steady && "caretip-brand-loader--steady", className)}>
       <div className="caretip-brand-loader__logo-wrap">
         <h1 className="caretip-brand-loader__wordmark" aria-hidden>
           <span className="caretip-brand-loader__wordmark-care">Care</span>
