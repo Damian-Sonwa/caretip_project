@@ -1,4 +1,4 @@
-import type Stripe from "stripe";
+import Stripe from "stripe";
 import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
 import { getStripeClient, isStripeConfigured } from "./stripe.service.js";
 import {

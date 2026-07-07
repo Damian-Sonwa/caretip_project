@@ -89,8 +89,11 @@ async function verifyGoogleIdToken(idToken: string): Promise<VerifiedGoogleIdent
   try {
     const ticket = await client.verifyIdToken({ idToken, audience: audiences });
     const payload = ticket.getPayload();
-    const email = payload?.email?.trim().toLowerCase();
-    const sub = payload?.sub?.trim();
+    if (!payload) {
+      throw new GoogleTokenVerificationError();
+    }
+    const email = payload.email?.trim().toLowerCase();
+    const sub = payload.sub?.trim();
     if (!email || !sub) {
       throw new GoogleTokenVerificationError();
     }
