@@ -6314,7 +6314,8 @@
           "submitted": "{{total}} neu eingereichte Onboarding-Anfragen",
           "approved": "{{total}} freigegebene Unternehmen",
           "rejected": "{{total}} abgelehnte Onboarding-Anfragen",
-          "suspended": "{{total}} gesperrte Unternehmen"
+          "suspended": "{{total}} gesperrte Unternehmen",
+          "inactive": "{{total}} inaktive Unternehmen"
         }
       },
       "empty": {
