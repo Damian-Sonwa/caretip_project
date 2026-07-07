@@ -1,10 +1,10 @@
-import type { ReactNode } from "react";
 import { useEffect } from "react";
+import type { ReactNode } from "react";
 import { useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { hasPendingStoredSessionWithoutUser, isAuthRestorePending } from "../lib/authRestore";
 import { isPublicAuthenticationPath } from "../lib/authSession";
-import {
+import { shouldSuppressSessionBootstrapOverlay } from "../lib/authTransitionIntent";import {
   APP_LOADING_PRIORITY,
   useAppLoadingRegistration,
   useReleaseAppBootOverlay,
@@ -26,7 +26,6 @@ function shouldBlockGlobalAuthLoader(
   const restorePending = isAuthRestorePending();
   const initializing = authStatus === "initializing";
 
-  // Auth forms must not paint until bootstrap completes — use global overlay + page shell.
   if (initializing && isPublicAuthenticationPath(pathname)) return true;
 
   if (isPublicShellPath(pathname)) return false;
@@ -40,13 +39,15 @@ function shouldBlockGlobalAuthLoader(
 
 /**
  * Registers global auth/session bootstrap with the loading overlay.
- * Public marketing and guest flows render immediately; auth login routes wait on bootstrap.
+ * Intentional logout suppresses bootstrap — logout navigates directly to login.
  */
 export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNode }) {
   const { authStatus, user } = useAuth();
   const { pathname } = useLocation();
   const publicShell = isPublicShellPath(pathname);
-  const authBootstrapBlocking = shouldBlockGlobalAuthLoader(pathname, authStatus, user);
+  const suppressBootstrap = shouldSuppressSessionBootstrapOverlay();
+  const authBootstrapBlocking =
+    !suppressBootstrap && shouldBlockGlobalAuthLoader(pathname, authStatus, user);
   const releaseAppBootOverlay = useReleaseAppBootOverlay();
 
   useAppLoadingRegistration(

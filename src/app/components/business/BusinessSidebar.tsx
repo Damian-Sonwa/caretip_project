@@ -1,8 +1,13 @@
 import { motion } from "motion/react";
-import { useNavigate } from "react-router";
+import { useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
 import { CareIcon } from "@/components/icons";
 import { useAuth } from "../../hooks/useAuth";
+import {
+  isAuthLogoutTransitionActive,
+  subscribeAuthLogoutTransition,
+} from "../../lib/authLogoutTransition";
 import { CareTipLogo, DASHBOARD_SIDEBAR_BRAND_CLASS, DASHBOARD_SIDEBAR_NAV_CLASS } from "../CareTipLogo";
 import { BusinessSidebarNavShell } from "./sidebar/BusinessSidebarNavShell";
 import { BusinessSidebarUpgradeCta } from "./sidebar/BusinessSidebarUpgradeCta";
@@ -11,8 +16,12 @@ import { cn } from "@/lib/utils";
 
 export function BusinessSidebar() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user, logout, exitImpersonation } = useAuth();
+  const signingOut = useSyncExternalStore(
+    subscribeAuthLogoutTransition,
+    isAuthLogoutTransitionActive,
+    () => false,
+  );
 
   return (
     <motion.aside
@@ -33,17 +42,22 @@ export function BusinessSidebar() {
         <BusinessSidebarUpgradeCta />
         <button
           type="button"
+          disabled={signingOut}
+          aria-busy={signingOut}
           onClick={() => {
+            if (signingOut) return;
             if (user?.impersonation) {
               void exitImpersonation();
               return;
             }
             logout();
-            navigate("/business/login", { replace: true });
           }}
           className={dashboardSidebarSignOutButton}
         >
           <CareIcon name="signOut" size="md" />
+          {signingOut ? (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+          ) : null}
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
         </button>
       </div>

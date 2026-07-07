@@ -1,4 +1,5 @@
 import type { AuthStatus } from "./authSession";
+import { shouldSuppressSessionBootstrapOverlay } from "./authTransitionIntent";
 import { hasClientSessionHint } from "./authSessionHint";
 import { hasClientStoredSession } from "./authUserStore";
 
@@ -25,6 +26,7 @@ export function shouldShowAuthBootstrapShell(options: {
   /** Cold anonymous visits may paint the form while bootstrap settles in the background. */
   allowImmediateLoginPaint?: boolean;
 }): boolean {
+  if (shouldSuppressSessionBootstrapOverlay()) return false;
   if (options.authTransitionPending) return true;
   if (
     options.authStatus === "initializing" &&

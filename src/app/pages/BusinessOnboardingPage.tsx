@@ -198,7 +198,6 @@ export function BusinessOnboardingPage() {
   const handleAuthFailure = () => {
     logout();
     toast.error(t("business.onboarding.toastSessionExpired"));
-    navigate("/login", { replace: true });
   };
 
   const goBack = () => {

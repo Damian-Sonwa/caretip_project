@@ -31,7 +31,12 @@ export function BusinessTipsLivePage() {
   return (
     <div className="space-y-6 pt-6">
       <p className="text-sm text-muted-foreground">{t("business.tips.liveDesc")}</p>
-      <LiveActivityCenter items={items} liveIds={liveIds} loading={data.loading} />
+      <LiveActivityCenter
+        items={items}
+        liveIds={liveIds}
+        loading={data.isInitialAnalyticsLoading}
+        refreshing={data.isAnalyticsRefreshing}
+      />
     </div>
   );
 }

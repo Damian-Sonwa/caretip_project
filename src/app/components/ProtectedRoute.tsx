@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useSyncExternalStore } from "react";
 import { Navigate } from "react-router";
 import { isClientSessionRevoked } from "../lib/api";
 import { authDebug } from "../lib/authDebugLog";
@@ -8,6 +9,10 @@ import {
   useAppLoadingRegistration,
 } from "../context/AppLoadingManager";
 import { useProtectedRouteGate } from "../hooks/useProtectedRouteGate";
+import {
+  isAuthLogoutTransitionActive,
+  subscribeAuthLogoutTransition,
+} from "../lib/authLogoutTransition";
 import { AppRouteGateShell } from "./AppRouteGateShell";
 
 export function ProtectedRoute({
@@ -19,12 +24,21 @@ export function ProtectedRoute({
 }) {
   const gate = useProtectedRouteGate(allowedRoles);
   const rolesKey = allowedRoles.join(",");
+  const logoutTransitionActive = useSyncExternalStore(
+    subscribeAuthLogoutTransition,
+    isAuthLogoutTransitionActive,
+    () => false,
+  );
 
   useAppLoadingRegistration(
     `protected-route-guard:${rolesKey}:${gate.pathname}`,
     APP_LOADING_PRIORITY.ROUTE_GUARD,
-    gate.guardBlocking,
+    gate.guardBlocking && !logoutTransitionActive,
   );
+
+  if (logoutTransitionActive) {
+    return null;
+  }
 
   if (gate.blocking) {
     if (gate.guardBlocking) {

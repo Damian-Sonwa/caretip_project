@@ -30,6 +30,7 @@ export {
   fetchBusinessAnalyticsBundle,
   fetchBusinessAnalyticsDTO,
   fetchBusinessPeriodStats,
+  isBusinessAnalyticsBundleComplete,
 } from "./businessAnalyticsService";
 
 export {

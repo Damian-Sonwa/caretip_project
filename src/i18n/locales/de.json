@@ -1945,8 +1945,11 @@
     },
     "status": {
       "live": "Live",
+      "realtimeLive": "Live",
       "updating": "Aktualisierung",
       "dataUpToDate": "Aktuell",
+      "liveDesc": "Echtzeit-Verbindung aktiv",
+      "realtimeLiveDesc": "Echtzeit-Verbindung aktiv",
       "refreshFailed": "Aktualisierung fehlgeschlagen",
       "actionRequired": "Aktion erforderlich",
       "businessLiveDesc": "Dashboard-Daten synchronisiert",

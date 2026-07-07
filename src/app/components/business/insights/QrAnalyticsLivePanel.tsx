@@ -22,23 +22,41 @@ import type { BusinessQrAnalytics } from "../../../lib/api";
 type QrAnalyticsLivePanelProps = {
   data: BusinessQrAnalytics | null;
   loading?: boolean;
+  refreshing?: boolean;
   compact?: boolean;
   className?: string;
 };
 
-function MetricTile({ label, value, loading }: { label: string; value: number; loading?: boolean }) {
+function MetricTile({
+  label,
+  value,
+  loading,
+  refreshing,
+}: {
+  label: string;
+  value: number;
+  loading?: boolean;
+  refreshing?: boolean;
+}) {
+  const showPlaceholder = loading && !refreshing;
   return (
     <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">
-        {loading ? "—" : <CountUpMetric value={value} kind="integer" />}
+        {showPlaceholder ? "—" : <CountUpMetric value={value} kind="integer" />}
       </p>
     </div>
   );
 }
 
 /** Sprint 4E — DB-backed QR analytics (qr_scan_events only). */
-export function QrAnalyticsLivePanel({ data, loading, compact, className }: QrAnalyticsLivePanelProps) {
+export function QrAnalyticsLivePanel({
+  data,
+  loading,
+  refreshing = false,
+  compact,
+  className,
+}: QrAnalyticsLivePanelProps) {
   const { t, i18n } = useTranslation();
   const timeLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
 
@@ -55,15 +73,15 @@ export function QrAnalyticsLivePanel({ data, loading, compact, className }: QrAn
 
   const topLocation = data?.scansByLocation[0] ?? null;
   const topEmployee = data?.scansByEmployee[0] ?? null;
-  const hasTrend = (data?.scanTrend.some((r) => r.count > 0) ?? false) && !loading;
+  const hasTrend = (data?.scanTrend.some((r) => r.count > 0) ?? false) && (!loading || refreshing);
 
   return (
     <div className={cn("space-y-4", className)}>
       <div className={cn("grid gap-3", compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3")}>
-        <MetricTile label={t("business.qrAnalytics.totalScans")} value={data?.totalScans ?? 0} loading={loading} />
-        <MetricTile label={t("business.qrAnalytics.uniqueVisitors")} value={data?.uniqueScans ?? 0} loading={loading} />
+        <MetricTile label={t("business.qrAnalytics.totalScans")} value={data?.totalScans ?? 0} loading={loading} refreshing={refreshing} />
+        <MetricTile label={t("business.qrAnalytics.uniqueVisitors")} value={data?.uniqueScans ?? 0} loading={loading} refreshing={refreshing} />
         {!compact ? (
-          <MetricTile label={t("business.qrAnalytics.repeatScans")} value={data?.repeatScans ?? 0} loading={loading} />
+          <MetricTile label={t("business.qrAnalytics.repeatScans")} value={data?.repeatScans ?? 0} loading={loading} refreshing={refreshing} />
         ) : null}
       </div>
 

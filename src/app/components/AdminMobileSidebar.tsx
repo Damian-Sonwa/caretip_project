@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router';
 import { X } from 'lucide-react';
 import { CareIcon } from '@/components/icons';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +22,6 @@ interface AdminMobileSidebarProps {
 
 export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const displayName = user?.name || t('admin.fallbackAdminName');
 
@@ -56,7 +54,6 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
           onClick={() => {
             logout();
             onClose();
-            navigate('/platform-admin/login');
           }}
           className={dashboardSidebarSignOutButton}
         >

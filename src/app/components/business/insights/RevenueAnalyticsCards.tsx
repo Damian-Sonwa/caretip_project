@@ -14,10 +14,18 @@ import { formatEur } from "../../../lib/formatEur";
 type RevenueAnalyticsCardsProps = {
   data: BusinessIntelligenceInput;
   loading: boolean;
+  refreshing?: boolean;
+  refreshingLabel?: string;
   showHeading?: boolean;
 };
 
-export function RevenueAnalyticsCards({ data, loading, showHeading = true }: RevenueAnalyticsCardsProps) {
+export function RevenueAnalyticsCards({
+  data,
+  loading,
+  refreshing = false,
+  refreshingLabel,
+  showHeading = true,
+}: RevenueAnalyticsCardsProps) {
   const { t } = useTranslation();
   const revenue = useMemo(() => computeRevenueAnalytics(data), [data]);
 
@@ -32,6 +40,8 @@ export function RevenueAnalyticsCards({ data, loading, showHeading = true }: Rev
         <BusinessStatCard
           featured
           loading={loading}
+          refreshing={refreshing}
+          refreshingLabel={refreshingLabel}
           loadingVariant="currency"
           label={t("business.team.performance.bi.totalTips")}
           value={<CountUpMetric value={revenue.totalTips} kind="eur" />}
@@ -40,6 +50,8 @@ export function RevenueAnalyticsCards({ data, loading, showHeading = true }: Rev
         />
         <BusinessStatCard
           loading={loading}
+          refreshing={refreshing}
+          refreshingLabel={refreshingLabel}
           label={t("business.team.performance.bi.tipGrowth")}
           value={<CountUpMetric value={revenue.growthPercent} kind="percent" />}
           change={t("business.team.performance.bi.tipGrowthHint")}
@@ -47,12 +59,16 @@ export function RevenueAnalyticsCards({ data, loading, showHeading = true }: Rev
         />
         <BusinessStatCard
           loading={loading}
+          refreshing={refreshing}
+          refreshingLabel={refreshingLabel}
           label={t("business.team.performance.bi.avgTip")}
           value={<CountUpMetric value={revenue.averageTip} kind="eur" />}
           icon={<Wallet className="h-5 w-5" aria-hidden />}
         />
         <BusinessStatCard
           loading={loading}
+          refreshing={refreshing}
+          refreshingLabel={refreshingLabel}
           label={t("business.team.performance.bi.weeklyRevenue")}
           value={<CountUpMetric value={revenue.weeklyRevenue} kind="eur" />}
           change={t("business.team.performance.bi.periodRevenueHint", {

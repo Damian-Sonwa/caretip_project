@@ -32,6 +32,9 @@ export function upsertBusinessAnalyticsStatsBundle(
     periodStats,
     weekStats: weekStats ?? existing?.weekStats ?? periodStats,
     recentTips: existing?.recentTips ?? [],
+    qrAnalytics: existing?.qrAnalytics,
+    tipsFeedFetched: existing?.tipsFeedFetched ?? false,
+    qrFetched: existing?.qrFetched ?? false,
     fetchedAt: Date.now(),
   });
 }

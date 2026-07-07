@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { lazy, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Download } from "lucide-react";
@@ -7,6 +7,9 @@ import { RevenueAnalyticsCards } from "./insights/RevenueAnalyticsCards";
 import { QrAnalyticsSection } from "./insights/QrAnalyticsSection";
 import { OperationalMetricsCards } from "./insights/OperationalMetricsCards";
 import { DashboardAnalyticsPeriodToggle } from "../dashboard/DashboardAnalyticsPeriodToggle";
+import { DashboardRefreshIndicator } from "../dashboard/DashboardRefreshIndicator";
+import { DashboardStatusStrip } from "../dashboard/DashboardStatusStrip";
+import { deriveRealtimeStatusItems } from "../../lib/dashboardStatus/deriveDashboardStatus";
 import { DashboardChartsIdleMount } from "../dashboard/DashboardChartsIdleMount";
 import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { Button } from "@/components/ui/button";
@@ -115,7 +118,14 @@ export function BusinessAnalyticsReporting({
         : t("dashboard.filter_month");
 
   const revenueGrowth = data.bi.revenue.growthPercent;
-  const periodLoading = data.loading || data.timeframeLoading;
+  const refreshingLabel = t("dashboard.refresh.updating");
+  const cardsInitialLoading = data.isInitialAnalyticsLoading;
+  const cardsRefreshing = data.isAnalyticsRefreshing;
+
+  const analyticsStatusItems = useMemo(
+    () => deriveRealtimeStatusItems(data.connectionStatus ?? "idle", t),
+    [data.connectionStatus, t],
+  );
 
   const periodOptions = (["week", "month", "year"] as const).map((period) => ({
     id: period,
@@ -157,30 +167,43 @@ export function BusinessAnalyticsReporting({
       />
 
       <section className="space-y-3" aria-labelledby="business-revenue-analytics-heading">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2
-            id="business-revenue-analytics-heading"
-            className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-          >
-            {t("business.team.performance.bi.revenueTitle")}
-          </h2>
-          <div className="flex flex-wrap items-center gap-2">
-            <DashboardAnalyticsPeriodToggle
-              ariaLabel={t("business.tips.analytics.revenuePeriodAria")}
-              value={revenueTimeframe}
-              onChange={onRevenueTimeframeChange}
-              options={periodOptions.map((option) => ({
-                ...option,
-                loading: data.timeframeLoading && revenueTimeframe === option.id,
-              }))}
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <h2
+              id="business-revenue-analytics-heading"
+              className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+            >
+              {t("business.team.performance.bi.revenueTitle")}
+            </h2>
+            <DashboardRefreshIndicator
+              isRefreshing={cardsRefreshing}
+              lastUpdatedAt={data.lastUpdatedAt}
             />
-            <Button type="button" variant="outline" size="sm" disabled={exporting} onClick={() => void handleExport()}>
-              <Download className="mr-2 h-4 w-4" aria-hidden />
-              {t("business.tips.analytics.reporting.export")}
-            </Button>
           </div>
+          <DashboardStatusStrip items={analyticsStatusItems} />
         </div>
-        <RevenueAnalyticsCards data={data.input} loading={periodLoading} showHeading={false} />
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <DashboardAnalyticsPeriodToggle
+            ariaLabel={t("business.tips.analytics.revenuePeriodAria")}
+            value={revenueTimeframe}
+            onChange={onRevenueTimeframeChange}
+            options={periodOptions.map((option) => ({
+              ...option,
+              loading: data.isAnalyticsRefreshing && revenueTimeframe === option.id,
+            }))}
+          />
+          <Button type="button" variant="outline" size="sm" disabled={exporting} onClick={() => void handleExport()}>
+            <Download className="mr-2 h-4 w-4" aria-hidden />
+            {t("business.tips.analytics.reporting.export")}
+          </Button>
+        </div>
+        <RevenueAnalyticsCards
+          data={data.input}
+          loading={cardsInitialLoading}
+          refreshing={cardsRefreshing}
+          refreshingLabel={refreshingLabel}
+          showHeading={false}
+        />
       </section>
 
       <section className="space-y-3" aria-labelledby="business-qr-analytics-heading">
@@ -197,7 +220,8 @@ export function BusinessAnalyticsReporting({
           timeframe={qrTimeframe}
           showHeading={false}
           data={qrTimeframe === revenueTimeframe ? data.input.qrAnalytics : undefined}
-          dataLoading={qrTimeframe === revenueTimeframe ? periodLoading : undefined}
+          dataLoading={qrTimeframe === revenueTimeframe ? cardsInitialLoading : undefined}
+          dataRefreshing={qrTimeframe === revenueTimeframe ? cardsRefreshing : undefined}
         />
       </section>
 
@@ -205,7 +229,12 @@ export function BusinessAnalyticsReporting({
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           {t("business.tips.analytics.sections.employees")}
         </h2>
-        <OperationalMetricsCards data={data.input} loading={periodLoading} />
+        <OperationalMetricsCards
+          data={data.input}
+          loading={cardsInitialLoading}
+          refreshing={cardsRefreshing}
+          refreshingLabel={refreshingLabel}
+        />
         <p className="text-sm text-muted-foreground">
           {t("business.tips.analytics.rankingsHint")}{" "}
           <Link to="/dashboard/team/top-performers" className="font-medium text-primary underline-offset-2 hover:underline">
@@ -271,7 +300,7 @@ export function BusinessAnalyticsReporting({
             <div className={cn(businessUi.cardStatic, "h-[280px] animate-pulse bg-muted/30")} />
           }
         >
-          <BusinessIntelligenceCharts data={data.input} loading={periodLoading} />
+          <BusinessIntelligenceCharts data={data.input} loading={cardsInitialLoading} />
         </DashboardChartsIdleMount>
       </section>
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useReducer } from "react";
+import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -11,9 +12,9 @@ import {
   patchMyOnboardingStatus,
   clearClientSessionRevoked,
   clearClientAuthStorage,
-  clearLogoutPending,
   isClientSessionRevoked,
   isMfaLoginChallenge,
+  markLogoutPending,
   type AuthResponse,
   type LoginApiResult,
 } from "../lib/api";
@@ -42,7 +43,12 @@ import {
 } from "../lib/authUserStore";
 import { clearEmployeeNotifications } from "../lib/employeeNotificationStore";
 import { resetAllClientSessionCaches } from "../lib/resetAllClientSessionCaches";
-import { performClientLogoutCleanup } from "../lib/clientLogout";
+import { performClientLogoutCleanup, captureLogoutSnapshot } from "../lib/clientLogout";
+import {
+  beginAuthLogoutTransition,
+  endAuthLogoutTransition,
+  isAuthLogoutTransitionActive,
+} from "../lib/authLogoutTransition";
 import { markClientSessionHint } from "../lib/authSessionHint";
 import { setMemoryAccessToken } from "../lib/accessTokenStore";
 import { authDebug } from "../lib/authDebugLog";
@@ -445,20 +451,30 @@ export function useAuth() {
   }, []);
 
   const logout = useCallback(() => {
+    if (isAuthLogoutTransitionActive()) return;
+
     const clickStartedAt = performance.now();
     authDebug("logout_click", { t: clickStartedAt });
 
-    const { loginPath, capturedAccessToken, clientCleanupMs } = performClientLogoutCleanup();
+    beginAuthLogoutTransition();
+    markLogoutPending();
 
-    navigate(loginPath, { replace: true });
+    const snapshot = captureLogoutSnapshot();
+
+    flushSync(() => {
+      navigate(snapshot.loginPath, { replace: true });
+    });
+
+    const { clientCleanupMs } = performClientLogoutCleanup(snapshot);
+    endAuthLogoutTransition();
     authDebug("logout_navigate", {
-      loginPath,
+      loginPath: snapshot.loginPath,
       clientCleanupMs: Math.round(clientCleanupMs),
       msSinceClick: Math.round(performance.now() - clickStartedAt),
     });
 
     void logoutAPIWithTimeout({
-      capturedToken: capturedAccessToken,
+      capturedToken: snapshot.capturedAccessToken,
       clickStartedAt,
     });
   }, [navigate]);

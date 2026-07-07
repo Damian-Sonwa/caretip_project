@@ -15,6 +15,19 @@ import type {
 import type { BusinessDashboardStats } from "../api";
 import { trackAnalyticsCacheHit, trackAnalyticsCacheMiss, trackAnalyticsRefetch } from "../realtime/realtimeMetrics";
 
+/** Whether a cached bundle satisfies the requested fetch options (avoids stats-only false hits). */
+export function isBusinessAnalyticsBundleComplete(
+  bundle: BusinessAnalyticsBundle,
+  opts?: FetchBusinessAnalyticsOptions,
+): boolean {
+  const includeTipsFeed = opts?.includeTipsFeed !== false;
+  const includeQrAnalytics = opts?.includeQrAnalytics !== false;
+  if (!bundle.periodStats) return false;
+  if (includeTipsFeed && !bundle.tipsFeedFetched) return false;
+  if (includeQrAnalytics && !bundle.qrFetched) return false;
+  return true;
+}
+
 /**
  * Sprint 8.1 — single authoritative period stats fetch (scope=full).
  * Used by dashboard overview to avoid summary + analytics duplicate calls.
@@ -55,7 +68,7 @@ export async function fetchBusinessAnalyticsBundle(
 ): Promise<BusinessAnalyticsBundle> {
   if (!opts?.revalidate) {
     const cached = getBusinessAnalyticsBundle(timeframe);
-    if (cached) {
+    if (cached && isBusinessAnalyticsBundleComplete(cached, opts)) {
       trackAnalyticsCacheHit();
       return cached;
     }
@@ -104,6 +117,8 @@ export async function fetchBusinessAnalyticsBundle(
     weekStats: weekStats ?? periodStats,
     recentTips: feed.items,
     qrAnalytics,
+    tipsFeedFetched: includeTipsFeed,
+    qrFetched: includeQrAnalytics,
     fetchedAt: Date.now(),
   };
 

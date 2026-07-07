@@ -1,6 +1,5 @@
 import type { CareTipPageLoaderProps } from "./CareTipPageLoader";
 import { CareTipPageLoader } from "./CareTipPageLoader";
-import { isLogoutPending } from "../lib/api";
 import { useTranslation } from "react-i18next";
 
 export type PageLoaderProps = Pick<CareTipPageLoaderProps, "message" | "className" | "variant">;
@@ -11,8 +10,7 @@ export type PageLoaderProps = Pick<CareTipPageLoaderProps, "message" | "classNam
  */
 export function PageLoader({ message, className, variant = "wait" }: PageLoaderProps) {
   const { t } = useTranslation();
-  const defaultMessage = isLogoutPending() ? t("common.signingOut") : t("common.settingUp");
   return (
-    <CareTipPageLoader variant={variant} message={message ?? defaultMessage} className={className} />
+    <CareTipPageLoader variant={variant} message={message ?? t("common.settingUp")} className={className} />
   );
 }

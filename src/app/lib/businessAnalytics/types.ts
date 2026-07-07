@@ -20,6 +20,10 @@ export type BusinessAnalyticsBundle = {
   recentTips: TipActivityRow[];
   qrAnalytics?: import("../api").BusinessQrAnalytics | null;
   fetchedAt: number;
+  /** True after tips feed was fetched for this bundle (stats-only cache writes leave false). */
+  tipsFeedFetched?: boolean;
+  /** True after QR analytics was requested for this bundle. */
+  qrFetched?: boolean;
 };
 
 /**

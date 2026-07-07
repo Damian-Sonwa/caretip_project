@@ -19,14 +19,30 @@ import {
   traceGlobalLoaderReady,
   traceGlobalOverlayDismissed,
 } from "../lib/globalAppLoadingTrace";
+import { isPublicAuthenticationPath } from "../lib/authSession";
 import { isPublicShellPath } from "../lib/publicRoutes";
 import { traceLoaderRegistration, warnLoaderDiagDeadlock } from "../lib/loaderDiagFlags";
 
 const OVERLAY_FADE_MS = 180;
 /** Absorb one-frame registration gaps between auth, route guard, and layout paint. */
 const OVERLAY_EXIT_DEBOUNCE_MS = 120;
+/** Avoid sub-frame loader flashes — intentional minimum visible time. */
+const MIN_OVERLAY_VISIBLE_MS = 280;
 /** Block APP_INIT from re-opening the overlay shortly after a full dismiss (paint-ready race). */
 const OVERLAY_REENTRY_LOCK_MS = 600;
+
+/** Same-priority overlay winner — higher wins. */
+const OVERLAY_KEY_PRECEDENCE: Record<string, number> = {
+  "auth-post-login-transition": 30,
+  "app-auth-bootstrap": 20,
+  "app-boot": 10,
+};
+
+function overlayKeyPrecedence(key: string): number {
+  if (OVERLAY_KEY_PRECEDENCE[key] != null) return OVERLAY_KEY_PRECEDENCE[key]!;
+  if (key.startsWith("protected-route-guard")) return 15;
+  return 0;
+}
 
 type Registration = {
   key: string;
@@ -110,7 +126,8 @@ function createInitialRegistrations(): Map<string, Registration> {
 }
 
 function createInitialOverlayPhase(): OverlayPhase {
-  return isPublicShellPath(readInitialPathname()) ? "hidden" : "visible";
+  if (isPublicShellPath(readInitialPathname())) return "hidden";
+  return "visible";
 }
 
 export function AppLoadingManagerProvider({ children }: { children: React.ReactNode }) {
@@ -121,6 +138,8 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
   const showOverlayRef = useRef(false);
   const exitDebounceRef = useRef<number | null>(null);
   const overlayDismissedAtRef = useRef(0);
+  const overlayShownAtRef = useRef(0);
+  const minVisibleTimerRef = useRef<number | null>(null);
 
   const register = useCallback(
     (key: string, priority: AppLoadingPriority, active: boolean, message?: string) => {
@@ -218,7 +237,12 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
     for (const reg of registrations.values()) {
       if (reg.key === BOOTSTRAP_KEY && hasNonBootstrap) continue;
       if (!GLOBAL_OVERLAY_PRIORITIES.has(reg.priority)) continue;
-      if (!best || reg.priority > best.priority) {
+      if (
+        !best ||
+        reg.priority > best.priority ||
+        (reg.priority === best.priority &&
+          overlayKeyPrecedence(reg.key) > overlayKeyPrecedence(best.key))
+      ) {
         best = reg;
       }
     }
@@ -235,6 +259,13 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
         window.clearTimeout(exitDebounceRef.current);
         exitDebounceRef.current = null;
       }
+      if (minVisibleTimerRef.current !== null) {
+        window.clearTimeout(minVisibleTimerRef.current);
+        minVisibleTimerRef.current = null;
+      }
+      if (overlayPhase !== "visible") {
+        overlayShownAtRef.current = Date.now();
+      }
       setOverlayPhase("visible");
       const key = winner?.key ?? null;
       if (import.meta.env.DEV && key && key !== lastWinnerKeyRef.current) {
@@ -246,10 +277,33 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
 
     if (overlayPhase === "hidden") return;
 
-    const publicShellPath = isPublicShellPath(
-      window.location.pathname.split("?")[0]?.split("#")[0] ?? "/",
-    );
-    if (publicShellPath) {
+    const pathname =
+      window.location.pathname.split("?")[0]?.split("#")[0] ?? "/";
+    const publicShellPath = isPublicShellPath(pathname);
+    const authRouteFade = isPublicAuthenticationPath(pathname);
+
+    const scheduleExit = (): void => {
+      const elapsed = Date.now() - overlayShownAtRef.current;
+      const delayExit = Math.max(0, MIN_OVERLAY_VISIBLE_MS - elapsed);
+
+      const startExit = (): void => {
+        if (showOverlayRef.current) return;
+        overlayDismissedAtRef.current = Date.now();
+        setOverlayPhase("exiting");
+        traceGlobalOverlayDismissed();
+      };
+
+      if (delayExit === 0) {
+        startExit();
+        return;
+      }
+      minVisibleTimerRef.current = window.setTimeout(() => {
+        minVisibleTimerRef.current = null;
+        startExit();
+      }, delayExit);
+    };
+
+    if (publicShellPath && !authRouteFade) {
       if (exitDebounceRef.current !== null) {
         window.clearTimeout(exitDebounceRef.current);
         exitDebounceRef.current = null;
@@ -266,15 +320,17 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
     exitDebounceRef.current = window.setTimeout(() => {
       exitDebounceRef.current = null;
       if (showOverlayRef.current) return;
-      overlayDismissedAtRef.current = Date.now();
-      setOverlayPhase("exiting");
-      traceGlobalOverlayDismissed();
+      scheduleExit();
     }, OVERLAY_EXIT_DEBOUNCE_MS);
 
     return () => {
       if (exitDebounceRef.current !== null) {
         window.clearTimeout(exitDebounceRef.current);
         exitDebounceRef.current = null;
+      }
+      if (minVisibleTimerRef.current !== null) {
+        window.clearTimeout(minVisibleTimerRef.current);
+        minVisibleTimerRef.current = null;
       }
     };
   }, [showOverlay, winner?.key, overlayPhase]);

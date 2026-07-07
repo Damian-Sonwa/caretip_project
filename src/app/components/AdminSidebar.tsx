@@ -1,8 +1,13 @@
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router';
+import { useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
 import { CareIcon } from '@/components/icons';
 import { useAuth } from '../hooks/useAuth';
+import {
+  isAuthLogoutTransitionActive,
+  subscribeAuthLogoutTransition,
+} from '../lib/authLogoutTransition';
 import { cn } from '@/lib/utils';
 import {
   DASHBOARD_SIDEBAR_SHELL_CLASS,
@@ -13,8 +18,12 @@ import { PlatformSidebarNavShell } from './platform/PlatformSidebarNavShell';
 
 export function AdminSidebar() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const signingOut = useSyncExternalStore(
+    subscribeAuthLogoutTransition,
+    isAuthLogoutTransitionActive,
+    () => false,
+  );
   const displayName = user?.name || t("admin.fallbackAdminName");
 
   return (
@@ -35,13 +44,18 @@ export function AdminSidebar() {
       <div className="px-4 pb-4">
         <button
           type="button"
+          disabled={signingOut}
+          aria-busy={signingOut}
           onClick={() => {
+            if (signingOut) return;
             logout();
-            navigate('/platform-admin/login');
           }}
           className={dashboardSidebarSignOutButton}
         >
           <CareIcon name="signOut" size="md" />
+          {signingOut ? (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+          ) : null}
           <span className="text-sm font-medium">{t('admin.sidebar.signOut')}</span>
         </button>
       </div>

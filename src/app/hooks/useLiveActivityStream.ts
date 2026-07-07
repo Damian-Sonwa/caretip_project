@@ -59,17 +59,26 @@ export function useLiveActivityStream({
   initialTips = [],
   t,
 }: UseLiveActivityStreamOptions) {
-  const [items, setItems] = useState<LiveActivityItem[]>([]);
+  const baseItems = useMemo(
+    () => initialTips.map((tip) => tipRowToActivity(tip, t)),
+    [initialTips, t],
+  );
+  const [socketPrepends, setSocketPrepends] = useState<LiveActivityItem[]>([]);
   const [liveIds, setLiveIds] = useState<Set<string>>(new Set());
   const socketReady = useDeferSocketConnect(enabled);
   const { socket } = useSocket(socketReady);
 
-  useEffect(() => {
-    setItems(initialTips.map((tip) => tipRowToActivity(tip, t)));
-  }, [initialTips, t]);
+  const items = useMemo(() => {
+    if (socketPrepends.length === 0) return baseItems;
+    const merged = [...socketPrepends];
+    for (const row of baseItems) {
+      if (!merged.some((item) => item.id === row.id)) merged.push(row);
+    }
+    return merged.slice(0, 40);
+  }, [baseItems, socketPrepends]);
 
   const prepend = useCallback((item: LiveActivityItem) => {
-    setItems((prev) => {
+    setSocketPrepends((prev) => {
       if (prev.some((p) => p.id === item.id)) return prev;
       return [item, ...prev].slice(0, 40);
     });

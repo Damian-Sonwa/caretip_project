@@ -9,6 +9,10 @@ import { wakeRemoteApi, migrateLegacyAccessTokenFromStorage } from "./app/lib/ap
 import { ensureI18nReady } from "./i18n/i18n";
 import { initSentry } from "./app/lib/sentry";
 import { initGoogleAdsConversion } from "./app/lib/googleAdsConversion";
+import {
+  initCareTipStartupOrchestrator,
+  markCareTipStartupReactMounted,
+} from "./app/lib/caretipStartupSession";
 import "./styles/index.css";
 
 /** Manrope display font — marketing headings only; skip on auth/admin shells. */
@@ -53,4 +57,6 @@ void ensureI18nReady().then(() => {
       <App />
     </GlobalErrorBoundary>,
   );
+  markCareTipStartupReactMounted();
+  initCareTipStartupOrchestrator();
 });

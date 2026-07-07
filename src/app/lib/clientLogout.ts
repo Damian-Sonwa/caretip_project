@@ -1,12 +1,11 @@
 /**
- * Synchronous client-side logout cleanup — must complete before navigation.
+ * Synchronous client-side logout cleanup — runs after navigation begins.
  * Server refresh invalidation runs separately via {@link logoutAPIWithTimeout}.
  */
 
 import {
   cancelPendingSessionRefresh,
   clearClientAuthStorage,
-  clearLogoutPending,
   markClientSessionRevoked,
 } from "./api";
 import { getMemoryAccessToken } from "./accessTokenStore";
@@ -20,18 +19,30 @@ import { clearEmployeeNotifications } from "./employeeNotificationStore";
 import { resetAllClientSessionCaches } from "./resetAllClientSessionCaches";
 import { commitAuthUser, getAuthUser } from "./authUserStore";
 
-export type ClientLogoutResult = {
+export type LogoutSnapshot = {
   loginPath: string;
   capturedAccessToken: string | null;
+};
+
+export type ClientLogoutResult = LogoutSnapshot & {
   clientCleanupMs: number;
 };
 
-/** Clears all local session state immediately; returns token snapshot for background logout POST. */
-export function performClientLogoutCleanup(): ClientLogoutResult {
+/** Capture routing + token before session teardown (call before navigate). */
+export function captureLogoutSnapshot(): LogoutSnapshot {
+  const priorUser = getAuthUser();
+  return {
+    loginPath: priorUser ? getLoginPathForSessionRole(priorUser.role) : "/login",
+    capturedAccessToken: getMemoryAccessToken(),
+  };
+}
+
+/** Clears all local session state; returns token snapshot for background logout POST. */
+export function performClientLogoutCleanup(
+  snapshot: LogoutSnapshot = captureLogoutSnapshot(),
+): ClientLogoutResult {
   const started = performance.now();
   const priorUser = getAuthUser();
-  const loginPath = priorUser ? getLoginPathForSessionRole(priorUser.role) : "/login";
-  const capturedAccessToken = getMemoryAccessToken();
 
   bumpSessionEpoch();
   clearEmployeeNotifications();
@@ -42,16 +53,15 @@ export function performClientLogoutCleanup(): ClientLogoutResult {
   resetAllClientSessionCaches();
   clearClientAuthStorage({ notifySync: false });
   markSessionBootstrapSettled();
-  clearLogoutPending();
   notifyAuthStorageSync();
 
   const clientCleanupMs = performance.now() - started;
   authDebug("logout_client_cleanup", {
-    loginPath,
+    loginPath: snapshot.loginPath,
     clientCleanupMs: Math.round(clientCleanupMs),
     priorRole: priorUser?.role ?? null,
     session: deriveAuthSession(null),
   });
 
-  return { loginPath, capturedAccessToken, clientCleanupMs };
+  return { ...snapshot, clientCleanupMs };
 }

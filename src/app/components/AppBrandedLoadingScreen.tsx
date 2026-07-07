@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { isLogoutPending } from "../lib/api";
 import { traceGlobalOverlayMounted } from "../lib/globalAppLoadingTrace";
 import { LoadingSpinner } from "./ui/loading-spinner";
 
@@ -24,8 +23,7 @@ export function AppBrandedLoadingScreen({
   exiting = false,
 }: AppBrandedLoadingScreenProps) {
   const { t } = useTranslation();
-  const resolvedMessage =
-    message ?? (isLogoutPending() ? t("common.signingOut") : t("common.settingUp"));
+  const resolvedMessage = message ?? t("common.settingUp");
 
   useEffect(() => {
     if (!fixed || exiting) return;

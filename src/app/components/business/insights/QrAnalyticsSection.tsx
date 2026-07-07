@@ -17,6 +17,7 @@ type QrAnalyticsSectionProps = {
   /** When provided, skips a separate fetch and uses bundle data from useBusinessAnalytics. */
   data?: BusinessQrAnalytics | null;
   dataLoading?: boolean;
+  dataRefreshing?: boolean;
 };
 
 /** Analytics page — QR scan metrics from qr_scan_events (Sprint 4). */
@@ -25,6 +26,7 @@ export function QrAnalyticsSection({
   showHeading = true,
   data: dataProp,
   dataLoading,
+  dataRefreshing,
 }: QrAnalyticsSectionProps) {
   const { t } = useTranslation();
   const { user, sessionValidated } = useRequireAuth();
@@ -39,6 +41,7 @@ export function QrAnalyticsSection({
   );
   const data = dataProp !== undefined ? dataProp : qr.data;
   const loading = dataProp !== undefined ? Boolean(dataLoading) : qr.loading;
+  const refreshing = dataProp !== undefined ? Boolean(dataRefreshing) : false;
 
   return (
     <section className="space-y-3" aria-label={showHeading ? t("business.team.performance.bi.qrTitle") : undefined}>
@@ -48,7 +51,7 @@ export function QrAnalyticsSection({
         </h2>
       ) : null}
       <Suspense fallback={<DashboardChartSkeleton minHeightClass="min-h-[220px]" />}>
-        <QrAnalyticsLivePanel data={data} loading={loading} />
+        <QrAnalyticsLivePanel data={data} loading={loading} refreshing={refreshing} />
       </Suspense>
     </section>
   );

@@ -20,6 +20,7 @@ type LiveActivityCenterProps = {
   items: LiveActivityItem[];
   liveIds: Set<string>;
   loading: boolean;
+  refreshing?: boolean;
 };
 
 const KIND_ICON: Record<LiveActivityKind, typeof Radio> = {
@@ -34,15 +35,22 @@ const KIND_ICON: Record<LiveActivityKind, typeof Radio> = {
   billing_updated: CreditCard,
 };
 
-export function LiveActivityCenter({ items, liveIds, loading }: LiveActivityCenterProps) {
+export function LiveActivityCenter({ items, liveIds, loading, refreshing = false }: LiveActivityCenterProps) {
   const { t } = useTranslation();
+  const showSkeleton = loading && items.length === 0;
 
   return (
     <DashboardWorkspacePanel
       title={t("business.liveActivity.centerTitle")}
-      headerExtra={t("business.liveActivity.streamLabel")}
+      headerExtra={
+        refreshing ? (
+          <span className="text-xs font-medium text-muted-foreground">{t("dashboard.refresh.updating")}</span>
+        ) : (
+          t("business.liveActivity.streamLabel")
+        )
+      }
     >
-      {loading && items.length === 0 ? (
+      {showSkeleton ? (
         <div className="divide-y divide-border">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="flex animate-pulse items-center gap-3 px-4 py-4 sm:px-5">

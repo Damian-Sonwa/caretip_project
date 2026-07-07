@@ -3,7 +3,7 @@
   <html
     lang="en"
     class="caretip-font-inter"
-    style="background-color: #faf9f6; font-family: Inter, 'Inter Fallback', ui-sans-serif, system-ui, sans-serif"
+    style="font-family: Inter, 'Inter Fallback', ui-sans-serif, system-ui, sans-serif"
   >
     <head>
       <meta charset="UTF-8" />
@@ -12,9 +12,9 @@
         content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5"
       />
       <meta name="color-scheme" content="light dark" />
-      <meta name="theme-color" content="#FAF9F6" />
+      <meta name="theme-color" content="#FFFFFF" />
       <meta name="theme-color" content="#FAF9F6" media="(prefers-color-scheme: light)" />
-      <meta name="theme-color" content="#FAF9F6" media="(prefers-color-scheme: dark)" />
+      <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
       <meta name="msapplication-TileColor" content="#FAF9F6" />
       <meta
         name="description"
@@ -25,6 +25,159 @@
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="apple-mobile-web-app-title" content="CareTip" />
       <title>CareTip</title>
+      <style>
+        html.caretip-startup-active,
+        html.caretip-startup-active body {
+          background-color: #ffffff;
+          background-image: linear-gradient(180deg, #ffffff 0%, #fff8f0 100%);
+        }
+
+        #caretip-startup-loader {
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 2147483646;
+          align-items: center;
+          justify-content: center;
+          margin: 0;
+          padding: 0;
+          background: linear-gradient(180deg, #ffffff 0%, #fff8f0 100%);
+          opacity: 1;
+          transform: translateZ(0);
+        }
+
+        html.caretip-startup-active #caretip-startup-loader {
+          display: flex;
+        }
+
+        #caretip-startup-loader.caretip-startup-loader--exit {
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 300ms ease-in;
+        }
+
+        .caretip-startup-brand {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1.25rem;
+          animation: caretip-startup-brand-in 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          opacity: 0;
+          transform: scale(0.96);
+        }
+
+        .caretip-startup-lockup {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.625rem;
+        }
+
+        @keyframes caretip-startup-brand-in {
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .caretip-startup-wordmark {
+          margin: 0;
+          font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+          font-size: clamp(2.5rem, 11vw, 3.75rem);
+          font-weight: 700;
+          letter-spacing: -0.045em;
+          line-height: 1;
+          user-select: none;
+          -webkit-font-smoothing: antialiased;
+        }
+
+        .caretip-startup-wordmark-care {
+          color: #eb992c;
+        }
+
+        .caretip-startup-wordmark-tip {
+          color: #0a0a0a;
+        }
+
+        .caretip-startup-slogan {
+          margin: 0;
+          font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+          font-size: clamp(0.8125rem, 2.6vw, 0.9375rem);
+          font-weight: 500;
+          letter-spacing: 0.05em;
+          line-height: 1.35;
+          color: #444444;
+          text-align: center;
+          user-select: none;
+          -webkit-font-smoothing: antialiased;
+        }
+
+        .caretip-startup-progress {
+          position: relative;
+          width: 4.5rem;
+          height: 2px;
+          border-radius: 999px;
+          background: rgba(235, 153, 44, 0.14);
+          overflow: hidden;
+        }
+
+        .caretip-startup-progress-bar {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            transparent 35%,
+            #eb992c 50%,
+            transparent 65%,
+            transparent 100%
+          );
+          background-size: 220% 100%;
+          animation: caretip-startup-shimmer 1.75s linear infinite;
+        }
+
+        @keyframes caretip-startup-shimmer {
+          0% {
+            background-position: 120% 0;
+          }
+          100% {
+            background-position: -120% 0;
+          }
+        }
+
+        #root {
+          min-height: 100vh;
+          min-height: 100dvh;
+        }
+
+        html.dark body,
+        html.dark #root {
+          background-color: #0a0a0a;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          #caretip-startup-loader.caretip-startup-loader--exit {
+            transition-duration: 1ms;
+          }
+
+          .caretip-startup-brand {
+            animation: none;
+            opacity: 1;
+            transform: none;
+          }
+
+          .caretip-startup-progress-bar {
+            animation: none;
+            background: #eb992c;
+            background-size: 100% 100%;
+            width: 42%;
+            margin-inline: auto;
+            inset: auto;
+            left: 50%;
+            transform: translateX(-50%);
+          }
+        }
+      </style>
       <link rel="preload" href="/fonts/inter/inter-latin-400.woff2" as="font" type="font/woff2" crossorigin />
       <link rel="preload" href="/fonts/inter/inter-latin-600.woff2" as="font" type="font/woff2" crossorigin />
       <link rel="preload" href="/fonts/inter/inter-latin-700.woff2" as="font" type="font/woff2" crossorigin />
@@ -36,14 +189,70 @@
       <script src="/theme-init.js"></script>
     </head>
 
-    <body style="margin: 0; background-color: #faf9f6">
-      <div id="root" style="min-height: 100vh; min-height: 100dvh; background-color: #faf9f6"></div>
-      <style>
-        html.dark body,
-        html.dark #root {
-          background-color: #0a0a0a;
-        }
-      </style>
+    <body style="margin: 0">
+      <div id="caretip-startup-loader" role="status" aria-label="CareTip" aria-busy="true">
+        <div class="caretip-startup-brand">
+          <div class="caretip-startup-lockup">
+            <p class="caretip-startup-wordmark" aria-hidden="true">
+              <span class="caretip-startup-wordmark-care">Care</span><span class="caretip-startup-wordmark-tip">Tip</span>
+            </p>
+            <p class="caretip-startup-slogan" aria-hidden="true">Caring is Tipping</p>
+          </div>
+          <div class="caretip-startup-progress" aria-hidden="true">
+            <span class="caretip-startup-progress-bar"></span>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          function readPath() {
+            var p = window.location.pathname || "/";
+            return p.split("?")[0].split("#")[0] || "/";
+          }
+
+          function removeSplashImmediately() {
+            document.documentElement.classList.remove("caretip-startup-active");
+            var el = document.getElementById("caretip-startup-loader");
+            if (el) el.remove();
+          }
+
+          function isStandalone() {
+            return (
+              (window.matchMedia &&
+                window.matchMedia("(display-mode: standalone)").matches) ||
+              window.navigator.standalone
+            );
+          }
+
+          function hasStoredUser() {
+            try {
+              return !!localStorage.getItem("caretip_user");
+            } catch (e) {
+              return false;
+            }
+          }
+
+          var path = readPath();
+
+          /* Route exclusion FIRST — protected URLs fail instantly (no auth/React wait). */
+          if (path !== "/" && path !== "/landing") {
+            removeSplashImmediately();
+            console.log("Splash check:", path, false);
+            return;
+          }
+
+          var shouldShowSplash = !isStandalone() && !hasStoredUser();
+          console.log("Splash check:", path, shouldShowSplash);
+
+          if (!shouldShowSplash) {
+            removeSplashImmediately();
+            return;
+          }
+
+          document.documentElement.classList.add("caretip-startup-active");
+        })();
+      </script>
+      <div id="root"></div>
       <script type="module" src="/src/main.tsx"></script>
     </body>
   </html>

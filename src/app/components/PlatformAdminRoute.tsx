@@ -1,12 +1,18 @@
 import type { ReactNode } from "react";
+import { useSyncExternalStore } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { isAuthRestorePending } from "../lib/authRestore";
 import { hasClientStoredSession } from "../lib/authUserStore";
 import { isClientSessionRevoked } from "../lib/api";
 import { isPlatformAdminSessionRole } from "../lib/authSession";
+import {
+  isAuthLogoutTransitionActive,
+  subscribeAuthLogoutTransition,
+} from "../lib/authLogoutTransition";
 import { AppRouteGateShell } from "./AppRouteGateShell";
 import { navFlashLog } from "../lib/navigationFlashAudit";
+
 interface PlatformAdminRouteProps {
   children: ReactNode;
 }
@@ -20,6 +26,15 @@ export function PlatformAdminRoute({ children }: PlatformAdminRouteProps) {
   const storedSessionSync =
     !user && !isClientSessionRevoked() && hasClientStoredSession();
   const blocking = authBlocking || storedSessionSync;
+  const logoutTransitionActive = useSyncExternalStore(
+    subscribeAuthLogoutTransition,
+    isAuthLogoutTransitionActive,
+    () => false,
+  );
+
+  if (logoutTransitionActive) {
+    return null;
+  }
 
   if (blocking) {
     navFlashLog("guard_started", {

@@ -12,6 +12,8 @@ import {
 
   invalidateBusinessAnalytics,
 
+  isBusinessAnalyticsBundleComplete,
+
   subscribeBusinessAnalyticsRefresh,
 
   type AnalyticsTimeframe,
@@ -42,6 +44,11 @@ import type { LiveNewTipPayload } from "../lib/realtime/realtimeContracts";
 import { shouldProcessRealtimeEvent } from "../lib/realtime/realtimeEventDedupe";
 
 import { trackAnalyticsRefetch, trackSocketEventProcessed } from "../lib/realtime/realtimeMetrics";
+
+import {
+  deriveAnalyticsLoadingLifecycle,
+  hasVisibleAnalyticsData as dtoHasVisibleAnalyticsData,
+} from "../lib/analyticsLoadingLifecycle";
 
 
 
@@ -306,13 +313,19 @@ export function useBusinessAnalytics(
 
       const tf = timeframeRef.current;
 
+      const fetchOpts = {
+        includeTipsFeed: includeTipsFeed && advancedAnalytics,
+        includeWeekStats,
+        includeQrAnalytics,
+      };
+
 
 
       if (!opts?.revalidate) {
 
         const cached = getBusinessAnalyticsBundle(tf);
 
-        if (cached) {
+        if (cached && isBusinessAnalyticsBundleComplete(cached, fetchOpts)) {
 
           applyBundle(buildBusinessAnalyticsDTO(cached));
 
@@ -350,11 +363,7 @@ export function useBusinessAnalytics(
 
           revalidate: opts?.revalidate,
 
-          includeTipsFeed: includeTipsFeed && advancedAnalytics,
-
-          includeWeekStats,
-
-          includeQrAnalytics,
+          ...fetchOpts,
 
         });
 
@@ -436,7 +445,7 @@ export function useBusinessAnalytics(
 
   const socketReady = useDeferSocketConnect(enabled);
 
-  const { socket, connected } = useSocket(socketReady);
+  const { socket, connected, connectionStatus } = useSocket(socketReady);
 
 
 
@@ -556,6 +565,22 @@ export function useBusinessAnalytics(
 
   const resolved = dto ?? EMPTY_DTO;
 
+  const visibleAnalyticsData = dtoHasVisibleAnalyticsData(dto);
+
+  const valuesMatchPeriod = dto?.timeframe === timeframe;
+
+  const { isInitialAnalyticsLoading, isAnalyticsRefreshing } = deriveAnalyticsLoadingLifecycle({
+
+    hasVisibleAnalyticsData: visibleAnalyticsData,
+
+    isColdLoading: loading,
+
+    isTimeframeLoading: timeframeLoading,
+
+    valuesMatchPeriod,
+
+  });
+
   const bi = useMemo(
 
     () => (includeIntelligence ? resolved.intelligence : EMPTY_DTO.intelligence),
@@ -571,6 +596,14 @@ export function useBusinessAnalytics(
     loading,
 
     timeframeLoading,
+
+    hasVisibleAnalyticsData: visibleAnalyticsData,
+
+    isInitialAnalyticsLoading,
+
+    isAnalyticsRefreshing,
+
+    valuesMatchPeriod,
 
     timeframe,
 
@@ -605,6 +638,8 @@ export function useBusinessAnalytics(
     refresh: refreshQuiet,
 
     connected,
+
+    connectionStatus,
 
   };
 

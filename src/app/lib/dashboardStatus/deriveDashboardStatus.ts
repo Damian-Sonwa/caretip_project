@@ -6,28 +6,45 @@ function isSocketConnecting(status: SocketConnectionStatus | undefined): boolean
   return status === "connecting" || status === "reconnecting";
 }
 
-/** Connection badge only when degraded — healthy connected state shows no badge. */
-function deriveConnectionStatusItem(
+/**
+ * Realtime connection badge — separate from data refresh ("Updating…" / "Updated just now").
+ * Live = socket connected; amber/red only when connection is degraded.
+ */
+export function deriveRealtimeStatusItems(
   socketStatus: SocketConnectionStatus,
   t: TFunction,
-): DashboardStatusItem | null {
+): DashboardStatusItem[] {
   if (isSocketConnecting(socketStatus)) {
-    return {
-      id: "connection",
-      tone: "updating",
-      label: t("dashboard.status.realtimeConnecting"),
-      description: t("dashboard.status.realtimeConnectingDesc"),
-    };
+    return [
+      {
+        id: "connection",
+        tone: "updating",
+        label: t("dashboard.status.realtimeConnecting"),
+        description: t("dashboard.status.realtimeConnectingDesc"),
+      },
+    ];
   }
   if (socketStatus === "disconnected") {
-    return {
-      id: "connection",
-      tone: "action",
-      label: t("dashboard.status.connectionOffline"),
-      description: t("dashboard.status.connectionOfflineDesc"),
-    };
+    return [
+      {
+        id: "connection",
+        tone: "action",
+        label: t("dashboard.status.connectionOffline"),
+        description: t("dashboard.status.connectionOfflineDesc"),
+      },
+    ];
   }
-  return null;
+  if (socketStatus === "connected") {
+    return [
+      {
+        id: "live",
+        tone: "live",
+        label: t("dashboard.status.realtimeLive"),
+        description: t("dashboard.status.realtimeLiveDesc"),
+      },
+    ];
+  }
+  return [];
 }
 
 function deriveSyncStatusItem(
@@ -116,23 +133,7 @@ export function deriveBusinessDashboardStatus(
     });
   }
 
-  const connection = deriveConnectionStatusItem(input.socketStatus, t);
-  if (connection) items.push(connection);
-
-  const sync = deriveSyncStatusItem(
-    {
-      isRefreshing: input.isPeriodSyncing,
-      isSettled: input.isMetricsSettled,
-      hasData: input.hasPeriodActivity,
-      refreshFailed: Boolean(input.statsLoadFailed),
-      hasVisibleData: input.hasVisibleMetrics,
-    },
-    t,
-    "dashboard.status.businessUpdatingDesc",
-    "dashboard.status.businessLiveDesc",
-    "dashboard.status.businessNoDataDesc",
-  );
-  if (sync) items.push(sync);
+  items.push(...deriveRealtimeStatusItems(input.socketStatus, t));
 
   return items;
 }
@@ -169,23 +170,7 @@ export function deriveEmployeeDashboardStatus(
     });
   }
 
-  const connection = deriveConnectionStatusItem(input.socketStatus, t);
-  if (connection) items.push(connection);
-
-  const sync = deriveSyncStatusItem(
-    {
-      isRefreshing: input.isPeriodSyncing,
-      isSettled: input.isMetricsSettled,
-      hasData: input.hasPeriodActivity,
-      refreshFailed: Boolean(input.statsLoadFailed),
-      hasVisibleData: input.hasVisibleMetrics,
-    },
-    t,
-    "dashboard.status.employeeUpdatingDesc",
-    "dashboard.status.employeeDataUpToDateDesc",
-    "dashboard.status.employeeNoDataDesc",
-  );
-  if (sync) items.push(sync);
+  items.push(...deriveRealtimeStatusItems(input.socketStatus, t));
 
   return items;
 }
@@ -228,8 +213,7 @@ export function derivePlatformAdminDashboardStatus(
     });
   }
 
-  const connection = deriveConnectionStatusItem(input.socketStatus, t);
-  if (connection) items.push(connection);
+  items.push(...deriveRealtimeStatusItems(input.socketStatus, t));
 
   const sync = deriveSyncStatusItem(
     {

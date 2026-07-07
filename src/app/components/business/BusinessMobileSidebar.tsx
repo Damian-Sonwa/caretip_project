@@ -1,8 +1,12 @@
-import { useNavigate } from "react-router";
-import { X } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { Loader2, X } from "lucide-react";
 import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
+import {
+  isAuthLogoutTransitionActive,
+  subscribeAuthLogoutTransition,
+} from "../../lib/authLogoutTransition";
 import { cn } from "@/lib/utils";
 import {
   CareTipLogo,
@@ -21,8 +25,12 @@ interface BusinessMobileSidebarProps {
 
 export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebarProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user, logout, exitImpersonation } = useAuth();
+  const signingOut = useSyncExternalStore(
+    subscribeAuthLogoutTransition,
+    isAuthLogoutTransitionActive,
+    () => false,
+  );
 
   return (
     <MobileDrawer isOpen={isOpen} onClose={onClose} ariaLabel={t("shell.header.menuButtonAria")}>
@@ -55,7 +63,10 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
         <BusinessSidebarUpgradeCta />
         <button
           type="button"
+          disabled={signingOut}
+          aria-busy={signingOut}
           onClick={() => {
+            if (signingOut) return;
             if (user?.impersonation) {
               void exitImpersonation();
               onClose();
@@ -63,11 +74,13 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
             }
             logout();
             onClose();
-            navigate("/business/login", { replace: true });
           }}
           className={dashboardSidebarSignOutButton}
         >
           <CareIcon name="signOut" size="md" />
+          {signingOut ? (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+          ) : null}
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
         </button>
       </div>

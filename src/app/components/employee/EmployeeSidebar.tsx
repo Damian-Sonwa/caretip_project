@@ -1,10 +1,15 @@
 import { motion } from "motion/react";
+import { useSyncExternalStore } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { CareIcon } from "@/components/icons";
-import { Lock } from "lucide-react";
+import { Lock, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../../hooks/useAuth";
+import {
+  isAuthLogoutTransitionActive,
+  subscribeAuthLogoutTransition,
+} from "../../lib/authLogoutTransition";
 import { cn } from "@/lib/utils";
 import {
   DASHBOARD_SIDEBAR_BRAND_CLASS,
@@ -41,6 +46,11 @@ export function EmployeeSidebar({
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const signingOut = useSyncExternalStore(
+    subscribeAuthLogoutTransition,
+    isAuthLogoutTransitionActive,
+    () => false,
+  );
   const { tier, ready: entitlementsReady } = useSubscriptionEntitlements({
     enabled: user?.role === "employee",
     role: user?.role === "employee" ? "employee" : null,
@@ -111,13 +121,18 @@ export function EmployeeSidebar({
       <div className="mt-auto shrink-0 border-t border-sidebar-border px-4 pb-4 pt-3">
         <button
           type="button"
+          disabled={signingOut}
+          aria-busy={signingOut}
           onClick={() => {
+            if (signingOut) return;
             logout();
-            navigate("/employee/login", { replace: true });
           }}
           className={cn("employee-dash-nav-link", dashboardSidebarSignOutButton)}
         >
           <CareIcon name="signOut" size="md" />
+          {signingOut ? (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+          ) : null}
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
         </button>
       </div>
