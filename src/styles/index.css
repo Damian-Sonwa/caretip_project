@@ -4,6 +4,7 @@
 @import "./tailwind.css";
 @import "./caretip-typography.css";
 @import "./caretip-polish.css";
+@import "./caretip-ux-polish.css";
 @import "./caretip-public-motion.css";
 @import "./caretip-optical-balance.css";
 @import "./caretip-brand.css";
@@ -65,3 +66,4 @@
 @import "./dashboard-workspace.css";
 @import "./business-dashboard-hierarchy.css";
 @import "./caretip-platform-ui-polish.css";
+@import "./caretip-mobile-perf.css";

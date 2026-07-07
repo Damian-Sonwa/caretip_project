@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { RouteOutletTransition } from "../components/RouteOutletTransition";
 import { useTranslation } from "react-i18next";
 import { AdminSidebar } from "../components/AdminSidebar";
 import { AdminMobileSidebar } from "../components/AdminMobileSidebar";
@@ -14,6 +14,7 @@ import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { cn } from "@/lib/utils";
 import { useDashboardLayoutPaintReady } from "../lib/globalAppLoading";
 import { useMobileMenuState } from "../hooks/useMobileMenuState";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 /**
  * Platform / Super Admin shell only: sidebar, platform header, footer.
  * Child routes render page content (no shared "Dashboard" with business).
@@ -24,6 +25,7 @@ export function SuperAdminLayout() {
   const { user, authStatus } = useAuth();
   const showDemoRibbon = isWalkthroughDemoPlatformAdmin(user);
   const isAppReady = authStatus === "authenticated" && user?.role === "platform_admin";
+  const isLargeScreen = useMinWidthMedia(1024);
 
   useDashboardLayoutPaintReady("platform-admin-layout-paint");
 
@@ -40,7 +42,7 @@ export function SuperAdminLayout() {
         </div>
       ) : null}
       <div className="relative z-10">
-        {isAppReady ? <AdminSidebar /> : <SidebarSkeleton />}
+        {isAppReady ? (isLargeScreen ? <AdminSidebar /> : null) : isLargeScreen ? <SidebarSkeleton /> : null}
         <AdminMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
         <div
           className={cn(
@@ -51,7 +53,7 @@ export function SuperAdminLayout() {
           <DashboardHeader onMenuClick={openMobileMenu} />
           <main className="caretip-dashboard-page-enter min-w-0 flex-1 overflow-x-clip">
             <RouteChunkBoundary variant="shell">
-              <Outlet />
+              <RouteOutletTransition />
             </RouteChunkBoundary>
           </main>
           <Footer variant="minimal" />

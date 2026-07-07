@@ -49,6 +49,10 @@ import {
 } from '../lib/inviteContextStore';
 import { scheduleIdleWork } from "@/lib/publicRouteDefer";
 import { prefetchDashboardRoutes } from "../lib/prefetchAuthenticatedRoutes";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../lib/globalAppLoading";
 
 const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as const;
 
@@ -113,6 +117,14 @@ export function AuthPage() {
   const postAuthRedirectRef = useRef<string | null>(null);
   /** Suppresses session-resume UI during fresh sign-in before navigation completes. */
   const [authFlowInProgress, setAuthFlowInProgress] = useState(false);
+
+  const signupSubmitting = isSubmitting && !isLogin;
+  useAppLoadingRegistration(
+    "auth-signup-submit",
+    APP_LOADING_PRIORITY.AUTH,
+    signupSubmitting,
+    t("common.creatingWorkspace"),
+  );
 
   /** Single post-auth navigation — only after explicit login/OAuth/continue (never on mount/back). */
   const redirectAfterAuth = useCallback(
@@ -816,7 +828,7 @@ export function AuthPage() {
               {isSubmitting
                 ? isLogin
                   ? t('auth.page.pleaseWait')
-                  : t('auth.page.creatingAccountWait')
+                  : t('common.creatingWorkspace')
                 : null}
             </AuthFormStatusSlot>
 

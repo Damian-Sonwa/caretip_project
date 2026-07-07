@@ -27,6 +27,10 @@ import { PricingTierCard, type PricingTierCardBadge } from "@/components/pricing
 import { pricingPageUi } from "@/components/pricing/pricingPageUi";
 import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 import { cn } from "@/lib/utils";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../../../../lib/globalAppLoading";
 import { formatBillingDate, resolveBillingLocale } from "./billingFormatters";
 
 type Props = {
@@ -51,6 +55,14 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
   const canCheckout = billing.billingEnabled && billing.stripeConfigured;
   const canPortal = canCheckout && Boolean(billing.stripeCustomerId);
   const canDowngradeViaPortal = canPortal && billing.hasStripeBilling;
+
+  const checkoutRedirecting = busyPlan !== null && busyPlan !== "cancel";
+  useAppLoadingRegistration(
+    "billing-plan-checkout",
+    APP_LOADING_PRIORITY.APP_INIT,
+    checkoutRedirecting,
+    t("common.openingSecureCheckout"),
+  );
 
   async function handleUpgrade(planKey: SubscriptionPlanKey, includeTrial = false) {
     if (planKey === "enterprise" || planKey === "basic") return;

@@ -4,8 +4,10 @@ import { cn } from "@/lib/utils";
 export type MarketingPictureProps = {
   src: string;
   webpSrc?: string;
+  avifSrc?: string;
   alt: string;
   className?: string;
+  frameClassName?: string;
   style?: ImgHTMLAttributes<HTMLImageElement>["style"];
   /** Maps to DOM `fetchpriority` (lowercase) for React 18 compatibility. */
   fetchPriority?: "high" | "low" | "auto";
@@ -21,8 +23,10 @@ export type MarketingPictureProps = {
 export function MarketingPicture({
   src,
   webpSrc,
+  avifSrc,
   alt,
   className,
+  frameClassName,
   loading,
   decoding = "async",
   sizes,
@@ -50,6 +54,7 @@ export function MarketingPicture({
     ref: imgRef,
     alt,
     className: cn(
+      "h-full w-full",
       className,
       shouldFade && "caretip-marketing-img",
       shouldFade && ready && "caretip-marketing-img--ready",
@@ -66,14 +71,33 @@ export function MarketingPicture({
       : {}),
   };
 
-  if (!webpSrc) {
-    return <img src={src} {...imgProps} />;
+  const resolvedSrc = webpSrc ?? src;
+
+  const imageNode = !webpSrc && !avifSrc ? (
+    <img src={src} {...imgProps} />
+  ) : (
+    <picture>
+      {avifSrc ? <source type="image/avif" srcSet={avifSrc} /> : null}
+      {webpSrc ? <source type="image/webp" srcSet={webpSrc} /> : null}
+      <img src={resolvedSrc} {...imgProps} />
+    </picture>
+  );
+
+  if (!shouldFade) {
+    return imageNode;
   }
 
   return (
-    <picture>
-      <source type="image/webp" srcSet={webpSrc} />
-      <img src={src} {...imgProps} />
-    </picture>
+    <span
+      className={cn("caretip-image-frame", frameClassName)}
+      style={
+        width && height
+          ? { aspectRatio: `${width} / ${height}` }
+          : undefined
+      }
+    >
+      {!ready ? <span className="caretip-image-frame__shimmer" aria-hidden /> : null}
+      {imageNode}
+    </span>
   );
 }

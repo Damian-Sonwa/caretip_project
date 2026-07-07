@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Loader2, MapPin, Palette } from "lucide-react";
 import { useAuth, getPostAuthRedirect } from "../hooks/useAuth";
 import { getAuthSessionFlags } from "../lib/authSessionBootstrap";
-import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
+import { useRegisterGlobalAppInit, useAppLoadingRegistration, APP_LOADING_PRIORITY } from "../lib/globalAppLoading";
 import { GlobalAppLoadingHold } from "../components/GlobalAppLoadingHold";
 import { toast } from "sonner";
 import { fetchBusinessProfile, patchBusinessProfile, uploadMyBusinessLogo, createBillingCheckoutSession } from "../lib/api";
@@ -74,6 +74,22 @@ export function BusinessOnboardingPage() {
   const [employeeCount, setEmployeeCount] = useState(0);
   const [busy, setBusy] = useState(false);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+
+  const checkoutIntent = peekCheckoutIntent();
+  const onboardingBusyMessage =
+    step === 3 &&
+    checkoutIntent &&
+    checkoutIntent.planKey !== "enterprise" &&
+    checkoutIntent.planKey !== "basic"
+      ? t("common.openingSecureCheckout")
+      : t("common.creatingWorkspace");
+
+  useAppLoadingRegistration(
+    "onboarding-submit",
+    APP_LOADING_PRIORITY.APP_INIT,
+    busy,
+    onboardingBusyMessage,
+  );
 
   useEffect(() => {
     if (!logoFile) {

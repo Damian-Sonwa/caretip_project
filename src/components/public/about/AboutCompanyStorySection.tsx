@@ -1,6 +1,9 @@
 import { useTranslation } from "react-i18next";
-import aboutTeamImg from "../../../../images/about-team.jpeg";
-import missionImg from "../../../../images/caretip-mission001.png";
+import aboutTeamWebp from "../../../../images/about-team.webp";
+import aboutTeamAvif from "../../../../images/about-team.avif";
+import missionWebp from "../../../../images/caretip-mission001.webp";
+import missionAvif from "../../../../images/caretip-mission001.avif";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 import { usePublicScrollReveal } from "@/lib/usePublicScrollReveal";
 
@@ -13,7 +16,6 @@ export function AboutCompanyStorySection() {
 
   return (
     <>
-      {/* Origin story — split layout (template: founders + photo) */}
       <section className="caretip-about-split" aria-labelledby="about-story-title">
         <div className="caretip-about-page__inner caretip-about-split__grid">
           <div
@@ -36,19 +38,20 @@ export function AboutCompanyStorySection() {
             style={originVisualReveal.style}
             className={cn(originVisualReveal.className, "caretip-about-split__media")}
           >
-            <img
-              src={aboutTeamImg}
+            <MarketingPicture
+              src={aboutTeamWebp}
+              webpSrc={aboutTeamWebp}
+              avifSrc={aboutTeamAvif}
               alt=""
-              className="caretip-about-split__photo caretip-marketing-img caretip-marketing-img--ready"
-              loading="eager"
+              className="caretip-about-split__photo"
+              priority
+              fadeIn={false}
               decoding="async"
-              fetchPriority="high"
             />
           </div>
         </div>
       </section>
 
-      {/* Founder quote — dark mission band (template: OUR MISSION) */}
       <section className="caretip-about-quote-band" aria-labelledby="about-quote-text">
         <div className="caretip-about-page__inner caretip-about-quote-band__inner">
           <blockquote className="caretip-about-quote-band__quote">
@@ -60,7 +63,6 @@ export function AboutCompanyStorySection() {
         </div>
       </section>
 
-      {/* Vision & drive — split with product showcase (template: Wise today) */}
       <section className="caretip-about-split caretip-about-split--product" aria-labelledby="about-vision-title">
         <div className="caretip-about-page__inner caretip-about-split__grid">
           <div
@@ -90,10 +92,12 @@ export function AboutCompanyStorySection() {
           >
             <div className="caretip-about-split__showcase caretip-about-split__showcase--mission">
               <div className="caretip-about-split__showcase-glow" aria-hidden />
-              <img
-                src={missionImg}
+              <MarketingPicture
+                src={missionWebp}
+                webpSrc={missionWebp}
+                avifSrc={missionAvif}
                 alt={t("staticPages.about.story.visionTitle")}
-                className="caretip-about-split__product caretip-about-split__product--mission caretip-marketing-img caretip-marketing-img--ready"
+                className="caretip-about-split__product caretip-about-split__product--mission"
                 loading="lazy"
                 decoding="async"
               />

@@ -1,5 +1,7 @@
-import qrImg from "../../../../images/feature001.png";
-import analyticsImg from "../../../../images/feature002.jpeg";
+import feature001Webp from "../../../../images/feature001.webp";
+import feature001Avif from "../../../../images/feature001.avif";
+import feature002Webp from "../../../../images/feature002.webp";
+import feature002Avif from "../../../../images/feature002.avif";
 import employeeImg from "../../../../images/employee03.webp";
 import securityImg from "../../../../images/payment02.webp";
 import realtimeImg from "../../../../images/live05.webp";
@@ -14,19 +16,22 @@ type FeatureProductVisualProps = {
   className?: string;
 };
 
-const FEATURE_IMAGES: Record<
-  FeatureVisualVariant,
-  {
-    src: string;
-    objectFit: "contain" | "cover";
-    objectPosition: string;
-    overlay?: boolean;
-    featuredHeight: string;
-    standardHeight: string;
-  }
-> = {
+type FeatureImageConfig = {
+  src: string;
+  webp?: string;
+  avif?: string;
+  objectFit: "contain" | "cover";
+  objectPosition: string;
+  overlay?: boolean;
+  featuredHeight: string;
+  standardHeight: string;
+};
+
+const FEATURE_IMAGES: Record<FeatureVisualVariant, FeatureImageConfig> = {
   qr: {
-    src: qrImg,
+    src: feature001Webp,
+    webp: feature001Webp,
+    avif: feature001Avif,
     objectFit: "cover",
     objectPosition: "center center",
     featuredHeight: "h-[12.5rem] sm:h-[14rem]",
@@ -41,7 +46,9 @@ const FEATURE_IMAGES: Record<
     standardHeight: "h-[7.5rem] sm:h-[8.25rem]",
   },
   analytics: {
-    src: analyticsImg,
+    src: feature002Webp,
+    webp: feature002Webp,
+    avif: feature002Avif,
     objectFit: "cover",
     objectPosition: "center 42%",
     featuredHeight: "h-[12rem] sm:h-[13.5rem]",
@@ -71,7 +78,7 @@ const FEATURE_IMAGES: Record<
 };
 
 export function FeatureProductVisual({ variant, featured = false, className }: FeatureProductVisualProps) {
-  const { src, objectFit, objectPosition, overlay, featuredHeight, standardHeight } =
+  const { src, webp, avif, objectFit, objectPosition, overlay, featuredHeight, standardHeight } =
     FEATURE_IMAGES[variant];
   const h = featured ? featuredHeight : standardHeight;
 
@@ -86,6 +93,8 @@ export function FeatureProductVisual({ variant, featured = false, className }: F
     >
       <MarketingPicture
         src={src}
+        webpSrc={webp ?? src}
+        avifSrc={avif}
         alt=""
         className={cn(
           "absolute inset-0 h-full w-full",

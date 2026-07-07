@@ -134,7 +134,7 @@ export function BusinessSettingsGeneralPanel({
                   className="inline-flex min-h-[44px] touch-manipulation items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50"
                 >
                   <Save className="h-4 w-4" />
-                  {t("business.accountSettings.saveProfile")}
+                  {saving ? t("common.savingChanges") : t("business.accountSettings.saveProfile")}
                 </button>
                 <button
                   type="button"

@@ -5,8 +5,8 @@ import {
   LandingSplitShowcaseSection,
 } from "@/app/components/landing/LandingSplitShowcaseSection";
 import { landingCopyVisible } from "@/components/landing/landingUi";
-import businessSectionImg from "../../../../images/caring002.png";
-import businessSectionImgWebp from "../../../../images/caring002.webp";
+import caring002Webp from "../../../../images/caring002.webp";
+import caring002Avif from "../../../../images/caring002.avif";
 
 export function BusinessLandingSection() {
   const { t, i18n } = useTranslation();
@@ -38,8 +38,9 @@ export function BusinessLandingSection() {
       }}
       visual={
         <LandingShowcaseCoverImage
-          src={businessSectionImg}
-          webpSrc={businessSectionImgWebp}
+          src={caring002Webp}
+          webpSrc={caring002Webp}
+          avifSrc={caring002Avif}
           alt={t("landing.businessSection.imageAlt")}
           objectPosition="center"
           floatHint={

@@ -488,12 +488,53 @@ export function useEmployeeDashboardAnalytics(
       }
       tfRef.current = tf;
       setAnalyticsTimeframe(tf);
+      const seq = ++uiRequestSeqRef.current;
+
+      hydratePeriodSessionCache(tf);
+
+      if (isPeriodSessionReady(tf)) {
+        setSummaryLoading(false);
+        setAnalyticsLoading(false);
+        setIsRevalidating(false);
+        devSetHydrationPhase("metrics", "ready");
+        devSetHydrationPhase("charts", "ready");
+        devSetHydrationPhase("goals", "ready");
+        commitUiPayload(tf, seq, false);
+        markDashboardLiveSettled(hasSettledLiveUiRef);
+      } else {
+        const summaryPartial = summaryPartialRef.current.get(tf);
+        if (
+          summaryFetchedTfsRef.current.has(tf) &&
+          summaryPartial &&
+          isEmployeeSummaryPartialConfirmed(summaryPartial)
+        ) {
+          setSummaryLoading(false);
+          devSetHydrationPhase("metrics", "ready");
+          devSetHydrationPhase("goals", "ready");
+          const analyticsSlice = analyticsPartialRef.current.get(tf);
+          const chartsReady =
+            !advancedAnalyticsEnabledRef.current ||
+            hasEmployeeAnalyticsPayload(analyticsSlice);
+          setAnalyticsLoading(!chartsReady);
+          if (chartsReady) {
+            devSetHydrationPhase("charts", "ready");
+          } else {
+            devSetHydrationPhase("charts", "loading");
+          }
+          commitUiPayload(tf, seq, false);
+        } else {
+          setIsRevalidating(true);
+          setSummaryLoading(true);
+          setAnalyticsLoading(true);
+        }
+      }
+
       void loadForRef.current(tf, {
         affectsUi: true,
         soft: canUsePeriodSwitchCache(hasSettledLiveUiRef.current),
       });
     },
-    [abortInactiveTimeframes],
+    [abortInactiveTimeframes, hydratePeriodSessionCache, isPeriodSessionReady, commitUiPayload],
   );
 
   const loadFor = useCallback(

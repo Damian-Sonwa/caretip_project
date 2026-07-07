@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { DashboardMetricStatCard } from "../dashboard/DashboardMetricStatCard";
 import { businessMetricTokens } from "../dashboard/dashboardMetricTokens";
 
@@ -16,6 +16,6 @@ type BusinessStatCardProps = {
   loadingVariant?: "currency" | "count" | "pulse";
 };
 
-export function BusinessStatCard(props: BusinessStatCardProps) {
+export const BusinessStatCard = memo(function BusinessStatCard(props: BusinessStatCardProps) {
   return <DashboardMetricStatCard tokens={businessMetricTokens} {...props} />;
-}
+});

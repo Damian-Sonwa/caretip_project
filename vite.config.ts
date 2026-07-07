@@ -86,7 +86,7 @@ export default defineConfig(({ mode }) => {
           if (id.includes('i18next') || id.includes('react-i18next')) return 'vendor-i18n';
           if (id.includes('socket.io-client') || id.includes('engine.io-client')) return 'vendor-socket';
           if (id.includes('firebase')) return 'vendor-firebase';
-          if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion';
+          if (id.includes('motion') && id.includes('node_modules')) return 'vendor-motion';
           if (id.includes('html2canvas')) return 'vendor-html2canvas';
           if (id.includes('@radix-ui')) return 'vendor-radix';
           if (id.includes('react-router') || id.includes('@remix-run/router')) return 'vendor-router';
@@ -143,7 +143,7 @@ export default defineConfig(({ mode }) => {
       },
       workbox: {
         /** Bump when PWA shell/manifest semantics change so old precaches are abandoned. */
-        cacheId: 'caretip-pwa-v9',
+        cacheId: 'caretip-pwa-v10',
         /** Ensure old precaches are removed when SW updates. */
         cleanupOutdatedCaches: true,
         /**
@@ -151,7 +151,13 @@ export default defineConfig(({ mode }) => {
          * Large marketing/dashboard images live in `dist/assets/*` and should be runtime-cached instead.
          */
         globPatterns: ['**/*.{js,css,html,ico,svg,woff2,json,webmanifest}'],
-        globIgnores: ['**/assets/*.{png,jpg,jpeg,webp,gif}'],
+        globIgnores: [
+          '**/assets/*.{png,jpg,jpeg,webp,gif}',
+          '**/vendor-three-*.js',
+          '**/vendor-jspdf-*.js',
+          '**/*HeroAnimation*',
+          '**/*SaasDashboard3D*',
+        ],
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [
           /^\/api(\/|$)/,

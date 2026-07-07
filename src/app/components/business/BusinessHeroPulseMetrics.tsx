@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Clock, CalendarDays } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -83,7 +84,7 @@ function PulseCard({ icon, tone, label, loading, count, amount }: PulseCardProps
   );
 }
 
-export function BusinessHeroPulseMetrics({
+export const BusinessHeroPulseMetrics = memo(function BusinessHeroPulseMetrics({
   loading,
   pulse,
   isRefreshing,
@@ -121,4 +122,4 @@ export function BusinessHeroPulseMetrics({
       />
     </div>
   );
-}
+});

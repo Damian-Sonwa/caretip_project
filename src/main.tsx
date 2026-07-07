@@ -6,6 +6,7 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./app/App";
 import { GlobalErrorBoundary } from "./app/components/GlobalErrorBoundary";
 import { wakeRemoteApi, migrateLegacyAccessTokenFromStorage } from "./app/lib/api";
+import { scheduleMobileDeferredWork } from "./lib/mobilePerf";
 import { ensureI18nReady } from "./i18n/i18n";
 import { initSentry } from "./app/lib/sentry";
 import { initGoogleAdsConversion } from "./app/lib/googleAdsConversion";
@@ -40,7 +41,7 @@ initGoogleAdsConversion();
 
 initSentry();
 migrateLegacyAccessTokenFromStorage();
-wakeRemoteApi();
+scheduleMobileDeferredWork(() => wakeRemoteApi(), { mobileTimeoutMs: 3500, desktopTimeoutMs: 900 });
 
 const updateSW = registerSW({
   immediate: true,

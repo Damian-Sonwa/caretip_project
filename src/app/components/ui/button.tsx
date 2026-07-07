@@ -8,7 +8,8 @@ const buttonVariants = cva(
   [
     "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap",
     "rounded-xl text-sm font-semibold tracking-[-0.01em]",
-    "touch-manipulation transition-[color,background-color,border-color,box-shadow,opacity]",
+    "touch-manipulation transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-200",
+    "enabled:hover:scale-[1.02] enabled:active:scale-[0.98]",
     "outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0",

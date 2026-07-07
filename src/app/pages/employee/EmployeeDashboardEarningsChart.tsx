@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion } from "motion/react";
 import { TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -33,7 +34,7 @@ export type EmployeeDashboardEarningsChartProps = {
   chartRenderKey?: string | number;
 };
 
-export function EmployeeDashboardEarningsChart({
+export const EmployeeDashboardEarningsChart = memo(function EmployeeDashboardEarningsChart({
   showChartLoading,
   chartData,
   analyticsPeriodRefreshing,
@@ -116,4 +117,4 @@ export function EmployeeDashboardEarningsChart({
       </Card>
     </motion.div>
   );
-}
+});

@@ -6,6 +6,10 @@ import { toast } from "sonner";
 import type { BillingStatus } from "@/app/lib/api";
 import { createBillingCheckoutSession } from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "@/app/lib/globalAppLoading";
 import { shouldShowTrialExpiredUpgrade } from "@/app/lib/billingDisplayState";
 import { cn } from "@/lib/utils";
 import {
@@ -32,6 +36,13 @@ export function BillingTrialPlanDialog({
 }: BillingTrialPlanDialogProps) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
+
+  useAppLoadingRegistration(
+    "billing-trial-checkout",
+    APP_LOADING_PRIORITY.APP_INIT,
+    busy,
+    t("common.openingSecureCheckout"),
+  );
 
   async function startTrialCheckout() {
     setBusy(true);
@@ -175,6 +186,13 @@ export function BillingTrialSection({
 function BillingTrialExpiredUpgrade({ billingCycle }: { billingCycle: "monthly" | "yearly" }) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
+
+  useAppLoadingRegistration(
+    "billing-trial-expired-checkout",
+    APP_LOADING_PRIORITY.APP_INIT,
+    busy,
+    t("common.openingSecureCheckout"),
+  );
 
   async function handleUpgrade() {
     setBusy(true);

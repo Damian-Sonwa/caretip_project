@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Timer, Sparkles } from "lucide-react";
-import liveImg from "../../../../images/live-in-minutes.jpeg";
+import liveWebp from "../../../../images/live-in-minutes.webp";
+import liveAvif from "../../../../images/live-in-minutes.avif";
 import { MarketingPicture } from "@/lib/marketingPicture";
 
 export function LandingSpeedSection() {
@@ -41,7 +42,9 @@ export function LandingSpeedSection() {
         >
           <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] dark:border-neutral-800 dark:bg-neutral-900">
             <MarketingPicture
-              src={liveImg}
+              src={liveWebp}
+              webpSrc={liveWebp}
+              avifSrc={liveAvif}
               alt="Team using CareTip on devices during service"
               className="aspect-[4/3] w-full object-cover object-center"
               loading="lazy"

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { RouterProvider } from 'react-router';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'sonner';
@@ -5,11 +6,14 @@ import { router } from './routes';
 import { TipFlowProvider } from './context/TipFlowContext';
 import { AppLoadingSplashProvider } from './context/AppLoadingSplashContext';
 import { AppLoadingManagerProvider } from './context/AppLoadingManager';
-import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider } from "./components/AuthProvider";
 import { SocketProvider } from "./context/SocketProvider";
 import { googleOAuthWebClientId } from "./lib/googleOAuthWebClientId";
+
+const PwaInstallPrompt = lazy(() =>
+  import('./components/PwaInstallPrompt').then((m) => ({ default: m.PwaInstallPrompt })),
+);
 
 const googleClientId = googleOAuthWebClientId();
 
@@ -26,7 +30,9 @@ function AppTree() {
           </AppLoadingManagerProvider>
         </AuthProvider>
         <Toaster theme={resolvedTheme} position="top-center" closeButton />
-        <PwaInstallPrompt />
+        <Suspense fallback={null}>
+          <PwaInstallPrompt />
+        </Suspense>
       </AppLoadingSplashProvider>
     </TipFlowProvider>
   );

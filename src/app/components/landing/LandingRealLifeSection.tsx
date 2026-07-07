@@ -1,15 +1,25 @@
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import logyImg from "../../../../images/logy.png";
-import repImg from "../../../../images/rep.png";
-import newMidImg from "../../../../images/new-mid.png";
-import fieldServicesImg from "../../../../images/trade and home services.webp";
+import logyWebp from "../../../../images/logy.webp";
+import logyAvif from "../../../../images/logy.avif";
+import repWebp from "../../../../images/rep.webp";
+import repAvif from "../../../../images/rep.avif";
+import newMidWebp from "../../../../images/new-mid.webp";
+import newMidAvif from "../../../../images/new-mid.avif";
+import fieldServicesWebp from "../../../../images/trade and home services.webp";
+import fieldServicesAvif from "../../../../images/trade and home services.avif";
 import { landingStaggerDelay } from "@/lib/landingMotion";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingBoldComponents } from "@/components/landing/landingRichText";
 import { LandingReveal } from "@/components/landing/LandingReveal";
 import { ExpandableInfoCard } from "@/components/ui/expandable-info-card";
 import { cn } from "@/lib/utils";
+
+type ScenarioImage = {
+  src: string;
+  webp: string;
+  avif: string;
+};
 
 export function LandingRealLifeSection() {
   const { t, i18n } = useTranslation();
@@ -22,7 +32,7 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s1Tag"),
           textKey: "landing.realLife.s1Text" as const,
           detail: t("landing.realLife.s1Detail"),
-          img: logyImg,
+          image: { src: logyWebp, webp: logyWebp, avif: logyAvif } satisfies ScenarioImage,
           alt: t("landing.realLife.s1Alt"),
           imageFit: "cover" as const,
           imagePosition: undefined,
@@ -34,7 +44,7 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s2Tag"),
           textKey: "landing.realLife.s2Text" as const,
           detail: t("landing.realLife.s2Detail"),
-          img: repImg,
+          image: { src: repWebp, webp: repWebp, avif: repAvif } satisfies ScenarioImage,
           alt: t("landing.realLife.s2Alt"),
           imageFit: "cover" as const,
           imagePosition: undefined,
@@ -46,7 +56,7 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s4Tag"),
           textKey: "landing.realLife.s4Text" as const,
           detail: t("landing.realLife.s4Detail"),
-          img: newMidImg,
+          image: { src: newMidWebp, webp: newMidWebp, avif: newMidAvif } satisfies ScenarioImage,
           alt: t("landing.realLife.s4Alt"),
           imageFit: "cover" as const,
           imagePosition: "50% 24%",
@@ -58,7 +68,11 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s5Tag"),
           textKey: "landing.realLife.s5Text" as const,
           detail: t("landing.realLife.s5Detail"),
-          img: fieldServicesImg,
+          image: {
+            src: fieldServicesWebp,
+            webp: fieldServicesWebp,
+            avif: fieldServicesAvif,
+          } satisfies ScenarioImage,
           alt: t("landing.realLife.s5Alt"),
           imageFit: "cover" as const,
           imagePosition: undefined,
@@ -94,7 +108,9 @@ export function LandingRealLifeSection() {
               className="w-full max-w-md sm:max-w-none"
             >
               <ExpandableInfoCard
-                imageSrc={item.img}
+                imageSrc={item.image.src}
+                imageWebpSrc={item.image.webp}
+                imageAvifSrc={item.image.avif}
                 imageAlt={item.alt}
                 imageFit={item.imageFit}
                 imagePosition={item.imagePosition}

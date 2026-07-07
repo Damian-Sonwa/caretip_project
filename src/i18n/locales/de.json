@@ -104,6 +104,10 @@
   },
   "common": {
     "settingUp": "Wird für Sie eingerichtet.",
+    "preparingWorkspace": "Ihr Workspace wird vorbereitet…",
+    "creatingWorkspace": "Workspace wird erstellt…",
+    "openingSecureCheckout": "Sicherer Checkout wird geöffnet…",
+    "savingChanges": "Änderungen werden gespeichert…",
     "signingOut": "Sie werden sicher abgemeldet …",
     "onlyAMoment": "Das dauert nur einen Moment.",
     "syncingAccountStatus": "Kontostatus wird synchronisiert…",

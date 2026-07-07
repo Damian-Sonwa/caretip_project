@@ -14,6 +14,7 @@ import { PrefetchLink } from "./PrefetchLink";
 import { prefetchDashboardRoutes } from "../lib/prefetchAuthenticatedRoutes";
 import { prefetchPrimaryNavRoutes } from "../lib/prefetchPublicRoutes";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
+import { scheduleMobileDeferredWork } from "@/lib/mobilePerf";
 
 let primaryNavPrefetchScheduled = false;
 
@@ -38,16 +39,10 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
   useEffect(() => {
     if (primaryNavPrefetchScheduled) return;
     primaryNavPrefetchScheduled = true;
-    const schedule = () => {
+    scheduleMobileDeferredWork(() => {
       prefetchPrimaryNavRoutes();
       prefetchDashboardRoutes();
-    };
-    if (typeof requestIdleCallback === "function") {
-      const id = requestIdleCallback(schedule, { timeout: 3500 });
-      return () => cancelIdleCallback(id);
-    }
-    const id = window.setTimeout(schedule, 2500);
-    return () => window.clearTimeout(id);
+    });
   }, []);
 
   useEffect(() => {

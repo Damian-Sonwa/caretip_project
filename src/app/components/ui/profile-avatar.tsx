@@ -41,6 +41,28 @@ export function ProfileAvatar({
   const name = displayName?.trim() || "?";
   const isSquare = variant === "square";
   const canLightbox = lightbox && showPhoto;
+  const [imgReady, setImgReady] = useState(false);
+
+  useEffect(() => {
+    setImgReady(false);
+  }, [resolved]);
+
+  const photoClassName = cn(
+    "h-full w-full object-cover object-center caretip-marketing-img",
+    imgReady && "caretip-marketing-img--ready",
+  );
+
+  const photoImg = (
+    <img
+      src={resolved}
+      alt={alt ?? name}
+      className={cn("pointer-events-none", photoClassName)}
+      onLoad={() => setImgReady(true)}
+      onError={() => setImgFailed(true)}
+      loading="lazy"
+      decoding="async"
+    />
+  );
 
   return (
     <>
@@ -64,24 +86,22 @@ export function ProfileAvatar({
               )}
               aria-label={`View ${name} profile photo full size`}
             >
+              {!imgReady ? <span className="caretip-image-frame__shimmer" aria-hidden /> : null}
+              {photoImg}
+            </button>
+          ) : (
+            <>
+              {!imgReady ? <span className="caretip-image-frame__shimmer" aria-hidden /> : null}
               <img
                 src={resolved}
                 alt={alt ?? name}
-                className="pointer-events-none h-full w-full object-cover object-center"
+                className={cn("absolute inset-0", photoClassName)}
+                onLoad={() => setImgReady(true)}
                 onError={() => setImgFailed(true)}
                 loading="lazy"
                 decoding="async"
               />
-            </button>
-          ) : (
-            <img
-              src={resolved}
-              alt={alt ?? name}
-              className="absolute inset-0 h-full w-full object-cover object-center"
-              onError={() => setImgFailed(true)}
-              loading="lazy"
-              decoding="async"
-            />
+            </>
           )
         ) : (
           <div className="absolute inset-0 flex h-full w-full items-stretch justify-stretch">

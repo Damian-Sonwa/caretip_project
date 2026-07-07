@@ -5,16 +5,14 @@ import { LandingHeroFloatingCards } from "@/components/landing/LandingHeroFloati
 import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
-import storyHero01Png from "../../../images/story-hero01.png";
 import storyHero01Webp from "../../../images/story-hero01.webp";
 import storyHero01Avif from "../../../images/story-hero01.avif";
-import storyHero02Png from "../../../images/story-hero02.png";
 import storyHero02Webp from "../../../images/story-hero02.webp";
 import storyHero02Avif from "../../../images/story-hero02.avif";
 
 const STORY_FRAMES = [
-  { key: "story-hero01", png: storyHero01Png, webp: storyHero01Webp, avif: storyHero01Avif },
-  { key: "story-hero02", png: storyHero02Png, webp: storyHero02Webp, avif: storyHero02Avif },
+  { key: "story-hero01", webp: storyHero01Webp, avif: storyHero01Avif },
+  { key: "story-hero02", webp: storyHero02Webp, avif: storyHero02Avif },
 ] as const;
 
 const STORY_CYCLE_MS = 5600;
@@ -26,10 +24,6 @@ function preloadHeroFrame(frame: (typeof STORY_FRAMES)[number]) {
   img.onerror = () => {
     const fallback = new Image();
     fallback.src = frame.webp;
-    fallback.onerror = () => {
-      const png = new Image();
-      png.src = frame.png;
-    };
   };
 }
 
@@ -79,7 +73,7 @@ export function LandingHeroStoryShowcase({ alt, className }: LandingHeroStorySho
                   <source type="image/avif" srcSet={frame.avif} />
                   <source type="image/webp" srcSet={frame.webp} />
                   <img
-                    src={frame.png}
+                    src={frame.webp}
                     alt={isActive ? alt : ""}
                     aria-hidden={!isActive}
                     className={cn(

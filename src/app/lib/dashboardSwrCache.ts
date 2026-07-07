@@ -3,7 +3,7 @@
  */
 
 /** Period metrics, charts, goals — brief display window while revalidating. */
-export const DASHBOARD_SWR_METRICS_TTL_MS = 8_000;
+export const DASHBOARD_SWR_METRICS_TTL_MS = 45_000;
 
 /** Earnings / available balance — shorter TTL for fresher financial reads. */
 export const DASHBOARD_SWR_BALANCE_TTL_MS = 4_000;

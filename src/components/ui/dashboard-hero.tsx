@@ -2,6 +2,7 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -83,6 +84,7 @@ export function DashboardHero({
   textColumnClassName,
 }: DashboardHeroProps) {
   const { t } = useTranslation();
+  const isLargeScreen = useMinWidthMedia(1024);
   const hasCustomMedia = Boolean(image);
   const hasPhoto = Boolean(imageSrc) && !hasCustomMedia;
   const tagline = description?.trim() ?? "";
@@ -341,12 +343,40 @@ export function DashboardHero({
           )}
         >
         {stackHeroOnMobile ? (
-          <>
-            {/*
-              Mobile flow (intentional): welcome → headline → supporting copy → CTAs → metrics → context bridge (actions slot) →
-              optional tabs → hero visual last so it supports rather than dominates.
-            */}
-            <div className="dashboard-hero-container flex min-w-0 flex-col gap-2.5 p-0 max-lg:gap-2.5 sm:gap-4 lg:hidden">
+          isLargeScreen ? (
+            <div
+              className={cn(
+                "dashboard-hero-container grid min-w-0",
+                hideImage
+                  ? "grid-flow-row grid-cols-1 gap-y-6 px-8 pb-8 pt-8"
+                  : "grid-cols-12 items-center gap-x-12 gap-y-6 px-8 pb-8 pt-8",
+                mobileAlign === "center" && "px-6",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex min-w-0 flex-col gap-4 text-left min-h-0 flex-none justify-center gap-4 text-left xl:gap-5",
+                  hideImage ? "col-span-12 row-start-1" : "col-span-5 row-start-1",
+                  textColumnClassName,
+                )}
+              >
+                <div className="min-h-0 space-y-4 lg:space-y-5">
+                  {badgeRow}
+                  {titleRow}
+                </div>
+                {taglineBlock}
+                {actionsPlacement === "belowText" && actionsRow ? <div className="pt-2 lg:pt-3">{actionsRow}</div> : null}
+              </div>
+              {!hideImage ? renderMediaColumn({ stackedLayout: true }) : null}
+              {hideTabs && actionsPlacement === "belowText" ? null : (
+                <div className="flex min-w-0 flex-col gap-6 col-span-12 row-start-2 w-full">
+                  {supportingCluster}
+                  {actionsPlacement === "belowTabs" ? actionsRow : null}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="dashboard-hero-container flex min-w-0 flex-col gap-2.5 p-0 max-lg:gap-2.5 sm:gap-4">
               <div
                 className={cn(
                   "flex min-w-0 flex-col gap-2 max-lg:gap-2 sm:gap-3",
@@ -375,40 +405,7 @@ export function DashboardHero({
                 <div className="min-w-0 pt-1">{renderMediaColumn({ stackedLayout: true })}</div>
               ) : null}
             </div>
-
-            {/* Desktop/tablet: two-column hero (headline + CTAs left, media right). */}
-            <div
-              className={cn(
-                "dashboard-hero-container hidden min-w-0 lg:grid",
-                hideImage
-                  ? "lg:grid-flow-row lg:grid-cols-1 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8"
-                  : "lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8",
-                stackHeroOnMobile && mobileAlign === "center" && "lg:px-6",
-              )}
-            >
-              <div
-                className={cn(
-                  "flex min-w-0 flex-col gap-4 text-left lg:min-h-0 lg:flex-none lg:justify-center lg:gap-4 lg:text-left xl:gap-5",
-                  hideImage ? "lg:col-span-12 lg:row-start-1" : "lg:col-span-5 lg:row-start-1",
-                  textColumnClassName,
-                )}
-              >
-                <div className="min-h-0 space-y-4 lg:space-y-5">
-                  {badgeRow}
-                  {titleRow}
-                </div>
-                {taglineBlock}
-                {actionsPlacement === "belowText" && actionsRow ? <div className="pt-2 lg:pt-3">{actionsRow}</div> : null}
-              </div>
-              {!hideImage ? renderMediaColumn({ stackedLayout: true }) : null}
-              {hideTabs && actionsPlacement === "belowText" ? null : (
-                <div className="flex min-w-0 flex-col gap-6 lg:col-span-12 lg:row-start-2 lg:w-full">
-                  {supportingCluster}
-                  {actionsPlacement === "belowTabs" ? actionsRow : null}
-                </div>
-              )}
-            </div>
-          </>
+          )
         ) : (
           <div
             className={cn(

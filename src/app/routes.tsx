@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import {
   createBrowserRouter,
   RouteObject,
@@ -6,17 +6,13 @@ import {
   isRouteErrorResponse,
   Navigate,
   Outlet,
-  useLocation,
-  useNavigation,
   useParams,
 } from "react-router";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthBootstrapLoadingRegistrar } from "./components/AuthBootstrapLoadingRegistrar";
 import { AuthPostLoginTransitionRegistrar } from "./components/AuthPostLoginTransitionRegistrar";
-import {
-  useAppLoadingCoordinator,
-  useMarkAppShellReadyOptional,
-} from "./context/AppLoadingSplashContext";
+import { RouteNavigationLoadingRegistrar } from "./components/RouteNavigationLoadingRegistrar";
+import { useMarkAppShellReadyOptional } from "./context/AppLoadingSplashContext";
 import { RouteChunkBoundary } from "./routing/RouteChunkBoundary";
 import {
   routeLazy,
@@ -38,8 +34,13 @@ import { ApprovedBusinessGate } from './components/ApprovedBusinessGate';
 import { PendingVerificationAllowedGate } from './components/PendingVerificationAllowedGate';
 import { PendingVerification } from './components/PendingVerification';
 import { logClientError } from './lib/clientLog';
-import { LoaderDiagRuntime } from './components/LoaderDiagRuntime';
 import { useNavigationFlashProbe } from './hooks/useNavigationFlashProbe';
+
+const LoaderDiagRuntime = import.meta.env.DEV
+  ? React.lazy(() =>
+      import('./components/LoaderDiagRuntime').then((m) => ({ default: m.LoaderDiagRuntime })),
+    )
+  : null;
 
 /** Canonical alias: `/qr/business/:id` → existing `/qr-landing/:id` (no behavior change). */
 function RedirectQrBusiness() {
@@ -90,34 +91,30 @@ function ErrorBoundary() {
 }
 
 function RootLayout() {
-  const navigation = useNavigation();
-  const location = useLocation();
-  const { markAppShellReady, setRouteTransitionPending } = useAppLoadingCoordinator();
-  const routeSigRef = useRef<string | null>(null);
+  const markAppShellReady = useMarkAppShellReadyOptional();
   useNavigationFlashProbe();
 
   useLayoutEffect(() => {
-    markAppShellReady();
+    markAppShellReady?.();
   }, [markAppShellReady]);
-
-  /** Single branded “route transition” overlay — not for in-route data fetching. */
-  useLayoutEffect(() => {
-    // Disable global route-transition spinner overlay.
-    // We use a single, consistent loader via ProtectedRoute / page-level loaders instead.
-    setRouteTransitionPending(false);
-  }, [setRouteTransitionPending]);
 
   return (
     <>
-      {import.meta.env.DEV ? <LoaderDiagRuntime /> : null}
+      {import.meta.env.DEV && LoaderDiagRuntime ? (
+        <React.Suspense fallback={null}>
+          <LoaderDiagRuntime />
+        </React.Suspense>
+      ) : null}
       <ScrollToTop />
-      <AuthBootstrapLoadingRegistrar>
-        <AuthPostLoginTransitionRegistrar>
-          <RouteChunkBoundary variant="minimal" registrationKey="root-route">
-            <Outlet />
-          </RouteChunkBoundary>
-        </AuthPostLoginTransitionRegistrar>
-      </AuthBootstrapLoadingRegistrar>
+      <RouteNavigationLoadingRegistrar>
+        <AuthBootstrapLoadingRegistrar>
+          <AuthPostLoginTransitionRegistrar>
+            <RouteChunkBoundary variant="minimal" registrationKey="root-route">
+              <Outlet />
+            </RouteChunkBoundary>
+          </AuthPostLoginTransitionRegistrar>
+        </AuthBootstrapLoadingRegistrar>
+      </RouteNavigationLoadingRegistrar>
     </>
   );
 }

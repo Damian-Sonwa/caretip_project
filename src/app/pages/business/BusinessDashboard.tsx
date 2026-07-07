@@ -1,8 +1,8 @@
 import { motion } from "motion/react";
-import { dashboardBlockMotion } from "@/lib/motionPerf";
+import { dashboardBlockMotion, useMinWidthMedia } from "@/lib/motionPerf";
 import { useState, useEffect, useCallback, useMemo, useRef, lazy } from "react";
 import { Link, Navigate } from "react-router";
-import type { ImgHTMLAttributes } from "react";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import {
   Sparkles,
   HelpCircle,
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
+import { useRegisterPagePaintReady } from "../../lib/globalAppLoading";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
@@ -89,7 +90,8 @@ import { getAuthSessionFlags } from "../../lib/authSessionBootstrap";
 import { isOnboardingCompleted } from "../../lib/onboardingProgress";
 import { isWalkthroughDemoManager } from "../../lib/walkthroughDemo";
 import { getBusinessVerificationNoticeLabels } from "../../lib/businessVerificationNotice";
-import businessHeroImage from "../../../../images/bizzy001.png";
+import bizzyHeroWebp from "../../../../images/bizzy001.webp";
+import bizzyHeroAvif from "../../../../images/bizzy001.avif";
 import { BusinessDashboardMobileHero } from "../../components/business/BusinessDashboardMobileHero";
 import { BusinessDashboardHeroActions } from "../../components/business/BusinessDashboardHeroActions";
 
@@ -115,6 +117,7 @@ export function BusinessDashboard() {
   );
   const { user, logout, isBusiness, exitImpersonation, sessionValidated, authReady } =
     useRequireAuth();
+  useRegisterPagePaintReady("business-dashboard-paint");
 
   const handleLogout = () => {
     if (user?.impersonation) {
@@ -343,6 +346,23 @@ export function BusinessDashboard() {
     !useDevDemo && !isMetricsSettled && !operationalPulse;
   const showGoalsLoading = isGoalsInitialLoad && !useDevDemo;
   const periodRefreshingLabel = t("dashboard.refresh.updating");
+  const isLargeScreen = useMinWidthMedia(1024);
+
+  const dashboardMetrics = useMemo(() => {
+    if (useDevDemo && devPeriod) {
+      return {
+        totalTips: devPeriod.totalTips,
+        tipCount: devPeriod.tipCount,
+        employeeCount: devPeriod.employeeCount,
+      };
+    }
+    if (!displayMetrics) return null;
+    return {
+      ...displayMetrics,
+      employeeCount:
+        activeRosterCount > 0 ? activeRosterCount : (displayMetrics.employeeCount ?? 0),
+    };
+  }, [useDevDemo, devPeriod, displayMetrics, activeRosterCount]);
 
   const dashboardStatusItems = useMemo(
     () =>
@@ -414,30 +434,33 @@ export function BusinessDashboard() {
         </div>
       )}
 
-      <div className="lg:hidden">
-        <div className="business-dashboard-overview__prompts">
-          <FixPrompt
-            id="pendingVerification"
-            issueActive={showOnboardingReviewNotice}
-            tone="info"
-            density="compact"
-            title={verificationNoticeLabels.title}
-            description={verificationNoticeLabels.description}
-            actionLabel={verificationNoticeLabels.cta}
-            actionTo="/awaiting-approval"
-            dismissPersistence="session"
+      {!isLargeScreen ? (
+        <div>
+          <div className="business-dashboard-overview__prompts">
+            <FixPrompt
+              id="pendingVerification"
+              issueActive={showOnboardingReviewNotice}
+              tone="info"
+              density="compact"
+              title={verificationNoticeLabels.title}
+              description={verificationNoticeLabels.description}
+              actionLabel={verificationNoticeLabels.cta}
+              actionTo="/awaiting-approval"
+              dismissPersistence="session"
+            />
+          </div>
+          <BusinessDashboardMobileHero
+            welcomeName={user.name?.split(" ")[0]}
+            isPreviewMode={isPreviewMode}
+            heroPulseLoading={heroPulseLoading}
+            operationalPulse={operationalPulse ?? null}
+            isPeriodRefreshing={isPeriodRefreshing}
           />
         </div>
-        <BusinessDashboardMobileHero
-          welcomeName={user.name?.split(" ")[0]}
-          isPreviewMode={isPreviewMode}
-          heroPulseLoading={heroPulseLoading}
-          operationalPulse={operationalPulse ?? null}
-          isPeriodRefreshing={isPeriodRefreshing}
-        />
-      </div>
+      ) : null}
 
-      <div className={cn(businessUi.pageInner, "hidden lg:block")}>
+      {isLargeScreen ? (
+      <div className={businessUi.pageInner}>
         <FixPrompt
           id="pendingVerification"
           issueActive={showOnboardingReviewNotice}
@@ -487,13 +510,15 @@ export function BusinessDashboard() {
               className="business-hero-visual relative flex w-full max-w-full flex-col items-center justify-center touch-manipulation max-lg:mx-auto lg:items-start lg:justify-start lg:justify-self-stretch"
             >
               <div className="business-hero-illustration-card w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                <img
-                  src={businessHeroImage}
+                <MarketingPicture
+                  src={bizzyHeroWebp}
+                  webpSrc={bizzyHeroWebp}
+                  avifSrc={bizzyHeroAvif}
                   alt=""
                   className="business-hero-illustration relative z-[1] block w-full max-w-[min(100%,20rem)] object-cover object-center max-lg:mx-auto lg:max-w-none lg:object-left"
-                  loading="eager"
+                  priority
+                  fadeIn={false}
                   decoding="async"
-                  {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
                 />
               </div>
             </motion.div>
@@ -598,6 +623,7 @@ export function BusinessDashboard() {
         />
         </PremiumPageHero>
       </div>
+      ) : null}
 
       <TracingBeam className={cn(businessUi.pageInner, "business-dashboard-body business-dashboard-mobile-body !pt-2 sm:!pt-3")}>
         <section
@@ -662,23 +688,7 @@ export function BusinessDashboard() {
           >
             <BusinessDashboardMetricsGrid
               analyticsTimeframe={analyticsTimeframe}
-              metrics={
-                useDevDemo && devPeriod
-                  ? {
-                      totalTips: devPeriod.totalTips,
-                      tipCount: devPeriod.tipCount,
-                      employeeCount: devPeriod.employeeCount,
-                    }
-                  : displayMetrics
-                    ? {
-                        ...displayMetrics,
-                        employeeCount:
-                          activeRosterCount > 0
-                            ? activeRosterCount
-                            : (displayMetrics.employeeCount ?? 0),
-                      }
-                    : null
-              }
+              metrics={dashboardMetrics}
               loading={periodMetricsLoading}
               isPeriodRefreshing={isPeriodRefreshing}
               refreshingLabel={periodRefreshingLabel}

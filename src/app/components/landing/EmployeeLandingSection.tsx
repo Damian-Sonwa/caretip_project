@@ -8,15 +8,17 @@ import {
 import { landingUi } from "@/components/landing/landingUi";
 import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
-import employeeSectionImgDe from "../../../../images/FYP.jpeg";
 import employeeSectionImgDeWebp from "../../../../images/FYP.webp";
-import employeeSectionImgEn from "../../../../images/English-version.webp";
+import employeeSectionImgDeAvif from "../../../../images/FYP.avif";
+import employeeSectionImgEnWebp from "../../../../images/English-version.webp";
+import employeeSectionImgEnAvif from "../../../../images/English-version.avif";
 
 export function EmployeeLandingSection() {
   const { t, i18n } = useTranslation();
   const isDe = i18n.language?.toLowerCase().startsWith("de");
-  const employeeSectionImg = isDe ? employeeSectionImgDe : employeeSectionImgEn;
-  const employeeSectionWebp = isDe ? employeeSectionImgDeWebp : undefined;
+  const employeeSectionImg = isDe ? employeeSectionImgDeWebp : employeeSectionImgEnWebp;
+  const employeeSectionWebp = employeeSectionImg;
+  const employeeSectionAvif = isDe ? employeeSectionImgDeAvif : employeeSectionImgEnAvif;
 
   const benefits = useMemo(
     () => [
@@ -50,6 +52,7 @@ export function EmployeeLandingSection() {
             <MarketingPicture
               src={employeeSectionImg}
               webpSrc={employeeSectionWebp}
+              avifSrc={employeeSectionAvif}
               alt={t("landing.employeeSection.imageAlt")}
               className={cn(landingUi.showcaseVisualImg, "object-[center_42%]")}
               loading="lazy"

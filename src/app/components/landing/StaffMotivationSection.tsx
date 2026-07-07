@@ -2,7 +2,9 @@ import { motion } from "motion/react";
 import { Award, Star, Target, Trophy } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import trophyImg from "../../../../images/trophy.jpeg";
+import { MarketingPicture } from "@/lib/marketingPicture";
+import trophyWebp from "../../../../images/trophy.webp";
+import trophyAvif from "../../../../images/trophy.avif";
 
 function Medal3D() {
   return (
@@ -350,8 +352,10 @@ function ExplodedViewStage({
           <motion.div className="relative">
             {/* trophy image */}
             <div className="relative h-[240px] w-[210px] overflow-hidden rounded-[44px] ring-1 ring-black/[0.14]">
-              <img
-                src={trophyImg}
+              <MarketingPicture
+                src={trophyWebp}
+                webpSrc={trophyWebp}
+                avifSrc={trophyAvif}
                 alt="CareTip trophy"
                 className="h-full w-full object-cover"
                 loading="lazy"

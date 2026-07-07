@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Bell, Sparkles } from "lucide-react";
 import { HERO_CHART_POINTS, HERO_NOTIFICATIONS, HERO_STATS } from "./dummyData";

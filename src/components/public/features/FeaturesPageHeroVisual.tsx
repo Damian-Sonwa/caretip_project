@@ -1,6 +1,7 @@
-import type { ImgHTMLAttributes } from "react";
 import { useTranslation } from "react-i18next";
-import featureHeroImg from "../../../../images/feature01.png";
+import featureHeroWebp from "../../../../images/feature01.webp";
+import featureHeroAvif from "../../../../images/feature01.avif";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 
 type FeaturesPageHeroVisualProps = {
@@ -24,12 +25,14 @@ export function FeaturesPageHeroVisual({ className }: FeaturesPageHeroVisualProp
         <div className="caretip-features-hero-v2__visual-ring" aria-hidden />
 
         <div className="caretip-features-hero-v2__visual-main-wrap caretip-features-hero-v2__float-y">
-          <img
-            src={featureHeroImg}
+          <MarketingPicture
+            src={featureHeroWebp}
+            webpSrc={featureHeroWebp}
+            avifSrc={featureHeroAvif}
             alt={t("staticPages.features.title")}
             className="caretip-features-hero-v2__visual-main"
-            loading="eager"
-            {...({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)}
+            priority
+            fadeIn={false}
             decoding="async"
           />
         </div>

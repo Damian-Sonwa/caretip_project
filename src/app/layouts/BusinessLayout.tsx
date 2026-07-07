@@ -1,5 +1,5 @@
-import { Outlet } from "react-router";
 import { useEffect } from "react";
+import { RouteOutletTransition } from "../components/RouteOutletTransition";
 import { useTranslation } from "react-i18next";
 import { BusinessSidebar } from "../components/business/BusinessSidebar";
 import { BusinessMobileSidebar } from "../components/business/BusinessMobileSidebar";
@@ -21,6 +21,8 @@ import { useCommercialPageTracking } from "../hooks/useCommercialPageTracking";
 import { BusinessEntitlementsProvider } from "../contexts/BusinessEntitlementsContext";
 import { BusinessFeatureInfoDrawerProvider } from "../components/business/BusinessFeatureInfoDrawerProvider";
 import { sessionHasActiveEntitlements } from "../lib/subscriptionEntitlementFastPath";
+import { useMinWidthMedia } from "@/lib/motionPerf";
+import { scheduleMobileDeferredWork } from "@/lib/mobilePerf";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -32,6 +34,7 @@ export function BusinessLayout() {
   const { user, authStatus } = useAuth();
   const showDemoRibbon = isWalkthroughDemoManager(user);
   const isAppReady = authStatus === "authenticated" && user?.role === "business";
+  const isLargeScreen = useMinWidthMedia(1024);
 
   useBusinessVerificationRealtime(isAppReady && !user?.impersonation);
   useDashboardLayoutPaintReady("business-layout-paint");
@@ -40,8 +43,10 @@ export function BusinessLayout() {
   useEffect(() => {
     if (!isAppReady || user?.impersonation) return;
     if (!sessionHasActiveEntitlements()) return;
-    void import("../lib/qrStudioWarmCache").then(({ preloadQrStudioDashboardData }) => {
-      preloadQrStudioDashboardData();
+    scheduleMobileDeferredWork(() => {
+      void import("../lib/qrStudioWarmCache").then(({ preloadQrStudioDashboardData }) => {
+        preloadQrStudioDashboardData();
+      });
     });
   }, [isAppReady, user?.impersonation]);
 
@@ -60,7 +65,7 @@ export function BusinessLayout() {
       {/* Suppressed on /dashboard — inline card there; see businessVerificationNotice.ts */}
       <VerificationPendingBanner />
       <div className="relative z-10">
-        {isAppReady ? <BusinessSidebar /> : <SidebarSkeleton />}
+        {isAppReady ? (isLargeScreen ? <BusinessSidebar /> : null) : isLargeScreen ? <SidebarSkeleton /> : null}
         <BusinessMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
         <div
           className={cn(
@@ -73,7 +78,7 @@ export function BusinessLayout() {
             <RouteChunkBoundary variant="shell" registrationKey="business-outlet">
               <BusinessEntitlementsProvider>
                 <BusinessFeatureInfoDrawerProvider>
-                  <Outlet />
+                  <RouteOutletTransition />
                 </BusinessFeatureInfoDrawerProvider>
               </BusinessEntitlementsProvider>
             </RouteChunkBoundary>

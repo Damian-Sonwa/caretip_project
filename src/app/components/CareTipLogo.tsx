@@ -1,6 +1,6 @@
 import type { ImgHTMLAttributes } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import companyLogoPng from "@/assets/brand/company_logo.png";
 import companyLogoWebp from "@/assets/brand/company_logo.webp";
 import companyLogoAvif from "@/assets/brand/company_logo.avif";
 import {
@@ -94,21 +94,40 @@ function CareTipLogoPicture({
   loading = "lazy",
   priority = false,
 }: LogoPictureProps) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [ready, setReady] = useState(priority);
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      setReady(true);
+    }
+  }, []);
+
   return (
-    <picture className={cn("block max-w-full", className)}>
-      <source type="image/avif" srcSet={companyLogoAvif} />
-      <source type="image/webp" srcSet={companyLogoWebp} />
-      <img
-        src={companyLogoPng}
-        alt={alt}
-        width={640}
-        height={240}
-        className={imgBase}
-        loading={priority ? "eager" : loading}
-        decoding="async"
-        {...(priority ? ({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>) : {})}
-      />
-    </picture>
+    <span className={cn("caretip-image-frame block max-w-full", className)}>
+      {!ready ? <span className="caretip-image-frame__shimmer" aria-hidden /> : null}
+      <picture className="block max-w-full">
+        <source type="image/avif" srcSet={companyLogoAvif} />
+        <source type="image/webp" srcSet={companyLogoWebp} />
+        <img
+          ref={imgRef}
+          src={companyLogoWebp}
+          alt={alt}
+          width={640}
+          height={240}
+          className={cn(
+            imgBase,
+            "caretip-marketing-img relative z-[2]",
+            ready && "caretip-marketing-img--ready",
+          )}
+          loading={priority ? "eager" : loading}
+          decoding="async"
+          onLoad={() => setReady(true)}
+          {...(priority ? ({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>) : {})}
+        />
+      </picture>
+    </span>
   );
 }
 

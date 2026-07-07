@@ -4,12 +4,13 @@ import { useTranslation } from "react-i18next";
 import { Link2, Smartphone, Zap, CheckCircle } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
-import newly01Img from "../../../../images/newly01.png";
+import newly01Webp from "../../../../images/newly01.webp";
+import newly01Avif from "../../../../images/newly01.avif";
 import { MarketingPicture } from "@/lib/marketingPicture";
 import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 
 /** Unsplash: people at a table paying with phone / card (original left-panel image) */
-const IMG_PEOPLE_PAYMENT = newly01Img;
+const IMG_PEOPLE_PAYMENT = newly01Webp;
 
 function InstantTipSplitIllustration() {
   return (
@@ -20,6 +21,8 @@ function InstantTipSplitIllustration() {
     >
       <MarketingPicture
         src={IMG_PEOPLE_PAYMENT}
+        webpSrc={newly01Webp}
+        avifSrc={newly01Avif}
         alt="Guests at a table paying with a phone"
         className="absolute inset-0 h-full w-full object-cover object-center"
         loading="lazy"

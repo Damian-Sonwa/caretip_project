@@ -104,6 +104,10 @@
   },
   "common": {
     "settingUp": "Setting things up for you.",
+    "preparingWorkspace": "Preparing your workspace…",
+    "creatingWorkspace": "Creating workspace…",
+    "openingSecureCheckout": "Opening secure checkout…",
+    "savingChanges": "Saving changes…",
     "signingOut": "Signing you out securely...",
     "onlyAMoment": "This will only take a moment.",
     "syncingAccountStatus": "Syncing account status…",

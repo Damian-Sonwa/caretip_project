@@ -22,6 +22,7 @@ function ExpandableInfoDetailBullet({ text }: { text: string }) {
 export type ExpandableInfoCardProps = {
   imageSrc: string;
   imageWebpSrc?: string;
+  imageAvifSrc?: string;
   imageAlt: string;
   title: string;
   summary: ReactNode;
@@ -47,6 +48,7 @@ export type ExpandableInfoCardProps = {
 export function ExpandableInfoCard({
   imageSrc,
   imageWebpSrc,
+  imageAvifSrc,
   imageAlt,
   title,
   summary,
@@ -83,13 +85,15 @@ export function ExpandableInfoCard({
           imageMediaClassName ?? "aspect-[16/10]",
           imageFit === "contain" &&
             "caretip-expandable-info-card__media--contain bg-neutral-100/80 px-4 pt-4 sm:px-5 sm:pt-5 dark:bg-neutral-900/50",
+          imageFit !== "contain" && "caretip-image-card-frame",
           tag ? "mt-0" : undefined,
           imageClassName,
         )}
       >
         <MarketingPicture
           src={imageSrc}
-          webpSrc={imageWebpSrc}
+          webpSrc={imageWebpSrc ?? imageSrc}
+          avifSrc={imageAvifSrc}
           alt={imageAlt}
           className={cn(
             "h-full w-full",

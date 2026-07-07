@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useReducedMotion } from "motion/react";
+import { useCoarsePointer } from "./mobilePerf";
 
 /** @deprecated Use LandingReveal — kept for non-landing dashboard code if referenced. */
 export const landingSectionViewport = { once: true, amount: 0.15, margin: "0px 0px -5% 0px" };
@@ -25,12 +26,24 @@ export const dashboardBlockMotion = {
 /** Respects reduced motion; optional stagger delay for chart blocks. */
 export function useDashboardBlockMotion(extraDelay = 0) {
   const reduceMotion = useReducedMotion();
+  const coarsePointer = useCoarsePointer();
   return React.useMemo(() => {
     if (reduceMotion) {
       return {
         initial: false as const,
         animate: { opacity: 1, y: 0 },
         transition: { duration: 0 },
+      };
+    }
+    if (coarsePointer) {
+      return {
+        initial: { opacity: 0 },
+        animate: { opacity: 1, y: 0 },
+        transition: {
+          duration: 0.22,
+          ease: [0.22, 1, 0.36, 1] as const,
+          ...(extraDelay > 0 ? { delay: extraDelay * 0.45 } : {}),
+        },
       };
     }
     return {
@@ -40,7 +53,7 @@ export function useDashboardBlockMotion(extraDelay = 0) {
         ...(extraDelay > 0 ? { delay: extraDelay } : {}),
       },
     };
-  }, [extraDelay, reduceMotion]);
+  }, [extraDelay, reduceMotion, coarsePointer]);
 }
 
 /** Pause timers / CSS loops when off-screen. */

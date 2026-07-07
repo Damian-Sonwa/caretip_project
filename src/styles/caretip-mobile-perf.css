@@ -1,0 +1,54 @@
+/**
+ * Mobile / PWA performance — GPU, touch, Safari. Desktop appearance unchanged.
+ * Scoped to max-width: 1023px unless noted.
+ */
+
+@media (max-width: 1023px) {
+  /* Faster taps — no 300ms delay on legacy WebKit. */
+  .caretip-dashboard-shell button,
+  .caretip-dashboard-shell a[role="button"],
+  .caretip-dashboard-shell [role="tab"],
+  .caretip-public-marketing-page button,
+  .caretip-public-marketing-page a[href] {
+    touch-action: manipulation;
+  }
+
+  /* iOS Safari: solid surfaces instead of backdrop-blur on fixed UI (same color read). */
+  .caretip-pwa-install-banner {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: hsl(var(--card)) !important;
+  }
+
+  /* Reduce compositor cost on sticky dashboard chrome. */
+  .caretip-dashboard-header-bar {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Lighter glass on marketing chips — mobile GPU friendly (desktop keeps blur). */
+  .caretip-hospitality-float-chip {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: rgba(255, 255, 255, 0.92);
+  }
+
+  .dark .caretip-hospitality-float-chip {
+    background-color: rgba(15, 23, 42, 0.88);
+  }
+
+  /* Pause decorative CSS loops when off-screen (battery + scroll jank). */
+  .caretip-public-motion-pause-offscreen {
+    animation-play-state: paused;
+  }
+
+  .caretip-public-motion-pause-offscreen.caretip-in-view {
+    animation-play-state: running;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-public-motion-pause-offscreen {
+    animation-play-state: paused !important;
+  }
+}

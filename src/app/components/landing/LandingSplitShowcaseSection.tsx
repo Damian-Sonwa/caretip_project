@@ -151,6 +151,7 @@ export function LandingShowcaseVisualFrame({
 export function LandingShowcaseCoverImage({
   src,
   webpSrc,
+  avifSrc,
   alt,
   objectPosition = "center",
   className,
@@ -159,6 +160,7 @@ export function LandingShowcaseCoverImage({
 }: {
   src: string;
   webpSrc?: string;
+  avifSrc?: string;
   alt: string;
   objectPosition?: string;
   className?: string;
@@ -169,8 +171,9 @@ export function LandingShowcaseCoverImage({
     <LandingShowcaseVisualFrame>
       <div className={landingUi.showcaseVisualFrame}>
         <MarketingPicture
-          src={src}
-          webpSrc={webpSrc}
+          src={webpSrc ?? src}
+          webpSrc={webpSrc ?? src}
+          avifSrc={avifSrc}
           alt={alt}
           className={cn(landingUi.showcaseVisualImg, className)}
           style={{ objectPosition }}

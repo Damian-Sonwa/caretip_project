@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
+import { useRegisterPagePaintReady } from "../../lib/globalAppLoading";
 import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
@@ -47,7 +48,9 @@ import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
 import { recordNewEmployeeTip } from "../../lib/employeeNotificationStore";
-import employeeHeroImage from "../../../../images/foremployee.png";
+import employeeHeroWebp from "../../../../images/foremployee.webp";
+import employeeHeroAvif from "../../../../images/foremployee.avif";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { PremiumPageHero } from "../../components/premium/PremiumPageHero";
@@ -86,6 +89,7 @@ interface NewTipPayload {
 export function EmployeeDashboard() {
   const { t, i18n } = useTranslation();
   const { user, authHydrated, sessionValidated, authReady, updateUser } = useRequireAuth();
+  useRegisterPagePaintReady("employee-dashboard-paint");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -452,15 +456,17 @@ export function EmployeeDashboard() {
                   "rounded-[1.75rem]",
                 )}
               >
-                <img
-                  src={employeeHeroImage}
+                <MarketingPicture
+                  src={employeeHeroWebp}
+                  webpSrc={employeeHeroWebp}
+                  avifSrc={employeeHeroAvif}
                   alt=""
                   width={480}
                   height={360}
                   className="employee-hero-chart-frame__img block h-auto max-h-[min(48svh,360px)] w-full max-w-full object-contain object-center"
-                  loading="eager"
+                  priority
+                  fadeIn={false}
                   decoding="async"
-                  {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
                 />
               </motion.div>
             </motion.div>

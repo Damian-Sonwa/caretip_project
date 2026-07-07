@@ -419,6 +419,34 @@ export function useBusinessAnalytics(
 
   useEffect(() => {
 
+    if (!enabled) return;
+
+    const tf = timeframeRef.current;
+
+    const fetchOpts = {
+
+      includeTipsFeed: includeTipsFeed && advancedAnalytics,
+
+      includeWeekStats,
+
+      includeQrAnalytics,
+
+    };
+
+    const cached = getBusinessAnalyticsBundle(tf);
+
+    if (cached && isBusinessAnalyticsBundleComplete(cached, fetchOpts)) {
+
+      applyBundle(buildBusinessAnalyticsDTO(cached));
+
+      setLoading(false);
+
+      setTimeframeLoading(false);
+
+      return;
+
+    }
+
     if (isFirstLoad.current) {
 
       isFirstLoad.current = false;
@@ -431,7 +459,7 @@ export function useBusinessAnalytics(
 
     void load({ quiet: true, periodSwitch: true });
 
-  }, [load, timeframe]);
+  }, [load, timeframe, enabled, advancedAnalytics, includeTipsFeed, includeWeekStats, includeQrAnalytics, applyBundle]);
 
 
 

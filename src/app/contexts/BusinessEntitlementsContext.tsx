@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useSubscriptionEntitlements } from "../hooks/useSubscriptionEntitlements";
 
@@ -10,10 +10,32 @@ const BusinessEntitlementsContext = createContext<BusinessEntitlementsValue | nu
 export function BusinessEntitlementsProvider({ children }: { children: ReactNode }) {
   const { user, authStatus } = useAuth();
   const enabled = authStatus === "authenticated" && user?.role === "business";
-  const value = useSubscriptionEntitlements({
+  const entitlements = useSubscriptionEntitlements({
     enabled,
     role: enabled ? "business" : null,
   });
+
+  const value = useMemo(
+    () => entitlements,
+    [
+      entitlements.tier,
+      entitlements.status,
+      entitlements.accessSource,
+      entitlements.isSponsored,
+      entitlements.capabilities,
+      entitlements.limits,
+      entitlements.hasActiveEntitlements,
+      entitlements.ready,
+      entitlements.isNone,
+      entitlements.isBasic,
+      entitlements.isPremium,
+      entitlements.isEnterprise,
+      entitlements.advancedAnalyticsEnabled,
+      entitlements.hasFeature,
+      entitlements.hasCapability,
+    ],
+  );
+
   return (
     <BusinessEntitlementsContext.Provider value={value}>{children}</BusinessEntitlementsContext.Provider>
   );

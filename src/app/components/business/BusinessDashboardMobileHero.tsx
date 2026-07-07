@@ -1,9 +1,11 @@
+import { memo } from "react";
 import { motion } from "motion/react";
-import type { ImgHTMLAttributes } from "react";
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import businessHeroImage from "../../../../images/bizzy001.png";
+import { MarketingPicture } from "@/lib/marketingPicture";
+import bizzyHeroWebp from "../../../../images/bizzy001.webp";
+import bizzyHeroAvif from "../../../../images/bizzy001.avif";
 import {
   BusinessHeroPulseMetrics,
   type BusinessHeroOperationalPulse,
@@ -19,7 +21,7 @@ type BusinessDashboardMobileHeroProps = {
   className?: string;
 };
 
-export function BusinessDashboardMobileHero({
+export const BusinessDashboardMobileHero = memo(function BusinessDashboardMobileHero({
   welcomeName,
   isPreviewMode,
   heroPulseLoading,
@@ -53,13 +55,18 @@ export function BusinessDashboardMobileHero({
 
         <div className="business-dashboard-mobile-hero__visual" aria-hidden>
           <div className="business-dashboard-mobile-hero__visual-frame">
-            <img
-              src={businessHeroImage}
+            <MarketingPicture
+              src={bizzyHeroWebp}
+              webpSrc={bizzyHeroWebp}
+              avifSrc={bizzyHeroAvif}
               alt=""
               className="business-dashboard-mobile-hero__visual-img"
-              loading="eager"
+              sizes="(max-width: 640px) 100vw, 320px"
+              width={320}
+              height={240}
+              priority
+              fadeIn={false}
               decoding="async"
-              {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
             />
           </div>
         </div>
@@ -87,4 +94,4 @@ export function BusinessDashboardMobileHero({
       </div>
     </section>
   );
-}
+});

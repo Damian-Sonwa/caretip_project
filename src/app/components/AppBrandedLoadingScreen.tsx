@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { traceGlobalOverlayMounted } from "../lib/globalAppLoadingTrace";
-import { LoadingSpinner } from "./ui/loading-spinner";
+import { CareTipLoadingTitle } from "./CareTipPageLoader";
 
 export type AppBrandedLoadingScreenProps = {
   className?: string;
@@ -14,7 +14,7 @@ export type AppBrandedLoadingScreenProps = {
 };
 
 /**
- * Global setup loader — spinner + copy only (no logo; branding lives in app chrome).
+ * Global CareTip loader — branded mark, warm pulse, workspace copy.
  */
 export function AppBrandedLoadingScreen({
   className,
@@ -23,7 +23,7 @@ export function AppBrandedLoadingScreen({
   exiting = false,
 }: AppBrandedLoadingScreenProps) {
   const { t } = useTranslation();
-  const resolvedMessage = message ?? t("common.settingUp");
+  const resolvedMessage = message ?? t("common.preparingWorkspace");
 
   useEffect(() => {
     if (!fixed || exiting) return;
@@ -33,7 +33,7 @@ export function AppBrandedLoadingScreen({
   return (
     <div
       className={cn(
-        "app-setup-loading flex flex-col items-center justify-center gap-4 bg-background px-6",
+        "app-setup-loading app-branded-loader flex flex-col items-center justify-center gap-5 bg-background px-6",
         fixed ? "fixed inset-0 z-[9998]" : "min-h-[100dvh] w-full",
         exiting && "app-setup-loading--exiting",
         className,
@@ -42,7 +42,9 @@ export function AppBrandedLoadingScreen({
       aria-busy={!exiting}
       aria-live="polite"
     >
-      <LoadingSpinner size="lg" />
+      <div className="app-branded-loader__mark" aria-hidden>
+        <CareTipLoadingTitle compact className="app-branded-loader__title" />
+      </div>
       <div className="flex max-w-sm flex-col items-center gap-1 text-center">
         <p className="text-sm font-medium text-foreground">{resolvedMessage}</p>
         <p className="text-xs text-muted-foreground">{t("common.onlyAMoment")}</p>

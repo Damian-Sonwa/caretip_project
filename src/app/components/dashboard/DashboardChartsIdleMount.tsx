@@ -114,14 +114,18 @@ export function DashboardChartsIdleMount({
 
   if (!ready) {
     return (
-      <div ref={bindSlotRef} aria-hidden={whenVisible ? true : undefined}>
+      <div
+        ref={bindSlotRef}
+        className="caretip-chart-slot-hold min-h-[14rem] w-full"
+        aria-hidden={whenVisible ? true : undefined}
+      >
         {fallback}
       </div>
     );
   }
 
   return (
-    <div ref={bindSlotRef}>
+    <div ref={bindSlotRef} className="caretip-chart-slot-hold min-h-[14rem] w-full">
       <Suspense fallback={fallback}>{children}</Suspense>
     </div>
   );

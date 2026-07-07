@@ -4,7 +4,9 @@ import { useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { hasPendingStoredSessionWithoutUser, isAuthRestorePending } from "../lib/authRestore";
 import { isPublicAuthenticationPath } from "../lib/authSession";
-import { shouldSuppressSessionBootstrapOverlay } from "../lib/authTransitionIntent";import {
+import { shouldSuppressSessionBootstrapOverlay } from "../lib/authTransitionIntent";
+import { useTranslation } from "react-i18next";
+import {
   APP_LOADING_PRIORITY,
   useAppLoadingRegistration,
   useReleaseAppBootOverlay,
@@ -42,6 +44,7 @@ function shouldBlockGlobalAuthLoader(
  * Intentional logout suppresses bootstrap — logout navigates directly to login.
  */
 export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const { authStatus, user } = useAuth();
   const { pathname } = useLocation();
   const publicShell = isPublicShellPath(pathname);
@@ -54,6 +57,7 @@ export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNod
     "app-auth-bootstrap",
     APP_LOADING_PRIORITY.AUTH,
     authBootstrapBlocking,
+    t("common.preparingWorkspace"),
   );
 
   useEffect(() => {

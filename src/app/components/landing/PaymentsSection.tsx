@@ -2,7 +2,8 @@ import { useMemo } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import paymentInfrastructureImg from "../../../../images/payment002.png";
+import payment002Webp from "../../../../images/payment002.webp";
+import payment002Avif from "../../../../images/payment002.avif";
 
 import { MarketingPicture } from "@/lib/marketingPicture";
 
@@ -150,9 +151,9 @@ export function PaymentsSection() {
             <LandingParallaxWrap>
 
               <MarketingPicture
-
-                src={paymentInfrastructureImg}
-
+                src={payment002Webp}
+                webpSrc={payment002Webp}
+                avifSrc={payment002Avif}
                 alt={t("landing.paymentsTrust.visualAlt")}
 
                 className="caretip-payments-trust-visual-image w-full max-w-[26rem] rounded-2xl"

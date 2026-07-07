@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { DashboardMetricStatCard } from "../dashboard/DashboardMetricStatCard";
 import { platformMetricTokens } from "../dashboard/dashboardMetricTokens";
 import { CountUpMetric, type CountUpMetricKind } from "../dashboard/CountUpMetric";
@@ -16,7 +16,7 @@ type PlatformStatCardProps = {
   loadingVariant?: "currency" | "count" | "pulse";
 };
 
-export function PlatformStatCard({
+export const PlatformStatCard = memo(function PlatformStatCard({
   label,
   value,
   numericValue,
@@ -48,4 +48,4 @@ export function PlatformStatCard({
       className={className}
     />
   );
-}
+});

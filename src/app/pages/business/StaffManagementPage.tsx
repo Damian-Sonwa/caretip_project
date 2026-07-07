@@ -20,6 +20,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 import { useSocket } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { fetchVenueCatalog, invalidateVenueCatalog } from "../../lib/businessVenueCatalog";
@@ -180,6 +181,7 @@ export function StaffManagementPage() {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
   const { user, isBusiness, authHydrated, sessionValidated } = useRequireAuth();
+  const isLargeScreen = useMinWidthMedia(1024);
   const { tier, hasFeature, advancedAnalyticsEnabled } = useSubscriptionEntitlements({
     enabled: isBusiness,
     role: "business",
@@ -833,10 +835,8 @@ export function StaffManagementPage() {
 
         {isInitialStaffLoad ? (
           <StaffRosterTableSkeleton rows={6} />
-        ) : (
-          <>
-        {/* Desktop Table View — horizontal scroll so Actions column stays reachable on narrow viewports */}
-        <div className={cn(businessUi.tablePanel, "hidden lg:block")}>
+        ) : isLargeScreen ? (
+        <div className={cn(businessUi.tablePanel)}>
           <table className="w-full min-w-[72rem]">
             <thead className="bg-muted/50">
               <tr>
@@ -1016,9 +1016,8 @@ export function StaffManagementPage() {
             </tbody>
           </table>
         </div>
-
-        {/* Mobile Card View */}
-        <div className="lg:hidden space-y-4">
+        ) : (
+        <div className="space-y-4">
           {filteredEmployees.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">{t("business.staffPage.mobileEmpty")}</div>
           ) : (
@@ -1150,7 +1149,6 @@ export function StaffManagementPage() {
             })
           )}
         </div>
-          </>
         )}
       </div>
 

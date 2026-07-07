@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { DashboardHeroMetricSkeleton } from "./DashboardAnalyticsLoader";
 
@@ -36,7 +36,7 @@ const CHANGE_PLACEHOLDER = "\u00a0";
  * Shared KPI card layout for business, employee, and platform dashboards.
  * Three-row grid: label → value → supporting text — aligned across cards in a row.
  */
-export function DashboardMetricStatCard({
+function DashboardMetricStatCardInner({
   tokens,
   label,
   value,
@@ -132,3 +132,5 @@ export function DashboardMetricStatCard({
     </div>
   );
 }
+
+export const DashboardMetricStatCard = memo(DashboardMetricStatCardInner);

@@ -4,6 +4,10 @@ import { Loader2, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "@/app/lib/globalAppLoading";
+import {
   activationCheckoutErrorMessage,
   startActivationCheckout,
   type ActivationCheckoutPlan,
@@ -36,6 +40,13 @@ export function ActivateCareTipCta({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+
+  useAppLoadingRegistration(
+    "activation-checkout",
+    APP_LOADING_PRIORITY.APP_INIT,
+    busy,
+    t("common.openingSecureCheckout"),
+  );
 
   const baseClass = cn(
     "inline-flex touch-manipulation items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:opacity-60",

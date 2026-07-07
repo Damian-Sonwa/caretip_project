@@ -1,6 +1,6 @@
+import { RouteOutletTransition } from "../components/RouteOutletTransition";
 import { useEffect, useState } from "react";
 import { useMobileMenuState } from "../hooks/useMobileMenuState";
-import { Outlet } from "react-router";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
@@ -14,6 +14,7 @@ import { PushNotificationSync } from "../components/PushNotificationSync";
 import { NotificationInboxSync } from "../components/NotificationInboxSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { useDashboardLayoutPaintReady } from "../lib/globalAppLoading";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 
 type EmployeeBusinessBranding = {
   businessLogo: string | null;
@@ -27,6 +28,7 @@ export function EmployeeLayout() {
   const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const { user, authStatus } = useAuth();
   const isAppReady = authStatus === "authenticated" && user?.role === "employee";
+  const isLargeScreen = useMinWidthMedia(1024);
   const [branding, setBranding] = useState<EmployeeBusinessBranding | null>(null);
 
   useEffect(() => {
@@ -58,10 +60,10 @@ export function EmployeeLayout() {
       <NotificationInboxSync />
       <div className="relative z-10">
         {isAppReady ? (
-          <EmployeeSidebar businessBranding={branding} />
-        ) : (
+          isLargeScreen ? <EmployeeSidebar businessBranding={branding} /> : null
+        ) : isLargeScreen ? (
           <SidebarSkeleton />
-        )}
+        ) : null}
         <EmployeeMobileSidebar
           isOpen={mobileMenuOpen}
           onClose={closeMobileMenu}
@@ -77,7 +79,7 @@ export function EmployeeLayout() {
           <DashboardHeader onMenuClick={openMobileMenu} />
           <main className="caretip-dashboard-page-enter min-w-0 flex-1 overflow-x-clip">
             <RouteChunkBoundary variant="shell" registrationKey="employee-outlet">
-              <Outlet />
+              <RouteOutletTransition />
             </RouteChunkBoundary>
           </main>
           <Footer variant="minimal" />

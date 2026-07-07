@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { SaasDashboard3DHeroCore } from "./SaasDashboard3DHeroCore";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
