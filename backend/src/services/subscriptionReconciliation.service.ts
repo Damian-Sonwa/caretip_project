@@ -5,6 +5,7 @@ import { prisma } from "../prisma.js";
 import {
   applyStripeMirrorTransactional,
   buildMirrorSnapshotFromStripeSubscription,
+  isInternalBasicSubscription,
 } from "./subscription.service.js";
 import { mapPlanKeyToBusinessTier } from "../lib/subscription/mapSubscriptionPlanKey.js";
 import { STRIPE_BILLING_AUDIT_TYPES } from "../lib/subscription/subscriptionAuditTypes.js";
@@ -33,6 +34,7 @@ export async function findDriftedSubscriptions(limit = 50): Promise<Subscription
       status: true,
       planKey: true,
       stripeSubscriptionId: true,
+      isTrial: true,
       business: { select: { subscriptionTier: true } },
     },
   });
@@ -42,6 +44,7 @@ export async function findDriftedSubscriptions(limit = 50): Promise<Subscription
 
   for (const row of rows) {
     if (!row.stripeSubscriptionId) continue;
+    if (isInternalBasicSubscription(row)) continue;
     try {
       const sub = await stripe.subscriptions.retrieve(row.stripeSubscriptionId);
       const snapshot = buildMirrorSnapshotFromStripeSubscription(sub);
@@ -96,9 +99,19 @@ export async function reconcileOneSubscription(subscriptionId: string): Promise<
 
   const row = await prisma.subscription.findUnique({
     where: { id: subscriptionId },
-    select: { id: true, businessId: true, stripeSubscriptionId: true },
+    select: {
+      id: true,
+      businessId: true,
+      stripeSubscriptionId: true,
+      planKey: true,
+      status: true,
+      isTrial: true,
+    },
   });
   if (!row?.stripeSubscriptionId) {
+    return false;
+  }
+  if (isInternalBasicSubscription(row)) {
     return false;
   }
 
@@ -124,14 +137,18 @@ export async function reconcileOneSubscription(subscriptionId: string): Promise<
 /** Batch reconciliation scaffold — returns count repaired. */
 export async function reconcileAllLinkedSubscriptions(limit = 100): Promise<number> {
   const ids = await prisma.subscription.findMany({
-    where: { stripeSubscriptionId: { not: null } },
+    where: {
+      stripeSubscriptionId: { not: null },
+      planKey: { not: "basic" },
+    },
     take: limit,
-    select: { id: true },
+    select: { id: true, planKey: true, status: true, stripeSubscriptionId: true, isTrial: true },
   });
 
   let repaired = 0;
-  for (const { id } of ids) {
-    const ok = await reconcileOneSubscription(id);
+  for (const row of ids) {
+    if (isInternalBasicSubscription(row)) continue;
+    const ok = await reconcileOneSubscription(row.id);
     if (ok) repaired += 1;
   }
   return repaired;
@@ -143,6 +160,19 @@ export async function reconcileAllLinkedSubscriptions(limit = 100): Promise<numb
 export async function reconcileBusinessMirrorFromStripe(
   businessId: string,
 ): Promise<{ repaired: boolean; reason?: string }> {
+  const mirror = await prisma.subscription.findUnique({
+    where: { businessId },
+    select: {
+      planKey: true,
+      status: true,
+      stripeSubscriptionId: true,
+      isTrial: true,
+    },
+  });
+  if (mirror && isInternalBasicSubscription(mirror)) {
+    return { repaired: false, reason: "internal_basic_skip" };
+  }
+
   const outcome = await tryActivateSubscriptionFromStripeForBusiness({
     businessId,
     source: "checkout_return_sync",

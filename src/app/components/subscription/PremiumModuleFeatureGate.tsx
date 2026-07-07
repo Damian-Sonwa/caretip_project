@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { FeatureKey } from "@/app/lib/subscriptionCapabilities";
 import { FeatureGate } from "./FeatureGate";
+import { ProUpgradeCard } from "./ProUpgradeCard";
 
 type PremiumModuleFeatureGateProps = {
   featureKey: FeatureKey;
@@ -8,7 +9,7 @@ type PremiumModuleFeatureGateProps = {
   enabled?: boolean;
 };
 
-/** Gates an entire module section — renders only LockedFeatureCard when access is denied (no partial premium UI). */
+/** Gates an entire module — shows dashboard Pro upgrade card when access is denied. */
 export function PremiumModuleFeatureGate({
   featureKey,
   children,
@@ -19,7 +20,7 @@ export function PremiumModuleFeatureGate({
       featureKey={featureKey}
       role="business"
       enabled={enabled}
-      lockedCardClassName="w-full"
+      lockedFallback={<ProUpgradeCard className="w-full" />}
     >
       {children}
     </FeatureGate>

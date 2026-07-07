@@ -1,0 +1,287 @@
+/**
+ * Landing page — optical balance & visual consistency (pass 3).
+ * Presentation only: spacing rhythm, alignment, typography, cards, stability, a11y.
+ * Scoped to .caretip-landing.caretip-landing--premium — no branding/color/layout redesign.
+ */
+
+.caretip-landing.caretip-landing--premium {
+  --caretip-landing-section-py-mobile: 3rem;
+  --caretip-landing-section-py-tablet: 4rem;
+  --caretip-landing-section-py-desktop: 5rem;
+  --caretip-landing-section-py-wide: 7rem;
+  --caretip-landing-intro-gap: 2rem;
+  --caretip-landing-intro-gap-md: 2.5rem;
+  --caretip-landing-intro-gap-lg: 3rem;
+  --caretip-landing-content-rail: 80rem;
+}
+
+/* ===== 1. Section spacing rhythm ===== */
+
+@media (max-width: 767px) {
+  .caretip-landing.caretip-landing--premium main > section[id]:not(#about-section):not(#final-cta) {
+    padding-top: var(--caretip-landing-section-py-mobile) !important;
+    padding-bottom: var(--caretip-landing-section-py-mobile) !important;
+  }
+
+  .caretip-landing.caretip-landing--premium #built-for-hospitality.caretip-landing-hospitality {
+    padding-top: var(--caretip-landing-section-py-mobile) !important;
+    padding-bottom: var(--caretip-landing-section-py-mobile) !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .caretip-landing.caretip-landing--premium main > section[id]:not(#about-section):not(#final-cta) {
+    padding-top: var(--caretip-landing-section-py-tablet) !important;
+    padding-bottom: var(--caretip-landing-section-py-tablet) !important;
+  }
+
+  .caretip-landing.caretip-landing--premium #built-for-hospitality.caretip-landing-hospitality {
+    padding-top: var(--caretip-landing-section-py-tablet) !important;
+    padding-bottom: var(--caretip-landing-section-py-tablet) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium main > section[id]:not(#about-section):not(#final-cta) {
+    padding-top: var(--caretip-landing-section-py-wide) !important;
+    padding-bottom: var(--caretip-landing-section-py-wide) !important;
+  }
+
+  .caretip-landing.caretip-landing--premium #built-for-hospitality.caretip-landing-hospitality {
+    padding-top: var(--caretip-landing-section-py-wide) !important;
+    padding-bottom: var(--caretip-landing-section-py-wide) !important;
+  }
+}
+
+/* Unified intro → content gap */
+.caretip-landing.caretip-landing--premium .caretip-section-intro,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-intro,
+.caretip-landing.caretip-landing--premium .caretip-real-life-section-intro,
+.caretip-landing.caretip-landing--premium .caretip-payments-trust-intro,
+.caretip-landing.caretip-landing--premium .caretip-live-minutes-intro {
+  margin-bottom: var(--caretip-landing-intro-gap) !important;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium .caretip-section-intro,
+  .caretip-landing.caretip-landing--premium .caretip-hospitality-intro,
+  .caretip-landing.caretip-landing--premium .caretip-real-life-section-intro,
+  .caretip-landing.caretip-landing--premium .caretip-payments-trust-intro,
+  .caretip-landing.caretip-landing--premium .caretip-live-minutes-intro {
+    margin-bottom: var(--caretip-landing-intro-gap-md) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-section-intro,
+  .caretip-landing.caretip-landing--premium .caretip-hospitality-intro,
+  .caretip-landing.caretip-landing--premium .caretip-real-life-section-intro,
+  .caretip-landing.caretip-landing--premium .caretip-payments-trust-intro,
+  .caretip-landing.caretip-landing--premium .caretip-live-minutes-intro {
+    margin-bottom: var(--caretip-landing-intro-gap-lg) !important;
+  }
+}
+
+/* ===== 2. Optical alignment ===== */
+
+.caretip-landing.caretip-landing--premium main > section[id] > .mx-auto.max-w-7xl,
+.caretip-landing.caretip-landing--premium main > section[id] .caretip-split-section-grid,
+.caretip-landing.caretip-landing--premium .caretip-hero-grid {
+  max-width: var(--caretip-landing-content-rail);
+  margin-inline: auto;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-section-intro,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-intro {
+  margin-inline: auto;
+}
+
+.caretip-landing.caretip-landing--premium #for-employees .caretip-showcase-action-cluster,
+.caretip-landing.caretip-landing--premium #business-section .caretip-showcase-action-cluster {
+  align-items: flex-start;
+}
+
+@media (max-width: 1023px) {
+  .caretip-landing.caretip-landing--premium #for-employees .caretip-showcase-action-cluster,
+  .caretip-landing.caretip-landing--premium #business-section .caretip-showcase-action-cluster {
+    align-items: center;
+  }
+}
+
+/* ===== 3. Typography hierarchy ===== */
+
+.caretip-landing.caretip-landing--premium .caretip-section-intro > h2,
+.caretip-landing.caretip-landing--premium .caretip-mobile-section-headline,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-title {
+  text-wrap: balance;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-section-intro > p,
+.caretip-landing.caretip-landing--premium .caretip-mobile-stack-tagline,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-lead,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-body__p {
+  text-wrap: pretty;
+  line-height: var(--caretip-landing-lead-lh, 1.62);
+}
+
+@media (max-width: 430px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-headline {
+    font-size: clamp(2rem, 8.2vw, 2.5rem) !important;
+    line-height: 1.08;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-mobile-section-headline,
+  .caretip-landing.caretip-landing--premium .caretip-section-intro > h2 {
+    font-size: clamp(1.75rem, 6.2vw, 2.125rem);
+    line-height: 1.1;
+  }
+}
+
+/* ===== 4. Card consistency ===== */
+
+.caretip-landing.caretip-landing--premium #real-life .grid {
+  align-items: stretch;
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-real-life-card,
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card {
+  height: 100%;
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__cta {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-feature-card .caretip-landing-feature-icon {
+  margin-bottom: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-feature-card .caretip-landing-feature-icon {
+    margin-bottom: 1rem;
+  }
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-features-grid {
+  align-items: stretch;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-features-grid > li {
+  display: flex;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-features-grid .caretip-landing-feature-card {
+  height: 100%;
+  width: 100%;
+}
+
+/* ===== 5. Mobile polish (375–430) ===== */
+
+@media (max-width: 430px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-media-shell {
+    max-width: min(100%, 21.25rem);
+    margin-inline: auto;
+  }
+
+  .caretip-landing.caretip-landing--premium #real-life .grid {
+    gap: 0.875rem;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-hero-cta-row {
+    gap: 0.625rem;
+    width: 100%;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-split-showcase-content-panel--mobile {
+    padding: 1.125rem 0.875rem;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-landing-section-cta {
+    margin-top: 0.25rem;
+  }
+}
+
+@media (min-width: 390px) and (max-width: 767px) {
+  .caretip-landing.caretip-landing--premium #real-life .grid > .w-full {
+    max-width: none;
+  }
+}
+
+/* ===== 6. Desktop polish (1366+) ===== */
+
+@media (min-width: 1280px) {
+  .caretip-landing.caretip-landing--premium .caretip-split-section-grid {
+    column-gap: 4.5rem;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-section-intro > p,
+  .caretip-landing.caretip-landing--premium .caretip-showcase-subtitle {
+    max-width: min(100%, 38ch);
+  }
+}
+
+@media (min-width: 1536px) {
+  .caretip-landing.caretip-landing--premium main {
+    margin-inline: auto;
+  }
+}
+
+/* ===== 7. Layout stability ===== */
+
+.caretip-landing.caretip-landing--premium .caretip-expandable-info-card__media {
+  background-color: hsl(var(--muted) / 0.28);
+}
+
+.caretip-landing.caretip-landing--premium .caretip-expandable-info-card__media img,
+.caretip-landing.caretip-landing--premium .caretip-showcase-visual-frame img,
+.caretip-landing.caretip-landing--premium .caretip-hero-showcase-img {
+  display: block;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-marketing-img {
+  max-width: 100%;
+  height: auto;
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__media .caretip-marketing-img {
+  height: 100%;
+  max-height: 100%;
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__media--contain::after {
+  opacity: 0.35;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-features-grid .caretip-landing-feature-card {
+  min-height: 0;
+}
+
+/* ===== 8. Accessibility visual pass ===== */
+
+.caretip-landing.caretip-landing--premium .caretip-hero-cta-button:focus-visible,
+.caretip-landing.caretip-landing--premium .caretip-section-cta-button:focus-visible,
+.caretip-landing.caretip-landing--premium .caretip-final-cta-button:focus-visible,
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__cta:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-expandable-info-card__cta {
+  min-height: 2.75rem;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-benefit-list li {
+  line-height: 1.5;
+}

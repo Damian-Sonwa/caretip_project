@@ -19,31 +19,31 @@ export type SubscriptionCapability =
 /** Phase B.2 — canonical feature key (1:1 with SubscriptionCapability). */
 export type FeatureKey = SubscriptionCapability;
 
-const STARTER_CAPABILITIES: SubscriptionCapability[] = [
+const BASIC_CAPABILITIES: SubscriptionCapability[] = [
+  "tipManagement",
   "employeeQr",
   "locationQr",
   "tableQr",
-  "teamManagement",
-  "customerFeedback",
-  "tipManagement",
   "basicAnalytics",
-  "csvExport",
+  "qrTemplates",
+  "teamManagement",
 ];
 
-const BUSINESS_CAPABILITIES: SubscriptionCapability[] = [
-  ...STARTER_CAPABILITIES,
-  "qrTemplates",
+const PRO_CAPABILITIES: SubscriptionCapability[] = [
+  ...BASIC_CAPABILITIES,
   "brandingCustomization",
   "advancedAnalytics",
+  "csvExport",
   "multiLocation",
   "employeeGoals",
+  "customerFeedback",
 ];
 
-const ENTERPRISE_CAPABILITIES: SubscriptionCapability[] = [...BUSINESS_CAPABILITIES];
+const ENTERPRISE_CAPABILITIES: SubscriptionCapability[] = [...PRO_CAPABILITIES];
 
 const TIER_CAPABILITIES: Record<BusinessSubscriptionTier, ReadonlySet<SubscriptionCapability>> = {
-  basic: new Set(STARTER_CAPABILITIES),
-  premium: new Set(BUSINESS_CAPABILITIES),
+  basic: new Set(BASIC_CAPABILITIES),
+  premium: new Set(PRO_CAPABILITIES),
   enterprise: new Set(ENTERPRISE_CAPABILITIES),
 };
 

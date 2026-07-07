@@ -19,9 +19,6 @@ import { PricingHero } from "@/components/pricing/PricingHero";
 import { PricingCardsHotels } from "@/components/pricing/PricingCardsHotels";
 import { PricingCardsFreelancers } from "@/components/pricing/PricingCardsFreelancers";
 import { PricingYearlyNotice } from "@/components/pricing/PricingYearlyNotice";
-import { PricingContractModels } from "@/components/pricing/PricingContractModels";
-import { PricingPackageAddOns } from "@/components/pricing/PricingPackageAddOns";
-import { PricingSpecialConditionsBanner } from "@/components/pricing/PricingSpecialConditionsBanner";
 import { PricingTrialCta } from "@/components/pricing/PricingTrialCta";
 import { cn } from "@/lib/utils";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
@@ -84,13 +81,8 @@ export function PricingPage() {
               </div>
             </div>
 
-            <PricingSpecialConditionsBanner />
             {isHotelsAudience ? (
-              <>
-                <PricingPackageAddOns />
-                <PricingContractModels billingCycle={billingCycle} />
-                <PricingTrialCta className="mx-auto max-w-3xl" billingCycle={billingCycle} />
-              </>
+              <PricingTrialCta className="mx-auto max-w-3xl" billingCycle={billingCycle} />
             ) : null}
           </div>
         </section>

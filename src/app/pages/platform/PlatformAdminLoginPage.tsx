@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useSyncExternalStore } from "react";
 import { useNavigate, Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
@@ -10,7 +10,11 @@ import { logClientError } from "../../lib/clientLog";
 import { isPlatformAdminSessionRole, shouldShowLoginSessionResumeUi } from "../../lib/authSession";
 import { shouldShowAuthBootstrapShell } from "../../lib/authBootstrapUi";
 import { AuthBootstrapShell } from "@/app/components/auth/AuthBootstrapShell";
-import { useAuthPostLoginTransitionOverlay } from "@/app/lib/useAuthPostLoginTransitionOverlay";
+import {
+  beginAuthPostLoginTransition,
+  isAuthPostLoginTransitionActive,
+  subscribeAuthPostLoginTransition,
+} from "@/app/lib/authPostLoginTransition";
 import { AuthMinimalFooter } from "@/app/components/auth/AuthMinimalFooter";
 import { caretipBtnPrimaryCompact, caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
@@ -55,8 +59,13 @@ export function PlatformAdminLoginPage() {
         !forceLogin &&
         !isPlatformAdminSessionRole(user.role),
     );
-  const authTransitionPending = authFlowInProgress && Boolean(postAuthRedirectRef.current);
-  useAuthPostLoginTransitionOverlay(authTransitionPending);
+  const postLoginTransitionActive = useSyncExternalStore(
+    subscribeAuthPostLoginTransition,
+    isAuthPostLoginTransitionActive,
+    () => false,
+  );
+  const authTransitionPending =
+    postLoginTransitionActive || (authFlowInProgress && Boolean(postAuthRedirectRef.current));
 
   const loginSubmitBlocked = Boolean(
     user && !sessionValidated && isPlatformAdminSessionRole(user.role) && !forceLogin,
@@ -67,6 +76,7 @@ export function PlatformAdminLoginPage() {
     if (postAuthRedirectRef.current === target) return;
     postAuthRedirectRef.current = target;
     setAuthFlowInProgress(true);
+    beginAuthPostLoginTransition(target);
     navigate(target, { replace: true });
   }, [navigate]);
 
@@ -199,7 +209,9 @@ export function PlatformAdminLoginPage() {
                         redirectAfterAuth();
                         return;
                       }
-                      navigate(getPostAuthRedirect(user), { replace: true });
+                      const target = getPostAuthRedirect(user);
+                      beginAuthPostLoginTransition(target);
+                      navigate(target, { replace: true });
                     }}
                     className={cn(caretipBtnPrimaryCompact, "h-9 min-h-9 px-3 text-xs disabled:opacity-50")}
                   >

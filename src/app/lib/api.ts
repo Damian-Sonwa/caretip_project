@@ -136,7 +136,8 @@ let refreshSingleton: Promise<RefreshSessionResult> | null = null;
 let refreshFailureCooldownUntil = 0;
 const REFRESH_FAILURE_COOLDOWN_MS = 15_000;
 
-function parseAuthRefreshPayload(data: unknown): AuthResponse | null {
+/** Validates `{ token, user }` auth payloads from login, OAuth, refresh, and MFA completion. */
+export function parseAuthResponsePayload(data: unknown): AuthResponse | null {
   if (!data || typeof data !== "object") return null;
   const d = data as Record<string, unknown>;
   if (typeof d.token !== "string" || !d.token.trim()) return null;
@@ -145,6 +146,10 @@ function parseAuthRefreshPayload(data: unknown): AuthResponse | null {
   const ur = u as Record<string, unknown>;
   if (typeof ur.id !== "string" || typeof ur.email !== "string" || typeof ur.role !== "string") return null;
   return data as AuthResponse;
+}
+
+function parseAuthRefreshPayload(data: unknown): AuthResponse | null {
+  return parseAuthResponsePayload(data);
 }
 
 /**
@@ -1023,9 +1028,9 @@ export async function oauthAPI(payload: {
   locale?: "en" | "de";
 }): Promise<AuthResponse> {
   const timeZone = getBrowserTimeZone();
-  return apiRequest<AuthResponse>(apiPath("/api/auth/oauth"), {
+  const raw = await apiRequest<unknown>(apiPath("/api/auth/oauth"), {
     method: "POST",
-    headers: getHeaders(),
+    headers: { "Content-Type": "application/json" },
     body: toJsonRequestBody({
       provider: payload.provider,
       idToken: payload.idToken,
@@ -1043,6 +1048,17 @@ export async function oauthAPI(payload: {
     }),
     credentials: "include",
   });
+  const parsed = parseAuthResponsePayload(raw);
+  if (!parsed) {
+    logClientError("api.oauthAPI", new Error("Incomplete OAuth auth response"), {
+      body: raw,
+      bodyKeys: raw && typeof raw === "object" ? Object.keys(raw as object) : [],
+    });
+    throw new Error(
+      "Google sign-in returned an incomplete response. Please try again. If this continues, refresh the page or use email sign-in.",
+    );
+  }
+  return parsed;
 }
 
 export async function refreshSessionAPI(): Promise<AuthResponse> {
@@ -2186,11 +2202,11 @@ export function mergeEmployeeTipsResponse(
     periodAmountEur:
       typeof summary?.periodAmountEur === "number"
         ? summary.periodAmountEur
-        : (analytics?.periodAmountEur ?? 0),
+        : analytics?.periodAmountEur,
     periodTipCount:
       typeof summary?.periodTipCount === "number"
         ? summary.periodTipCount
-        : (analytics?.periodTipCount ?? 0),
+        : analytics?.periodTipCount,
     averageRating:
       summary?.averageRating !== undefined
         ? summary.averageRating
@@ -2528,6 +2544,7 @@ export type BillingStatus = {
   sponsoredProgrammeKey?: string | null;
   sponsoredProgrammeLabelKey?: string | null;
   trialEligible?: boolean;
+  canStartTrial?: boolean;
   trialUsed?: boolean;
   trialPlanKey?: SubscriptionPlanKey | null;
   lastTrialPlanKey?: SubscriptionPlanKey | null;

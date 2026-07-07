@@ -24,23 +24,23 @@ import {
 } from "../src/services/subscriptionEntitlement.service.js";
 import { createLocationForBusinessUser } from "../src/services/locations.service.js";
 
-const STARTER_FEATURES: SubscriptionCapability[] = [
+const BASIC_CAPS: SubscriptionCapability[] = [
+  "tipManagement",
   "employeeQr",
   "locationQr",
   "tableQr",
-  "teamManagement",
-  "customerFeedback",
-  "tipManagement",
   "basicAnalytics",
-  "csvExport",
+  "qrTemplates",
+  "teamManagement",
 ];
 
-const BUSINESS_ONLY_FEATURES: FeatureKey[] = [
-  "qrTemplates",
+const PRO_ONLY_CAPS: FeatureKey[] = [
+  "brandingCustomization",
   "advancedAnalytics",
+  "csvExport",
   "multiLocation",
   "employeeGoals",
-  "brandingCustomization",
+  "customerFeedback",
 ];
 
 const results: string[] = [];
@@ -80,32 +80,32 @@ async function createTestBusiness(
 
 function testTierMatrix(): boolean {
   let ok = true;
-  for (const feature of STARTER_FEATURES) {
+  for (const feature of BASIC_CAPS) {
     if (!hasFeatureForTier(BusinessSubscriptionTier.basic, feature)) {
-      fail(`basic must have starter feature ${feature}`);
+      fail(`basic must have capability ${feature}`);
       ok = false;
     }
     if (!hasFeatureForTier(BusinessSubscriptionTier.premium, feature)) {
-      fail(`premium must have starter feature ${feature}`);
+      fail(`premium must have capability ${feature}`);
       ok = false;
     }
   }
-  for (const feature of BUSINESS_ONLY_FEATURES) {
+  for (const feature of PRO_ONLY_CAPS) {
     if (hasFeatureForTier(BusinessSubscriptionTier.basic, feature)) {
-      fail(`basic must not have business feature ${feature}`);
+      fail(`basic must not have pro capability ${feature}`);
       ok = false;
     }
     if (!hasFeatureForTier(BusinessSubscriptionTier.premium, feature)) {
-      fail(`premium must have business feature ${feature}`);
+      fail(`premium must have pro capability ${feature}`);
       ok = false;
     }
     if (!hasFeatureForTier(BusinessSubscriptionTier.enterprise, feature)) {
-      fail(`enterprise must have business feature ${feature}`);
+      fail(`enterprise must have pro capability ${feature}`);
       ok = false;
     }
   }
   if (ok) {
-    pass("tier matrix: starter on basic+, business-only on premium+, enterprise full");
+    pass("tier matrix: basic limited, pro advanced on premium+");
   }
   return ok;
 }
@@ -169,28 +169,28 @@ async function testHasFeatureDbTiers(): Promise<boolean> {
   const enterprise = await createTestBusiness(BusinessSubscriptionTier.enterprise);
 
   let ok = true;
-  for (const feature of STARTER_FEATURES) {
+  for (const feature of BASIC_CAPS) {
     if (!(await hasFeature(basic.businessId, feature))) {
-      fail(`hasFeature DB: basic business should have starter feature ${feature}`);
+      fail(`hasFeature DB: basic business should have ${feature}`);
       ok = false;
     }
   }
-  for (const feature of BUSINESS_ONLY_FEATURES) {
+  for (const feature of PRO_ONLY_CAPS) {
     if (await hasFeature(basic.businessId, feature)) {
-      fail(`hasFeature DB: basic business should not have business feature ${feature}`);
+      fail(`hasFeature DB: basic business should not have ${feature}`);
       ok = false;
     }
     if (!(await hasFeature(premium.businessId, feature))) {
-      fail(`hasFeature DB: premium business should have business feature ${feature}`);
+      fail(`hasFeature DB: premium business should have ${feature}`);
       ok = false;
     }
     if (!(await hasFeature(enterprise.businessId, feature))) {
-      fail(`hasFeature DB: enterprise business should have business feature ${feature}`);
+      fail(`hasFeature DB: enterprise business should have ${feature}`);
       ok = false;
     }
   }
   if (ok) {
-    pass("hasFeature(businessId): starter on basic, business features on premium + enterprise");
+    pass("hasFeature(businessId): basic limited, pro features on premium + enterprise");
   }
   return ok;
 }
@@ -231,11 +231,11 @@ async function main() {
   ok = (await testMultiLocationBasicCap()) && ok;
   ok = (await testMultiLocationPremiumUnlimited()) && ok;
 
-  if (capabilitiesForTier(BusinessSubscriptionTier.basic).length !== STARTER_FEATURES.length) {
+  if (capabilitiesForTier(BusinessSubscriptionTier.basic).length !== BASIC_CAPS.length) {
     fail("basic tier capability count mismatch");
     ok = false;
   } else {
-    pass("capabilitiesForTier: basic returns starter capability set");
+    pass("capabilitiesForTier: basic returns limited capability set");
   }
 
   console.log("Phase B.2.1 backend entitlements runtime checks\n");

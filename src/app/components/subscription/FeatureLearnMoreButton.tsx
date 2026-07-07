@@ -12,7 +12,7 @@ type FeatureLearnMoreButtonProps = {
 
 export function FeatureLearnMoreButton({
   featureKey,
-  intent = "activation",
+  intent = "upgrade",
   className,
 }: FeatureLearnMoreButtonProps) {
   const { t } = useTranslation();

@@ -1,6 +1,6 @@
 import { Check, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ActivateCareTipCta } from "../../subscription/ActivateCareTipCta";
+import { UpgradeCta } from "../../subscription/UpgradeCta";
 import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ type DashboardPremiumFeaturesSectionProps = {
   className?: string;
 };
 
-/** Primary upgrade section for unsubscribed business dashboards — single Activate CTA. */
+/** Upgrade section for legacy no-entitlement preview dashboards — Pro feature highlights. */
 export function DashboardPremiumFeaturesSection({ className }: DashboardPremiumFeaturesSectionProps) {
   const { t } = useTranslation();
 
@@ -64,7 +64,7 @@ export function DashboardPremiumFeaturesSection({ className }: DashboardPremiumF
           </div>
         </div>
         <div className="flex shrink-0 flex-col gap-3 lg:pt-2">
-          <ActivateCareTipCta size="md" className="w-full min-w-[200px] sm:w-auto" />
+          <UpgradeCta featureKey="advancedAnalytics" className="w-full min-w-[200px] sm:w-auto" />
         </div>
       </div>
     </section>

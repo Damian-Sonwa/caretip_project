@@ -1,13 +1,6 @@
-import { LockedFeatureCard } from "../../subscription/LockedFeatureCard";
+import { ProUpgradeCard } from "../../subscription/ProUpgradeCard";
 
-/** Dashboard locked analytics teaser — same LockedFeatureCard as full premium pages. */
+/** Dashboard analytics locked state — delegates to shared Pro upgrade card. */
 export function DashboardAnalyticsPreviewCard() {
-  return (
-    <LockedFeatureCard
-      featureKey="advancedAnalytics"
-      tier={null}
-      subscriptionStatus="none"
-      className="business-dashboard-panel-card w-full"
-    />
-  );
+  return <ProUpgradeCard className="business-dashboard-panel-card w-full" />;
 }

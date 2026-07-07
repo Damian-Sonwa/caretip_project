@@ -43,24 +43,24 @@ export type PlanLimits = {
   maxTables: number | null;
 };
 
-const STARTER_CAPABILITIES: SubscriptionCapability[] = [
+const BASIC_CAPABILITIES: SubscriptionCapability[] = [
+  "tipManagement",
   "employeeQr",
   "locationQr",
   "tableQr",
-  "teamManagement",
-  "customerFeedback",
-  "tipManagement",
   "basicAnalytics",
-  "csvExport",
+  "qrTemplates",
+  "teamManagement",
 ];
 
-const BUSINESS_CAPABILITIES: SubscriptionCapability[] = [
-  ...STARTER_CAPABILITIES,
-  "qrTemplates",
+const PRO_CAPABILITIES: SubscriptionCapability[] = [
+  ...BASIC_CAPABILITIES,
   "brandingCustomization",
   "advancedAnalytics",
+  "csvExport",
   "multiLocation",
   "employeeGoals",
+  "customerFeedback",
 ];
 
 const ENTERPRISE_FEATURES: EnterpriseFeatureKey[] = [
@@ -72,9 +72,9 @@ const ENTERPRISE_FEATURES: EnterpriseFeatureKey[] = [
 ];
 
 const TIER_CAPABILITIES: Record<BusinessSubscriptionTier, ReadonlySet<SubscriptionCapability>> = {
-  basic: new Set(STARTER_CAPABILITIES),
-  premium: new Set(BUSINESS_CAPABILITIES),
-  enterprise: new Set(BUSINESS_CAPABILITIES),
+  basic: new Set(BASIC_CAPABILITIES),
+  premium: new Set(PRO_CAPABILITIES),
+  enterprise: new Set(PRO_CAPABILITIES),
 };
 
 const PLAN_LIMITS: Record<BusinessSubscriptionTier, PlanLimits> = {

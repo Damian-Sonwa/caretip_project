@@ -12,6 +12,7 @@ import {
 } from "react-router";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthBootstrapLoadingRegistrar } from "./components/AuthBootstrapLoadingRegistrar";
+import { AuthPostLoginTransitionRegistrar } from "./components/AuthPostLoginTransitionRegistrar";
 import {
   useAppLoadingCoordinator,
   useMarkAppShellReadyOptional,
@@ -111,9 +112,11 @@ function RootLayout() {
       {import.meta.env.DEV ? <LoaderDiagRuntime /> : null}
       <ScrollToTop />
       <AuthBootstrapLoadingRegistrar>
-        <RouteChunkBoundary variant="minimal" registrationKey="root-route">
-          <Outlet />
-        </RouteChunkBoundary>
+        <AuthPostLoginTransitionRegistrar>
+          <RouteChunkBoundary variant="minimal" registrationKey="root-route">
+            <Outlet />
+          </RouteChunkBoundary>
+        </AuthPostLoginTransitionRegistrar>
       </AuthBootstrapLoadingRegistrar>
     </>
   );

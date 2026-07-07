@@ -57,7 +57,7 @@ export function LiveTipFeed({ items, loading }: LiveTipFeedProps) {
                 <p className="font-semibold tabular-nums text-primary">{formatEur(tip.amount)}</p>
                 <p className="flex items-center justify-end gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                   <Radio className="h-3 w-3" aria-hidden />
-                  {t("business.tips.live.liveBadge")}
+                  {t("status.live")}
                 </p>
               </div>
             </li>

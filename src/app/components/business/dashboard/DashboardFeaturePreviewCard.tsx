@@ -25,7 +25,7 @@ export function DashboardFeaturePreviewCard({
   icon,
   children,
   className,
-  intent = "activation",
+  intent = "upgrade",
 }: DashboardFeaturePreviewCardProps) {
   const { t } = useTranslation();
 
@@ -46,7 +46,7 @@ export function DashboardFeaturePreviewCard({
       </CardHeader>
       {children ? <CardContent className="pt-0">{children}</CardContent> : null}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 px-6 py-4">
-        <p className="text-sm text-muted-foreground">{t("business.dashboard.preview.availableWithPremium")}</p>
+        <p className="text-sm text-muted-foreground">{t("subscription.locked.availableOnPro")}</p>
         <FeatureLearnMoreButton featureKey={featureKey} intent={intent} />
       </div>
     </Card>

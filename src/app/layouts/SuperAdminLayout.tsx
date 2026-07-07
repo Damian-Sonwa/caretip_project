@@ -12,7 +12,7 @@ import { PushNotificationSync } from "../components/PushNotificationSync";
 import { NotificationInboxSync } from "../components/NotificationInboxSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { cn } from "@/lib/utils";
-import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
+import { useDashboardLayoutPaintReady } from "../lib/globalAppLoading";
 import { useMobileMenuState } from "../hooks/useMobileMenuState";
 /**
  * Platform / Super Admin shell only: sidebar, platform header, footer.
@@ -25,7 +25,7 @@ export function SuperAdminLayout() {
   const showDemoRibbon = isWalkthroughDemoPlatformAdmin(user);
   const isAppReady = authStatus === "authenticated" && user?.role === "platform_admin";
 
-  useRegisterPagePaintReady("platform-admin-layout-paint");
+  useDashboardLayoutPaintReady("platform-admin-layout-paint");
 
   return (
     <div className="relative min-h-screen bg-background">

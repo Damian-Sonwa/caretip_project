@@ -18,13 +18,16 @@ import {
   mapPricingTierToPlanKey,
   type PricingTierKey,
 } from "../../../../data/pricingPlanCatalog";
+import { buildBillingPlanComparisonFeatures } from "../../../../data/billingPlanComparisonFeatures";
+import {
+  hasOperationalBillingPlan,
+  resolveBillingPlanKey,
+} from "../../../../lib/billingDisplayState";
+import { PricingTierCard, type PricingTierCardBadge } from "@/components/pricing/PricingTierCard";
+import { pricingPageUi } from "@/components/pricing/pricingPageUi";
 import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 import { cn } from "@/lib/utils";
 import { formatBillingDate, resolveBillingLocale } from "./billingFormatters";
-import {
-  BillingWorkspacePlanCard,
-  type BillingWorkspacePlanBadge,
-} from "./BillingWorkspacePlanCard";
 
 type Props = {
   billing: BillingStatus;
@@ -39,21 +42,26 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
   const [busyPlan, setBusyPlan] = useState<SubscriptionPlanKey | "portal" | "cancel" | null>(null);
 
   const tiers = useMemo(() => buildPricingTierCatalog(t), [t]);
-  const currentPlanKey = billing.planKey;
+  const currentPlanKey = resolveBillingPlanKey(billing);
   const isTrialing =
     billing.isTrial || billing.status === "trialing" || billing.trialDaysRemaining != null;
   const trialDaysRemaining = billing.trialDaysRemaining ?? 0;
-  const isUnsubscribed = billing.status === "none" || !currentPlanKey;
+  const hasActivePlan = hasOperationalBillingPlan(billing);
 
   const canCheckout = billing.billingEnabled && billing.stripeConfigured;
   const canPortal = canCheckout && Boolean(billing.stripeCustomerId);
   const canDowngradeViaPortal = canPortal && billing.hasStripeBilling;
 
-  async function handleUpgrade(planKey: SubscriptionPlanKey) {
-    if (planKey === "enterprise") return;
+  async function handleUpgrade(planKey: SubscriptionPlanKey, includeTrial = false) {
+    if (planKey === "enterprise" || planKey === "basic") return;
     setBusyPlan(planKey);
     try {
-      const session = await createBillingCheckoutSession({ planKey, billingCycle });
+      const session = await createBillingCheckoutSession({
+        planKey,
+        billingCycle,
+        includeTrial,
+        checkoutFlow: "billing",
+      });
       if (session.url) {
         window.location.assign(session.url);
         return;
@@ -92,9 +100,9 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
     }
   }
 
-  function resolveBadge(tierKey: PricingTierKey): BillingWorkspacePlanBadge | null {
+  function resolveBadge(tierKey: PricingTierKey): PricingTierCardBadge | null {
     const planKey = mapPricingTierToPlanKey(tierKey);
-    const isCurrent = !isUnsubscribed && planKey === currentPlanKey;
+    const isCurrent = hasActivePlan && planKey === currentPlanKey;
 
     if (isCurrent && isTrialing && trialDaysRemaining > 0) {
       return { kind: "trial", daysRemaining: trialDaysRemaining };
@@ -105,22 +113,24 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
     return null;
   }
 
+  function tierActionClass(tierKey: PricingTierKey): string {
+    if (tierKey === "enterprise") return pricingPageUi.cardCtaEnterprise;
+    const tier = tiers.find((item) => item.tierKey === tierKey);
+    return tier?.isPopular ? pricingPageUi.cardCtaPrimary : pricingPageUi.cardCtaSecondary;
+  }
+
   function renderSubscriptionInfo(tierKey: PricingTierKey): ReactNode {
     const planKey = mapPricingTierToPlanKey(tierKey);
-    const isCurrent = !isUnsubscribed && planKey === currentPlanKey;
+    const isCurrent = hasActivePlan && planKey === currentPlanKey;
     if (!isCurrent) return null;
 
-    const renewalDate = billing.renewalDate ?? billing.currentPeriodEnd;
-    const lines: string[] = [];
-
     if (billing.cancelAtPeriodEnd && billing.cancellationEffective) {
-      lines.push(
-        t("business.billing.planCard.cancelScheduled", {
-          date: formatBillingDate(billing.cancellationEffective, locale, emptyDate),
-        }),
-      );
       return (
-        <p className="leading-relaxed">{lines.join(" ")}</p>
+        <p className="leading-relaxed">
+          {t("business.billing.planCard.cancelScheduled", {
+            date: formatBillingDate(billing.cancellationEffective, locale, emptyDate),
+          })}
+        </p>
       );
     }
 
@@ -134,6 +144,17 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
       );
     }
 
+    if (planKey === "basic") {
+      return (
+        <p className="leading-relaxed">
+          {t("business.billing.planCard.basicActive", {
+            price: t("business.billing.subscriptionSummary.basicPrice"),
+          })}
+        </p>
+      );
+    }
+
+    const renewalDate = billing.renewalDate ?? billing.currentPeriodEnd;
     if (renewalDate) {
       return (
         <p className="leading-relaxed">
@@ -149,28 +170,26 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
 
   function renderTierFooter(tierKey: PricingTierKey, tierName: string): ReactNode {
     const planKey = mapPricingTierToPlanKey(tierKey);
-    const isCurrent = !isUnsubscribed && planKey === currentPlanKey;
+    const isCurrent = hasActivePlan && planKey === currentPlanKey;
     const isEnterprise = tierKey === "enterprise";
 
     if (isEnterprise) {
       return (
-        <Link
-          to="/contact?intent=enterprise"
-          className={cn(dashboardWorkspaceUi.btnSecondary, "w-full justify-center")}
-        >
+        <Link to="/contact?intent=enterprise" className={tierActionClass(tierKey)}>
           {t("business.billing.contactSales")}
         </Link>
       );
     }
 
-    if (isCurrent) {
+    if (planKey === "basic") {
+      if (!isCurrent) return null;
       return (
         <button
           type="button"
           disabled
           className={cn(
-            dashboardWorkspaceUi.btnSecondary,
-            "w-full cursor-default justify-center gap-2 opacity-70",
+            pricingPageUi.cardCtaSecondary,
+            "inline-flex cursor-default items-center justify-center gap-2 opacity-70",
           )}
           aria-disabled="true"
         >
@@ -180,19 +199,67 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
       );
     }
 
-    if (isUnsubscribed || (currentPlanKey && isUpgrade(currentPlanKey, planKey))) {
+    if (isCurrent) {
+      return (
+        <button
+          type="button"
+          disabled
+          className={cn(
+            pricingPageUi.cardCtaSecondary,
+            "inline-flex cursor-default items-center justify-center gap-2 opacity-70",
+          )}
+          aria-disabled="true"
+        >
+          <CheckCircle2 className="size-4 shrink-0" aria-hidden />
+          {t("business.billing.currentPlanBadge")}
+        </button>
+      );
+    }
+
+    if (planKey === "premium" && currentPlanKey === "basic" && billing.trialEligible) {
+      return (
+        <div className="flex w-full flex-col gap-2">
+          <button
+            type="button"
+            disabled={!canCheckout || busyPlan !== null}
+            onClick={() => void handleUpgrade("premium", true)}
+            className={cn(tierActionClass(tierKey), "inline-flex items-center justify-center disabled:opacity-60")}
+            aria-busy={busyPlan === "premium" || undefined}
+          >
+            {busyPlan === "premium" ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              t("business.billing.trialFlow.promoCta")
+            )}
+          </button>
+          <button
+            type="button"
+            disabled={!canCheckout || busyPlan !== null}
+            onClick={() => void handleUpgrade("premium", false)}
+            className={cn(
+              pricingPageUi.cardCtaSecondary,
+              "inline-flex items-center justify-center disabled:opacity-60",
+            )}
+          >
+            {t("business.billing.planCard.subscribeToPro")}
+          </button>
+        </div>
+      );
+    }
+
+    if (!hasActivePlan || (currentPlanKey && isUpgrade(currentPlanKey, planKey))) {
       return (
         <button
           type="button"
           disabled={!canCheckout || busyPlan !== null}
           onClick={() => void handleUpgrade(planKey)}
-          className={cn(dashboardWorkspaceUi.btnPrimary, "w-full justify-center disabled:opacity-60")}
+          className={cn(tierActionClass(tierKey), "inline-flex items-center justify-center disabled:opacity-60")}
           aria-busy={busyPlan === planKey || undefined}
         >
           {busyPlan === planKey ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-          ) : isUnsubscribed ? (
-            t("business.billing.planCard.subscribeToPlan", { plan: tierName })
+          ) : planKey === "premium" ? (
+            t("business.billing.planCard.subscribeToPro")
           ) : (
             t("business.billing.upgradeToPlan", { plan: tierName })
           )}
@@ -208,7 +275,10 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
               type="button"
               disabled={busyPlan !== null}
               onClick={() => void handlePortal()}
-              className={cn(dashboardWorkspaceUi.btnSecondary, "w-full justify-center disabled:opacity-60")}
+              className={cn(
+                pricingPageUi.cardCtaSecondary,
+                "inline-flex items-center justify-center disabled:opacity-60",
+              )}
               aria-busy={busyPlan === "portal" || undefined}
             >
               {busyPlan === "portal" ? (
@@ -229,7 +299,10 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
           <button
             type="button"
             disabled
-            className={cn(dashboardWorkspaceUi.btnSecondary, "w-full justify-center opacity-60")}
+            className={cn(
+              pricingPageUi.cardCtaSecondary,
+              "inline-flex items-center justify-center opacity-60",
+            )}
             aria-disabled="true"
           >
             {t("business.billing.downgrade")}
@@ -303,21 +376,27 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
       ) : null}
 
       <div
-        className="billing-workspace-plans grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+        className="caretip-pricing-tiers caretip-pricing-tiers--billing"
+        data-billing-cycle={billingCycle}
         role="list"
         aria-label={t("business.billing.planManagement")}
       >
-        {tiers.map((tier) => (
-          <div key={tier.tierKey} role="listitem" className="min-w-0">
-            <BillingWorkspacePlanCard
-              tier={tier}
-              billingCycle={billingCycle}
-              badge={resolveBadge(tier.tierKey)}
-              footer={renderTierFooter(tier.tierKey, tier.name)}
-              subscriptionInfo={renderSubscriptionInfo(tier.tierKey)}
-            />
-          </div>
-        ))}
+        <div className="caretip-pricing-tiers__grid">
+          {tiers.map((tier) => (
+            <div key={tier.tierKey} role="listitem" className="min-w-0">
+              <PricingTierCard
+                tier={tier}
+                billingCycle={billingCycle}
+                badge={resolveBadge(tier.tierKey)}
+                footer={renderTierFooter(tier.tierKey, tier.name)}
+                subscriptionInfo={renderSubscriptionInfo(tier.tierKey)}
+                variant="subscription"
+                showFeatures
+                featureList={buildBillingPlanComparisonFeatures(t, tier.tierKey)}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

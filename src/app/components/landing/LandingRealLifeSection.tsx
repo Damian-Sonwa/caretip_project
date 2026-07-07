@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import logyImg from "../../../../images/logy.png";
 import repImg from "../../../../images/rep.png";
-import mid001Img from "../../../../images/mid001.png";
+import newMidImg from "../../../../images/new-mid.png";
 import fieldServicesImg from "../../../../images/trade and home services.webp";
 import { landingStaggerDelay } from "@/lib/landingMotion";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
@@ -24,6 +24,10 @@ export function LandingRealLifeSection() {
           detail: t("landing.realLife.s1Detail"),
           img: logyImg,
           alt: t("landing.realLife.s1Alt"),
+          imageFit: "cover" as const,
+          imagePosition: undefined,
+          imageMediaClassName: undefined,
+          cardClassName: undefined,
         },
         {
           headline: t("landing.realLife.s2Headline"),
@@ -32,14 +36,22 @@ export function LandingRealLifeSection() {
           detail: t("landing.realLife.s2Detail"),
           img: repImg,
           alt: t("landing.realLife.s2Alt"),
+          imageFit: "cover" as const,
+          imagePosition: undefined,
+          imageMediaClassName: undefined,
+          cardClassName: undefined,
         },
         {
           headline: t("landing.realLife.s4Headline"),
           tag: t("landing.realLife.s4Tag"),
           textKey: "landing.realLife.s4Text" as const,
           detail: t("landing.realLife.s4Detail"),
-          img: mid001Img,
+          img: newMidImg,
           alt: t("landing.realLife.s4Alt"),
+          imageFit: "cover" as const,
+          imagePosition: "50% 24%",
+          imageMediaClassName: "aspect-[16/11] caretip-real-life-card-image--midwife",
+          cardClassName: "caretip-real-life-card--midwife",
         },
         {
           headline: t("landing.realLife.s5Headline"),
@@ -48,6 +60,10 @@ export function LandingRealLifeSection() {
           detail: t("landing.realLife.s5Detail"),
           img: fieldServicesImg,
           alt: t("landing.realLife.s5Alt"),
+          imageFit: "cover" as const,
+          imagePosition: undefined,
+          imageMediaClassName: undefined,
+          cardClassName: undefined,
         },
       ],
     [t, i18n.language],
@@ -80,6 +96,9 @@ export function LandingRealLifeSection() {
               <ExpandableInfoCard
                 imageSrc={item.img}
                 imageAlt={item.alt}
+                imageFit={item.imageFit}
+                imagePosition={item.imagePosition}
+                imageMediaClassName={item.imageMediaClassName}
                 title={item.headline}
                 tag={landingCopyVisible(item.tag) ? item.tag : undefined}
                 summary={
@@ -92,6 +111,7 @@ export function LandingRealLifeSection() {
                   landingUi.mobileStackCard,
                   landingUi.realLifeCard,
                   "caretip-real-life-card",
+                  item.cardClassName,
                 )}
                 imageClassName={cn(landingUi.realLifeCardImage, "caretip-real-life-card-image")}
                 titleClassName={cn(landingUi.realLifeCardTitle, "text-left")}

@@ -3,7 +3,7 @@ import { Outlet } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile, hasClientAccessToken } from "../lib/api";
 import { BILLING_CHECKOUT_SYNCED_EVENT } from "../lib/billingCheckoutSuccessSync";
-import { primeSubscriptionEntitlementsFromSession } from "../lib/subscriptionSessionCache";
+import { primeSubscriptionEntitlementsFromSession, migrateSubscriptionEntitlementsCacheIfNeeded } from "../lib/subscriptionSessionCache";
 import { resolveSubscriptionTier } from "../lib/subscriptionCapabilities";
 import { logClientError } from "../lib/clientLog";
 import { isApiConnectivityError } from "../lib/errorMessages";
@@ -31,6 +31,10 @@ export function ApprovedBusinessGate() {
       onboardingVerificationStatus: p.onboardingVerificationStatus,
     });
   };
+
+  useEffect(() => {
+    migrateSubscriptionEntitlementsCacheIfNeeded();
+  }, []);
 
   useEffect(() => {
     if (!canSyncProfile) return;

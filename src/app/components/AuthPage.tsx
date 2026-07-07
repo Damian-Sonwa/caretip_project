@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { AuthFieldGroup } from './auth/AuthFieldGroup';
 import { AuthEmployeeVenueBanner } from './auth/AuthEmployeeVenueBanner';
 import { AuthTrustStrip } from './auth/AuthTrustStrip';
 import { LoadingSpinner } from './ui/loading-spinner';
-import { useAuthPostLoginTransitionOverlay } from '../lib/useAuthPostLoginTransitionOverlay';
+import { beginAuthPostLoginTransition, isAuthPostLoginTransitionActive, subscribeAuthPostLoginTransition } from '../lib/authPostLoginTransition';
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
 import { useAuth, type User, parseUser } from '../hooks/useAuth';
@@ -122,6 +122,7 @@ export function AuthPage() {
       if (postAuthRedirectRef.current === target) return;
       postAuthRedirectRef.current = target;
       setAuthFlowInProgress(true);
+      beginAuthPostLoginTransition(target);
       navigate(target, { replace: true });
     },
     [location.pathname, navigate],
@@ -463,8 +464,13 @@ export function AuthPage() {
   const resumeSessionPending = user != null && !sessionValidated;
   const inviteGateBlocking = isEmployeeJoinSignup && !inviteGateReady;
 
-  const authTransitionPending = authFlowInProgress && Boolean(postAuthRedirectRef.current);
-  useAuthPostLoginTransitionOverlay(authTransitionPending);
+  const postLoginTransitionActive = useSyncExternalStore(
+    subscribeAuthPostLoginTransition,
+    isAuthPostLoginTransitionActive,
+    () => false,
+  );
+  const authTransitionPending =
+    postLoginTransitionActive || (authFlowInProgress && Boolean(postAuthRedirectRef.current));
 
   if (inviteGateBlocking) {
     return (

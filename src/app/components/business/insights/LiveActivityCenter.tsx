@@ -99,7 +99,7 @@ export function LiveActivityCenter({ items, liveIds, loading, refreshing = false
                       <>
                         <span className="mx-1.5 text-border">·</span>
                         <span className="font-medium uppercase tracking-wide text-primary">
-                          {t("business.tips.live.liveBadge")}
+                          {t("status.live")}
                         </span>
                       </>
                     ) : null}

@@ -15,13 +15,13 @@ export type PricingTierDefinition = {
 export const PRICING_TIER_DEFINITIONS: readonly PricingTierDefinition[] = [
   {
     tierKey: "starter",
-    feeLine: "€29/month",
+    feeLine: "€0/month",
     icon: Store,
     isPopular: false,
   },
   {
     tierKey: "business",
-    feeLine: "€79/month",
+    feeLine: "€29/month",
     icon: Building2,
     isPopular: true,
   },

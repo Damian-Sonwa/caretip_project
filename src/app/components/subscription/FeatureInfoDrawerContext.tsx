@@ -28,7 +28,7 @@ export function FeatureInfoDrawerProvider({
 }) {
   const [state, setState] = useState<FeatureInfoDrawerState | null>(null);
 
-  const openFeatureInfo = useCallback((featureKey: FeatureKey, intent: FeatureInfoIntent = "activation") => {
+  const openFeatureInfo = useCallback((featureKey: FeatureKey, intent: FeatureInfoIntent = "upgrade") => {
     setState({ featureKey, intent });
   }, []);
 

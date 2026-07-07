@@ -180,12 +180,12 @@ export function StaffManagementPage() {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
   const { user, isBusiness, authHydrated, sessionValidated } = useRequireAuth();
-  const { tier, hasActiveEntitlements, advancedAnalyticsEnabled } = useSubscriptionEntitlements({
+  const { tier, hasFeature, advancedAnalyticsEnabled } = useSubscriptionEntitlements({
     enabled: isBusiness,
     role: "business",
   });
   const brandingTier = tier ?? "basic";
-  const canGrowTeam = hasActiveEntitlements;
+  const canGrowTeam = hasFeature("teamManagement");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState({

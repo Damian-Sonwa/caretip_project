@@ -26,6 +26,10 @@ type PricingTierCardProps = {
   displayOnly?: boolean;
   /** Subscription management layout: description before price, footer divider, aligned actions. */
   variant?: "marketing" | "subscription";
+  /** Hide marketing feature bullets (billing plan comparison). */
+  showFeatures?: boolean;
+  /** Override tier feature list (subscription billing comparison). */
+  featureList?: string[];
   className?: string;
 };
 
@@ -142,6 +146,8 @@ export function PricingTierCard({
   deferFeatureSkeleton = false,
   displayOnly = false,
   variant = "marketing",
+  showFeatures = true,
+  featureList,
   className,
 }: PricingTierCardProps) {
   const { t } = useTranslation();
@@ -194,7 +200,10 @@ export function PricingTierCard({
   );
 
   const features = (
-    <TierFeatureList features={tier.features} deferSkeleton={deferFeatureSkeleton} />
+    <TierFeatureList
+      features={featureList ?? tier.features}
+      deferSkeleton={deferFeatureSkeleton}
+    />
   );
 
   const footerBlock = (
@@ -225,10 +234,9 @@ export function PricingTierCard({
       {isSubscription ? (
         <>
           {header}
-          <p className="caretip-pricing-tier-card__desc">{description}</p>
           <div className="caretip-pricing-tier-card__divider" aria-hidden />
           {priceBlock}
-          {features}
+          {showFeatures ? features : null}
           {footerBlock}
         </>
       ) : (

@@ -5,8 +5,8 @@ import { GlobalAppLoadingHold } from "@/app/components/GlobalAppLoadingHold";
  * Shown while refresh-token validation / storage hydration resolves, or while navigating
  * away after a successful sign-in so authenticated chrome never flashes on the login route.
  *
- * Global overlay is owned by {@link AuthBootstrapLoadingRegistrar} or
- * {@link useAuthPostLoginTransitionOverlay} — never register a second AUTH loader here.
+ * Global overlay is owned by {@link AuthBootstrapLoadingRegistrar},
+ * {@link AuthPostLoginTransitionRegistrar}, or session bootstrap — never register a second AUTH loader here.
  */
 export function AuthBootstrapShell() {
   return (

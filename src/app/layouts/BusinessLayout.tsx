@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
 import { NotificationInboxSync } from "../components/NotificationInboxSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
-import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
+import { useDashboardLayoutPaintReady } from "../lib/globalAppLoading";
 import { VerificationPendingBanner } from "../components/business/VerificationPendingBanner";
 import { useBusinessVerificationRealtime } from "../hooks/useBusinessVerificationRealtime";
 import { useMobileMenuState } from "../hooks/useMobileMenuState";
@@ -34,7 +34,7 @@ export function BusinessLayout() {
   const isAppReady = authStatus === "authenticated" && user?.role === "business";
 
   useBusinessVerificationRealtime(isAppReady && !user?.impersonation);
-  useRegisterPagePaintReady("business-layout-paint");
+  useDashboardLayoutPaintReady("business-layout-paint");
   useCommercialPageTracking(isAppReady && !user?.impersonation);
 
   useEffect(() => {

@@ -6,6 +6,11 @@ import type { BillingStatus } from "../../../../lib/api";
 import { BillingStatusBadge } from "./BillingStatusBadge";
 import { formatBillingDate, resolveBillingLocale } from "./billingFormatters";
 import {
+  hasOperationalBillingPlan,
+  isOnInternalBasicPlan,
+  resolveBillingPlanKey,
+} from "../../../../lib/billingDisplayState";
+import {
   resolveBillingTrialPlanKey,
   subscriptionPlanDisplayName,
   subscriptionTrialStatusLabel,
@@ -68,8 +73,7 @@ export function BillingSubscriptionSummary({ billing, onManagePayment, className
     );
   }
 
-  const isUnsubscribed = billing.status === "none" || !billing.planKey;
-  if (isUnsubscribed) {
+  if (!hasOperationalBillingPlan(billing)) {
     return (
       <section
         className={cn("billing-subscription-summary billing-subscription-summary--empty", className)}
@@ -85,17 +89,23 @@ export function BillingSubscriptionSummary({ billing, onManagePayment, className
     );
   }
 
-  const effectivePlanKey = resolveBillingTrialPlanKey(billing);
+  const planKey = resolveBillingPlanKey(billing) ?? "basic";
+  const effectivePlanKey = resolveBillingTrialPlanKey(billing) ?? planKey;
   const planName = subscriptionPlanDisplayName(effectivePlanKey, t);
   const isTrialing =
     billing.isTrial || billing.status === "trialing" || billing.trialDaysRemaining != null;
   const trialDays = billing.trialDaysRemaining ?? 0;
   const renewalDate = billing.renewalDate ?? billing.currentPeriodEnd;
-  const showStatus = billing.status !== "none";
+  const onBasic = isOnInternalBasicPlan(billing);
 
   const metaParts: ReactNode[] = [];
 
-  if (showStatus && billing.status !== "none") {
+  if (onBasic) {
+    metaParts.push(
+      <span key="price">{t("business.billing.subscriptionSummary.basicPrice")}</span>,
+      <BillingStatusBadge key="status" status="active" />,
+    );
+  } else if (billing.status !== "none") {
     metaParts.push(<BillingStatusBadge key="status" status={billing.status} />);
   }
 
@@ -105,7 +115,7 @@ export function BillingSubscriptionSummary({ billing, onManagePayment, className
     );
   }
 
-  if (renewalDate) {
+  if (!onBasic && renewalDate) {
     metaParts.push(
       <span key="renewal">
         {t("business.billing.subscriptionSummary.renewsOn")}{" "}
@@ -119,6 +129,9 @@ export function BillingSubscriptionSummary({ billing, onManagePayment, className
       className={cn("billing-subscription-summary", className)}
       aria-labelledby="billing-summary-heading"
     >
+      <p className="billing-subscription-summary__eyebrow">
+        {t("business.billing.subscriptionSummary.currentPlanLabel")}
+      </p>
       <h2 id="billing-summary-heading" className="billing-subscription-summary__plan">
         {isTrialing ? subscriptionTrialStatusLabel(effectivePlanKey, t) : planName}
       </h2>

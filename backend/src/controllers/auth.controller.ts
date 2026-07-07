@@ -743,6 +743,24 @@ export async function oauth(req: Request, res: Response) {
       },
       { acceptLanguage: req.get("accept-language") ?? undefined },
     );
+    if (
+      !result ||
+      typeof result !== "object" ||
+      typeof (result as { then?: unknown }).then === "function"
+    ) {
+      logServerError("auth.oauth.invalidResult", new Error("OAuth returned non-object auth payload"), {
+        resultType: typeof result,
+      });
+      return res.status(503).json({ message: CLIENT_FALLBACK.loginUnexpected });
+    }
+    if (!result.token?.trim() || !result.user?.id || !result.user?.email || !result.user?.role) {
+      logServerError("auth.oauth.invalidResult", new Error("Incomplete OAuth auth result"), {
+        hasToken: Boolean(result?.token?.trim()),
+        hasUser: Boolean(result?.user),
+        userId: result?.user?.id,
+      });
+      return res.status(503).json({ message: CLIENT_FALLBACK.loginUnexpected });
+    }
     try {
       const rt = await issueRefreshToken(result.user.id);
       setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
@@ -768,6 +786,14 @@ export async function oauth(req: Request, res: Response) {
         }
       })();
     }
+    console.info(
+      "[oauth] success",
+      JSON.stringify({
+        userId: result.user.id,
+        role: result.user.role,
+        isLogin,
+      }),
+    );
     return res.status(isLogin ? 200 : 201).json(result);
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {

@@ -76,7 +76,7 @@ export const onboardingSectionTitle = cn(
 );
 
 export const onboardingBackBtn = cn(
-  "inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-xl px-4",
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4",
   "text-sm font-medium text-zinc-600 transition-all duration-200",
   "hover:text-zinc-900 hover:bg-zinc-100/80",
   "disabled:pointer-events-none disabled:opacity-30",
@@ -84,7 +84,7 @@ export const onboardingBackBtn = cn(
 );
 
 export const onboardingContinueBtn = cn(
-  "caretip-btn-primary inline-flex min-h-[3rem] w-full items-center justify-center gap-2",
+  "caretip-btn-primary inline-flex min-h-11 items-center justify-center gap-2",
   "rounded-xl px-6 text-[15px] font-semibold tracking-[0.01em]",
   "shadow-[0_8px_24px_-8px_rgba(234,88,12,0.45)]",
   "transition-all duration-200 ease-out",
@@ -95,7 +95,7 @@ export const onboardingContinueBtn = cn(
 
 export const onboardingFinishBtn = cn(
   onboardingContinueBtn,
-  "min-h-[3.25rem] text-base shadow-[0_12px_32px_-10px_rgba(234,88,12,0.55)]",
+  "text-[15px] shadow-[0_12px_32px_-10px_rgba(234,88,12,0.55)]",
   "hover:shadow-[0_16px_36px_-10px_rgba(234,88,12,0.6)]",
 );
 

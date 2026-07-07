@@ -34,7 +34,7 @@ export function LandingMotivationActivityFeedMobile() {
             {t("landing.motivation.compactFeedTitle")}
           </p>
           <span className="caretip-motivation-activity__live caretip-motivation-activity__live--pulse">
-            {t("landing.motivation.liveBadge")}
+            {t("status.live")}
           </span>
         </div>
 

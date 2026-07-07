@@ -14,6 +14,7 @@ import {
   type BillingPortalFlow,
   type SubscriptionCheckoutFlow,
 } from "./stripeBilling.service.js";
+import { assertSelfServeCheckoutPlanKey } from "../lib/subscription/billingCheckoutPolicy.js";
 import { mapPlanKeyToBusinessTier } from "../lib/subscription/mapSubscriptionPlanKey.js";
 import { resolveSubscriptionEntitlements } from "./subscriptionEntitlement.service.js";
 import type { EntitlementAccessSource } from "../lib/subscription/subscriptionEntitlementTypes.js";
@@ -47,6 +48,8 @@ export type BillingStatusDto = {
   sponsoredProgrammeKey: string | null;
   sponsoredProgrammeLabelKey: string | null;
   trialEligible: boolean;
+  /** Alias for trialEligible — explicit CTA signal for Pro trial from Basic. */
+  canStartTrial: boolean;
   trialUsed: boolean;
   /** Active trial plan (same as planKey while trialing). */
   trialPlanKey: SubscriptionPlanKey | null;
@@ -145,6 +148,7 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
       billingEnabled,
       stripeConfigured,
       trialEligible: trialEligibility.eligible,
+      canStartTrial: trialEligibility.eligible,
       trialUsed: trialEligibility.trialUsed,
       trialPlanKey: null,
       lastTrialPlanKey: trialEligibility.lastTrialPlanKey,
@@ -155,6 +159,7 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
   const sub = row.subscription;
   const trialFields = {
     trialEligible: trialEligibility.eligible,
+    canStartTrial: trialEligibility.eligible,
     trialUsed: trialEligibility.trialUsed,
     trialPlanKey:
       sub.isTrial || sub.status === SubscriptionStatus.trialing ? sub.planKey : null,
@@ -302,6 +307,8 @@ export async function createManagerCheckoutSession(params: {
   if (entitlements.accessSource === "sponsored") {
     throw new Error("Checkout is not available while sponsored access is active");
   }
+
+  assertSelfServeCheckoutPlanKey(params.planKey);
 
   const subscription = await prisma.subscription.findUnique({
     where: { businessId: params.businessId },

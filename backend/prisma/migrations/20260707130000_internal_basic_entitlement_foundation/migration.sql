@@ -1,0 +1,3 @@
+-- Commit 1: Internal Basic entitlement foundation (schema unchanged).
+-- Data backfill is idempotent — run after deploy:
+--   npm run db:migrate-internal-basic

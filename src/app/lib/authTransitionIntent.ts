@@ -9,8 +9,13 @@ import {
   isPostLogoutBootstrapSuppress,
   subscribeAuthLogoutTransition,
 } from "./authLogoutTransition";
+import {
+  isAuthPostLoginTransitionActive,
+  subscribeAuthPostLoginTransition,
+} from "./authPostLoginTransition";
 
 export { subscribeAuthLogoutTransition, isAuthLogoutTransitionActive };
+export { subscribeAuthPostLoginTransition, isAuthPostLoginTransitionActive };
 
 /** User clicked sign out — not cold-start session restore. */
 export function isIntentionalUserLogout(): boolean {
@@ -21,9 +26,9 @@ export function isIntentionalUserLogout(): boolean {
   );
 }
 
-/** Block "Setting things up for you" during intentional logout. */
+/** Block session bootstrap while logout or post-login transition owns the overlay. */
 export function shouldSuppressSessionBootstrapOverlay(): boolean {
-  return isIntentionalUserLogout();
+  return isIntentionalUserLogout() || isAuthPostLoginTransitionActive();
 }
 
 /** Sidebar sign-out button — brief disabled state, no global overlay. */

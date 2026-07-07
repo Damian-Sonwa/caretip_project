@@ -6,7 +6,7 @@ import {
   sessionHasFeature,
 } from "@/app/lib/subscriptionEntitlementFastPath";
 
-export type SidebarNavLockReason = "none" | "activation_required" | "upgrade_required";
+export type SidebarNavLockReason = "none" | "upgrade_required";
 
 export type SidebarNavEntitlementView = {
   ready: boolean;
@@ -16,25 +16,12 @@ export type SidebarNavEntitlementView = {
 
 const ALWAYS_OPEN_PREFIXES = ["/dashboard/billing", "/dashboard/settings"] as const;
 
-const SUBSCRIPTION_MODULE_PREFIXES = [
-  "/dashboard/qr-studio",
-  "/dashboard/customers",
-  "/dashboard/team",
-  "/dashboard/tips",
-] as const;
-
-const GROUP_ACTIVATION_FEATURE: Record<string, FeatureKey> = {
+const GROUP_MODULE_FEATURE: Record<string, FeatureKey> = {
   "qr-studio": "employeeQr",
   team: "teamManagement",
   customers: "customerFeedback",
   tips: "tipManagement",
 };
-
-function hrefRequiresSubscriptionModule(href: string): boolean {
-  return SUBSCRIPTION_MODULE_PREFIXES.some(
-    (prefix) => href === prefix || href.startsWith(`${prefix}/`),
-  );
-}
 
 function isAlwaysOpenHref(href: string): boolean {
   if (href === "/dashboard") return true;
@@ -73,17 +60,21 @@ export function resolveSidebarNavLock(
 } {
   const view = resolveSidebarNavEntitlements(entitlements);
   const dialogFeatureKey =
-    featureKey ?? (groupId ? GROUP_ACTIVATION_FEATURE[groupId] : undefined) ?? "tipManagement";
+    featureKey ?? (groupId ? GROUP_MODULE_FEATURE[groupId] : undefined) ?? "tipManagement";
 
   if (isAlwaysOpenHref(href)) {
     return { locked: false, reason: "none", dialogFeatureKey };
   }
 
-  if (!view.hasActiveEntitlements && hrefRequiresSubscriptionModule(href)) {
-    return { locked: true, reason: "activation_required", dialogFeatureKey };
+  if (!view.ready) {
+    return { locked: false, reason: "none", dialogFeatureKey };
   }
 
-  if (featureKey && view.hasActiveEntitlements && !view.hasFeature(featureKey)) {
+  if (!view.hasActiveEntitlements) {
+    return { locked: true, reason: "upgrade_required", dialogFeatureKey };
+  }
+
+  if (featureKey && !view.hasFeature(featureKey)) {
     return { locked: true, reason: "upgrade_required", dialogFeatureKey: featureKey };
   }
 

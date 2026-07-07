@@ -4,6 +4,7 @@ import {
   useAppLoadingOverlayActive,
   useAppLoadingRegistration,
 } from "../context/AppLoadingManager";
+import { signalPostLoginDashboardShellReady } from "./authPostLoginTransition";
 import { traceLoaderFlag } from "./loaderDiagFlags";
 import { globalAppLoadingHoldClassName } from "./globalAppLoadingHoldClassName";
 
@@ -53,4 +54,17 @@ export function useRegisterPagePaintReady(registrationKey: string, enabled = tru
   }
 
   useRegisterGlobalAppInit(registrationKey, holdForPaint);
+}
+
+/**
+ * Dashboard shell paint latch + post-login handoff signal.
+ * Extends the overlay one frame while the shell commits, then ends the login transition.
+ */
+export function useDashboardLayoutPaintReady(registrationKey: string, enabled = true): void {
+  useRegisterPagePaintReady(registrationKey, enabled);
+
+  useLayoutEffect(() => {
+    if (!enabled) return;
+    signalPostLoginDashboardShellReady();
+  }, [enabled, registrationKey]);
 }

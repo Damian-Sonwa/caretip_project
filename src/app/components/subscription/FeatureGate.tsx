@@ -19,6 +19,8 @@ type FeatureGateProps = {
   fallback?: ReactNode;
   /** When false, render nothing instead of LockedFeatureCard */
   showLockedCard?: boolean;
+  /** Custom locked UI (e.g. dashboard ProUpgradeCard for full modules). */
+  lockedFallback?: ReactNode;
   lockedCardCompact?: boolean;
   lockedCardClassName?: string;
 };
@@ -40,7 +42,8 @@ export function FeatureGate({
   children,
   fallback,
   showLockedCard = true,
-  lockedCardCompact = false,
+  lockedFallback,
+  lockedCardCompact = true,
   lockedCardClassName,
 }: FeatureGateProps) {
   const { tier, status, ready, hasFeature } = useEntitlementsForGate(role, enabled);
@@ -52,6 +55,7 @@ export function FeatureGate({
   if (isEntitlementsSessionPrimed() && !sessionHasFeature(featureKey)) {
     if (fallback) return <>{fallback}</>;
     if (!showLockedCard) return null;
+    if (lockedFallback) return <>{lockedFallback}</>;
     return (
       <LockedFeatureCard
         featureKey={featureKey}
@@ -70,6 +74,7 @@ export function FeatureGate({
 
   if (fallback) return <>{fallback}</>;
   if (!showLockedCard) return null;
+  if (lockedFallback) return <>{lockedFallback}</>;
 
   return (
     <LockedFeatureCard

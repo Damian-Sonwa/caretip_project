@@ -2,6 +2,7 @@
 export const SUBSCRIPTION_AUDIT_TYPES = {
   created: "subscription_created",
   planChanged: "subscription_plan_changed",
+  downgradedToBasic: "subscription_downgraded_to_basic",
 } as const;
 
 /** Stripe billing webhook audit types (Phase B.1+). */

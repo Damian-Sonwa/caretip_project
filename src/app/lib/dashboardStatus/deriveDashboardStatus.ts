@@ -39,7 +39,7 @@ export function deriveRealtimeStatusItems(
       {
         id: "live",
         tone: "live",
-        label: t("dashboard.status.realtimeLive"),
+        label: t("status.live"),
         description: t("dashboard.status.realtimeLiveDesc"),
       },
     ];

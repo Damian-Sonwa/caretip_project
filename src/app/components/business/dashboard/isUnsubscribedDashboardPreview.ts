@@ -3,7 +3,7 @@ import {
   sessionHasActiveEntitlements,
 } from "@/app/lib/subscriptionEntitlementFastPath";
 
-/** True when the business has no operational subscription/sponsored access (dashboard preview mode). */
+/** True only when the business has no entitled access (exceptional — not internal Basic). */
 export function isUnsubscribedDashboardPreview(
   entitlementsReady: boolean,
   hasActiveEntitlements: boolean,

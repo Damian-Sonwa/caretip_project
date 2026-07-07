@@ -193,6 +193,9 @@ export function userFromAuthResponse(data: AuthResponse["user"]): User {
 }
 
 export function parseUser(data: AuthResponse["user"]): User {
+  if (!data || typeof data !== "object") {
+    throw new Error("Invalid auth response: missing user profile.");
+  }
   const ext = data as AuthResponse["user"] & {
     impersonation?: boolean;
     impersonatedBy?: string;

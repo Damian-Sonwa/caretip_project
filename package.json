@@ -24,7 +24,10 @@
     "test:xss-audit": "node scripts/xss-audit.mjs",
     "test:csp": "node scripts/csp-verify.mjs",
     "test:csrf-audit": "node scripts/csrf-audit.mjs",
-    "test:secret-exposure": "npm --prefix backend run test:secret-exposure"
+    "test:secret-exposure": "npm --prefix backend run test:secret-exposure",
+    "test:subscription-entitlements-frontend": "node ./backend/node_modules/tsx/dist/cli.mjs ./scripts/subscription-entitlements-frontend-runtime.ts",
+    "test:subscription-billing-ux-frontend": "node ./backend/node_modules/tsx/dist/cli.mjs ./scripts/subscription-billing-ux-frontend-runtime.ts",
+    "test:subscription-migration-frontend": "node ./backend/node_modules/tsx/dist/cli.mjs ./scripts/subscription-migration-frontend-runtime.ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

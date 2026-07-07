@@ -26,36 +26,40 @@ export function VerificationPendingBanner({ className }: { className?: string })
   return (
     <div
       className={cn(
-        "business-verification-bar relative z-20 border-b px-4 py-2",
-        rejected
-          ? "border-destructive/15 bg-destructive/[0.03] text-destructive/90"
-          : "border-amber-500/15 bg-amber-500/[0.04] text-amber-950/85 dark:text-amber-100/90",
+        "business-verification-bar relative z-20 border-b bg-background/95 px-4 py-2.5 backdrop-blur-sm",
+        rejected ? "border-destructive/15" : "border-border",
         className,
       )}
       role="status"
       aria-live="polite"
     >
       <div className="mx-auto flex max-w-7xl items-center gap-2.5 sm:gap-3">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          {rejected ? (
-            <ShieldAlert className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
-          ) : (
-            <Clock className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
-          )}
-          <div className="flex min-w-0 flex-1 items-baseline gap-1.5 sm:gap-2">
-            <p className="shrink-0 text-xs font-medium">{labels.title}</p>
-            <span className="hidden text-xs opacity-50 sm:inline" aria-hidden>
-              ·
-            </span>
-            <p className="hidden min-w-0 truncate text-xs opacity-75 sm:block">{labels.description}</p>
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+          <span
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium",
+              rejected
+                ? "border-destructive/20 bg-destructive/5 text-destructive"
+                : "border-amber-200/90 bg-amber-50 text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-200",
+            )}
+          >
+            {rejected ? (
+              <ShieldAlert className="h-3 w-3" aria-hidden />
+            ) : (
+              <Clock className="h-3 w-3" aria-hidden />
+            )}
+            {rejected
+              ? t("business.awaitingApproval.badgeRejected")
+              : t("business.awaitingApproval.badgePending")}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium text-foreground">{labels.title}</p>
+            <p className="hidden truncate text-xs text-muted-foreground sm:block">{labels.description}</p>
           </div>
         </div>
         <Link
           to="/awaiting-approval"
-          className={cn(
-            "shrink-0 text-xs font-semibold underline-offset-2 transition-colors hover:underline",
-            rejected ? "text-destructive" : "text-amber-900/90 dark:text-amber-100",
-          )}
+          className="shrink-0 text-xs font-semibold text-foreground underline-offset-2 transition-colors hover:underline"
         >
           {labels.cta}
         </Link>

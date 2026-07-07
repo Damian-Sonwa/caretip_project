@@ -8,7 +8,6 @@ import {
 } from "@/app/lib/featurePlanInclusion";
 import { featureListKeys, getFeatureCatalog } from "@/app/lib/subscriptionFeatureCatalog";
 import { ACTIVATION_SHEET_CLOSE_MS } from "@/app/lib/activateCareTipNavigation";
-import { ActivateCareTipCta } from "./ActivateCareTipCta";
 import { UpgradeCta } from "./UpgradeCta";
 import type { FeatureInfoIntent } from "./FeatureInfoDrawerContext";
 import {
@@ -31,7 +30,6 @@ type FeatureInfoDrawerProps = {
 
 export function FeatureInfoDrawer({
   featureKey,
-  intent = "activation",
   open,
   onOpenChange,
 }: FeatureInfoDrawerProps) {
@@ -40,7 +38,6 @@ export function FeatureInfoDrawer({
 
   const catalog = getFeatureCatalog(featureKey);
   const benefits = featureListKeys(catalog);
-  const isActivation = intent === "activation";
 
   const closeBeforeNavigate = () => onOpenChange(false);
 
@@ -52,9 +49,7 @@ export function FeatureInfoDrawer({
             <div className="flex items-center gap-2 text-primary">
               <Lock className="h-4 w-4 shrink-0" aria-hidden />
               <span className="text-xs font-semibold uppercase tracking-wide">
-                {isActivation
-                  ? t("subscription.featureInfo.activationEyebrow")
-                  : t("subscription.featureInfo.upgradeEyebrow")}
+                {t("subscription.featureInfo.upgradeEyebrow")}
               </span>
             </div>
             <SheetTitle className="text-xl font-semibold tracking-tight">
@@ -119,22 +114,13 @@ export function FeatureInfoDrawer({
         </div>
 
         <SheetFooter className="mt-auto flex-col gap-2 border-t border-border/60 bg-muted/10 px-6 py-4">
-          {isActivation ? (
-            <ActivateCareTipCta
-              size="md"
-              className="w-full justify-center"
-              closeBeforeNavigate={closeBeforeNavigate}
-              closeAnimationMs={ACTIVATION_SHEET_CLOSE_MS}
-            />
-          ) : (
-            <UpgradeCta
-              featureKey={featureKey}
-              className="w-full justify-center"
-              fullWidth
-              closeBeforeNavigate={closeBeforeNavigate}
-              closeAnimationMs={ACTIVATION_SHEET_CLOSE_MS}
-            />
-          )}
+          <UpgradeCta
+            featureKey={featureKey}
+            className="w-full justify-center"
+            fullWidth
+            closeBeforeNavigate={closeBeforeNavigate}
+            closeAnimationMs={ACTIVATION_SHEET_CLOSE_MS}
+          />
           <Button type="button" variant="ghost" className="w-full" onClick={() => onOpenChange(false)}>
             {t("dashboardNav.business.premiumDialog.maybeLater")}
           </Button>

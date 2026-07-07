@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo, useRef, lazy } from "react";
 import { Link, Navigate } from "react-router";
 import type { ImgHTMLAttributes } from "react";
 import {
-  Star,
   Sparkles,
   HelpCircle,
 } from "lucide-react";
@@ -26,8 +25,8 @@ import { useBusinessDashboardStats } from "../../hooks/useBusinessDashboardStats
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { useBusinessEntitlementsContext } from "../../contexts/BusinessEntitlementsContext";
 import { FeatureGate } from "../../components/subscription/FeatureGate";
-import { DashboardPremiumFeaturesSection } from "../../components/business/dashboard/DashboardPremiumFeaturesSection";
-import { DashboardFeaturePreviewCard } from "../../components/business/dashboard/DashboardFeaturePreviewCard";
+import { ProUpgradeCard } from "../../components/subscription/ProUpgradeCard";
+import { BasicPlanStatusCard } from "../../components/business/dashboard/BasicPlanStatusCard";
 import { isUnsubscribedDashboardPreview } from "../../components/business/dashboard/isUnsubscribedDashboardPreview";
 import {
   DashboardHeroMetricSkeleton,
@@ -130,16 +129,15 @@ export function BusinessDashboard() {
     enabled: user?.role === "business" && authReady && businessEntitlements == null,
     role: user?.role === "business" ? "business" : null,
   });
-  const { ready: entitlementsReady, hasActiveEntitlements, advancedAnalyticsEnabled } =
+  const { ready: entitlementsReady, hasActiveEntitlements, advancedAnalyticsEnabled, tier } =
     businessEntitlements ?? fallbackEntitlements;
   const isPreviewMode = isUnsubscribedDashboardPreview(entitlementsReady, hasActiveEntitlements);
-  const onboardingReviewPending = Boolean(
+  const showProUpgradePromo = entitlementsReady && (tier === "basic" || isPreviewMode);
+  const onboardingReviewRejected = Boolean(
     isBusiness &&
       user &&
       !user.impersonation &&
-      user.onboardingVerificationStatus &&
-      (user.onboardingVerificationStatus === "submitted" ||
-        user.onboardingVerificationStatus === "rejected"),
+      user.onboardingVerificationStatus === "rejected",
   );
 
   const {
@@ -172,7 +170,7 @@ export function BusinessDashboard() {
     sessionValidated,
     advancedAnalyticsEnabled,
   );
-  const showOnboardingReviewNotice = onboardingReviewPending;
+  const showOnboardingReviewNotice = onboardingReviewRejected;
   const verificationNoticeLabels = getBusinessVerificationNoticeLabels(
     t,
     user?.onboardingVerificationStatus === "rejected",
@@ -689,62 +687,50 @@ export function BusinessDashboard() {
             />
           </motion.div>
 
-          {isPreviewMode ? (
-            <motion.div {...dashboardBlockMotion} transition={{ delay: 0.32 }} className="business-dashboard-block business-dashboard-block--primary">
-              <DashboardFeaturePreviewCard
-                featureKey="advancedAnalytics"
-                title={t("business.dashboard.preview.analyticsTitle")}
-                description={t("business.dashboard.preview.analyticsDesc")}
-                icon={<CareIcon name="analytics" size="md" className="text-primary/80" />}
-              />
-            </motion.div>
-          ) : (
+          {showProUpgradePromo ? (
             <motion.div
               {...dashboardBlockMotion}
-              transition={{ delay: 0.32 }}
+              transition={{ delay: 0.3 }}
               className="business-dashboard-block business-dashboard-block--primary"
             >
-              <FeatureGate featureKey="advancedAnalytics" role="business" enabled={isBusiness}>
-                <DashboardChartsIdleMount
-                  whenVisible
-                  mountSignal={`${analyticsTimeframe}-${dataRevision}`}
-                  fallback={<BusinessDashboardChartsFallback />}
-                >
-                  <BusinessDashboardAnalyticsCharts
-                    showChartsLoading={showChartsLoading}
-                    useDevDemo={useDevDemo}
-                    hasTipActivityInPeriod={hasChartTipActivity}
-                    tipDistributionChartData={tipDistributionChartData}
-                    tipDistributionTotal={tipDistributionTotal}
-                    employeePerformance={employeePerformance}
-                    employeeCount={activeRosterCount}
-                    analyticsTimeframe={analyticsTimeframe}
-                    chartRenderKey={`${analyticsTimeframe}-${dataRevision}-${tipDistributionChartData.length}`}
-                  />
-                </DashboardChartsIdleMount>
-              </FeatureGate>
-            </motion.div>
-          )}
-
-          {isPreviewMode ? (
-            <motion.div {...dashboardBlockMotion} transition={{ delay: 0.28 }} className="business-dashboard-block">
-              <DashboardPremiumFeaturesSection />
+              <div className="dashboard-upgrade-stack">
+                <BasicPlanStatusCard className="business-dashboard-panel-card w-full" />
+                <ProUpgradeCard className="business-dashboard-panel-card w-full" />
+              </div>
             </motion.div>
           ) : null}
+
+          <motion.div
+            {...dashboardBlockMotion}
+            transition={{ delay: 0.32 }}
+            className="business-dashboard-block business-dashboard-block--primary"
+          >
+            <FeatureGate featureKey="advancedAnalytics" role="business" enabled={isBusiness}>
+              <DashboardChartsIdleMount
+                whenVisible
+                mountSignal={`${analyticsTimeframe}-${dataRevision}`}
+                fallback={<BusinessDashboardChartsFallback />}
+              >
+                <BusinessDashboardAnalyticsCharts
+                  showChartsLoading={showChartsLoading}
+                  useDevDemo={useDevDemo}
+                  hasTipActivityInPeriod={hasChartTipActivity}
+                  tipDistributionChartData={tipDistributionChartData}
+                  tipDistributionTotal={tipDistributionTotal}
+                  employeePerformance={employeePerformance}
+                  employeeCount={activeRosterCount}
+                  analyticsTimeframe={analyticsTimeframe}
+                  chartRenderKey={`${analyticsTimeframe}-${dataRevision}-${tipDistributionChartData.length}`}
+                />
+              </DashboardChartsIdleMount>
+            </FeatureGate>
+          </motion.div>
 
           <motion.div
             {...dashboardBlockMotion}
             transition={{ delay: 0.35 }}
             className="business-dashboard-block business-dashboard-block--secondary"
           >
-            {isPreviewMode ? (
-              <DashboardFeaturePreviewCard
-                featureKey="employeeGoals"
-                title={t("business.dashboard.employeeGoalsTitle")}
-                description={t("business.dashboard.preview.goalsDesc")}
-                icon={<CareIcon name="goals" size="md" className="text-primary/80" />}
-              />
-            ) : (
             <FeatureGate featureKey="employeeGoals" role="business" enabled={isBusiness}>
             <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card business-dashboard-panel-card--secondary w-full")}>
               <CardHeader className="business-dashboard-panel-card__header space-y-2.5">
@@ -865,23 +851,13 @@ export function BusinessDashboard() {
               ) : null}
             </Card>
             </FeatureGate>
-            )}
           </motion.div>
 
           {/* Recent customer feedback */}
           <motion.div {...dashboardBlockMotion} transition={{ delay: 0.55 }} className="business-dashboard-block business-dashboard-block--secondary">
-            {isPreviewMode ? (
-              <DashboardFeaturePreviewCard
-                featureKey="customerFeedback"
-                title={t("business.customerFeedback.recentTitle")}
-                description={t("business.dashboard.preview.feedbackDesc")}
-                icon={<Star className="h-5 w-5 text-primary/80" aria-hidden />}
-              />
-            ) : (
-              <FeatureGate featureKey="customerFeedback" role="business" enabled={isBusiness}>
-                <RecentCustomerFeedbackPanel enabled={isBusiness && sessionValidated} />
-              </FeatureGate>
-            )}
+            <FeatureGate featureKey="customerFeedback" role="business" enabled={isBusiness}>
+              <RecentCustomerFeedbackPanel enabled={isBusiness && sessionValidated} />
+            </FeatureGate>
           </motion.div>
 
           {/* Help */}

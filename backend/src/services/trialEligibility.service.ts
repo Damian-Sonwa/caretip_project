@@ -1,16 +1,23 @@
-import type { SubscriptionPlanKey } from "@prisma/client";
+import { SubscriptionPlanKey, SubscriptionStatus } from "@prisma/client";
 import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
 import { isSubscriptionTrialEnabled } from "../config/subscriptionTrial.js";
+import { isSubscriptionMirrorEntitled } from "../lib/subscription/subscriptionMirrorEntitlement.js";
 import { prisma } from "../prisma.js";
+import { isInternalBasicSubscription } from "./subscription.service.js";
+import { findActiveSponsoredGrantForBusiness } from "./sponsoredAccess.service.js";
 import { isStripeConfigured } from "./stripe.service.js";
-import { resolveSubscriptionEntitlements } from "./subscriptionEntitlement.service.js";
 
 export type TrialEligibilityReason =
   | "eligible"
   | "sponsored"
-  | "active_subscription"
+  | "active_pro"
+  | "trialing_pro"
+  | "premium"
   | "trial_used"
-  | "billing_unavailable";
+  | "not_internal_basic"
+  | "billing_unavailable"
+  /** @deprecated Use active_pro — kept for log compatibility */
+  | "active_subscription";
 
 export type TrialEligibility = {
   eligible: boolean;
@@ -20,30 +27,45 @@ export type TrialEligibility = {
   lastTrialPlanKey: SubscriptionPlanKey | null;
 };
 
+/** Pro-only trials (internal planKey `premium` = marketing Pro). */
 export function isTrialPlanKeyEligibleForStripeTrial(planKey: SubscriptionPlanKey): boolean {
-  return planKey === "basic" || planKey === "premium";
+  return planKey === "premium";
+}
+
+export function hasProTrialBeenConsumed(sub: {
+  trialStartedAt: Date | null;
+  trialExpiredAt: Date | null;
+} | null): boolean {
+  return Boolean(sub?.trialStartedAt ?? sub?.trialExpiredAt);
+}
+
+/** Resolve which plan the business last trialed — survives downgrade to internal Basic. */
+export function resolveLastTrialPlanKey(
+  sub: {
+    planKey: SubscriptionPlanKey;
+    status: SubscriptionStatus;
+    trialStartedAt: Date | null;
+    trialExpiredAt: Date | null;
+  } | null,
+): SubscriptionPlanKey | null {
+  if (!sub) return null;
+  if (sub.status === SubscriptionStatus.trialing) return sub.planKey;
+  if (!hasProTrialBeenConsumed(sub)) return null;
+  // Commit 2+: trials are Pro-only; after downgrade mirror is basic but history remains.
+  return SubscriptionPlanKey.premium;
 }
 
 export async function resolveTrialEligibilityForBusiness(
   businessId: string,
 ): Promise<TrialEligibility> {
-  const entitlements = await resolveSubscriptionEntitlements(businessId);
+  const sponsoredGrant = await findActiveSponsoredGrantForBusiness(businessId);
 
-  if (entitlements.accessSource === "sponsored") {
+  if (sponsoredGrant) {
     return {
       eligible: false,
       trialUsed: false,
       reason: "sponsored",
       lastTrialPlanKey: null,
-    };
-  }
-
-  if (entitlements.hasActiveEntitlements) {
-    return {
-      eligible: false,
-      trialUsed: false,
-      reason: "active_subscription",
-      lastTrialPlanKey: entitlements.plan,
     };
   }
 
@@ -60,19 +82,77 @@ export async function resolveTrialEligibilityForBusiness(
     where: { businessId },
     select: {
       planKey: true,
+      status: true,
+      stripeSubscriptionId: true,
+      isTrial: true,
+      cancelAtPeriodEnd: true,
+      cancellationEffective: true,
+      currentPeriodEnd: true,
+      canceledAt: true,
       trialStartedAt: true,
       trialExpiredAt: true,
+      trialEndsAt: true,
     },
   });
 
-  const trialUsed = Boolean(sub?.trialStartedAt ?? sub?.trialExpiredAt);
+  const lastTrialPlanKey = resolveLastTrialPlanKey(sub);
+  const trialUsed = hasProTrialBeenConsumed(sub);
+
+  if (!sub) {
+    return {
+      eligible: false,
+      trialUsed: false,
+      reason: "not_internal_basic",
+      lastTrialPlanKey: null,
+    };
+  }
+
+  const entitled = isSubscriptionMirrorEntitled(sub);
+
+  if (entitled) {
+    if (sub.status === SubscriptionStatus.trialing || sub.isTrial) {
+      return {
+        eligible: false,
+        trialUsed: true,
+        reason: "trialing_pro",
+        lastTrialPlanKey: sub.planKey,
+      };
+    }
+
+    if (sub.planKey === SubscriptionPlanKey.enterprise) {
+      return {
+        eligible: false,
+        trialUsed,
+        reason: "premium",
+        lastTrialPlanKey,
+      };
+    }
+
+    if (!isInternalBasicSubscription(sub)) {
+      return {
+        eligible: false,
+        trialUsed,
+        reason: sub.planKey === SubscriptionPlanKey.premium ? "active_pro" : "premium",
+        lastTrialPlanKey,
+      };
+    }
+  }
 
   if (trialUsed) {
     return {
       eligible: false,
       trialUsed: true,
       reason: "trial_used",
-      lastTrialPlanKey: sub?.planKey ?? null,
+      lastTrialPlanKey,
+    };
+  }
+
+  if (!isInternalBasicSubscription(sub)) {
+    return {
+      eligible: false,
+      trialUsed,
+      reason: "not_internal_basic",
+      lastTrialPlanKey,
     };
   }
 
@@ -88,6 +168,10 @@ export async function assertTrialCheckoutAllowed(
   businessId: string,
   planKey: SubscriptionPlanKey,
 ): Promise<void> {
+  if (!isTrialPlanKeyEligibleForStripeTrial(planKey)) {
+    throw new Error("Free trial is only available for Pro");
+  }
+
   const eligibility = await resolveTrialEligibilityForBusiness(businessId);
   if (!eligibility.eligible) {
     throw new Error(
@@ -95,8 +179,5 @@ export async function assertTrialCheckoutAllowed(
         ? "Free trial has already been used for this business"
         : "Free trial is not available",
     );
-  }
-  if (!isTrialPlanKeyEligibleForStripeTrial(planKey)) {
-    throw new Error("Free trial is not available for the selected plan");
   }
 }

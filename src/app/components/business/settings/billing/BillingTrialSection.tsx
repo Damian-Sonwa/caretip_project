@@ -3,11 +3,10 @@ import { Link } from "react-router";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import type { BillingStatus, SubscriptionPlanKey } from "@/app/lib/api";
+import type { BillingStatus } from "@/app/lib/api";
 import { createBillingCheckoutSession } from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
-import { mapPricingTierToPlanKey, type PricingTierKey } from "@/app/data/pricingPlanCatalog";
-import { subscriptionPlanDisplayName } from "../../../../lib/subscriptionPlanDisplayName";
+import { shouldShowTrialExpiredUpgrade } from "@/app/lib/billingDisplayState";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -19,35 +18,26 @@ import {
 } from "@/app/components/ui/dialog";
 import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 
-const TRIAL_TIER_OPTIONS: PricingTierKey[] = ["starter", "business", "enterprise"];
-
 type BillingTrialPlanDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   billingCycle: "monthly" | "yearly";
 };
 
+/** Pro-only trial — upgrades Basic → Pro for 4 weeks. */
 export function BillingTrialPlanDialog({
   open,
   onOpenChange,
   billingCycle,
 }: BillingTrialPlanDialogProps) {
   const { t } = useTranslation();
-  const [selectedTier, setSelectedTier] = useState<PricingTierKey>("business");
   const [busy, setBusy] = useState(false);
 
   async function startTrialCheckout() {
-    const planKey = mapPricingTierToPlanKey(selectedTier);
-    if (planKey === "enterprise") {
-      onOpenChange(false);
-      window.location.assign("/contact?intent=enterprise");
-      return;
-    }
-
     setBusy(true);
     try {
       const session = await createBillingCheckoutSession({
-        planKey,
+        planKey: "premium",
         billingCycle,
         includeTrial: true,
         checkoutFlow: "billing",
@@ -76,46 +66,10 @@ export function BillingTrialPlanDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2 px-6 py-5" role="radiogroup" aria-label={t("business.billing.trialFlow.chooseTitle")}>
-          {TRIAL_TIER_OPTIONS.map((tierKey) => {
-            const planKey = mapPricingTierToPlanKey(tierKey);
-            const isSelected = selectedTier === tierKey;
-            const tierName = t(`staticPages.pricing.tiers.${tierKey}.name`);
-            const isPopular = tierKey === "business";
-
-            return (
-              <label
-                key={tierKey}
-                className={cn(
-                  "flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 transition-colors",
-                  isSelected
-                    ? "border-primary/40 bg-primary/[0.06] ring-1 ring-primary/20"
-                    : "border-border/70 bg-background hover:bg-muted/30",
-                )}
-              >
-                <input
-                  type="radio"
-                  name="trial-plan"
-                  className="mt-1 shrink-0 accent-[var(--caretip-brand-orange,#e9781c)]"
-                  checked={isSelected}
-                  onChange={() => setSelectedTier(tierKey)}
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="text-sm font-semibold text-foreground">{tierName}</span>
-                    {isPopular ? (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-                        {t("staticPages.pricing.popular")}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
-                    {t(`business.billing.trialFlow.planHint.${planKey}`)}
-                  </span>
-                </span>
-              </label>
-            );
-          })}
+        <div className="px-6 py-5">
+          <p className="rounded-lg border border-primary/15 bg-primary/[0.05] px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+            {t("business.billing.trialFlow.planHint.premium")}
+          </p>
         </div>
 
         <DialogFooter className="flex-col gap-2 border-t border-border/60 bg-muted/10 px-6 py-4 sm:flex-col">
@@ -127,9 +81,7 @@ export function BillingTrialPlanDialog({
             aria-busy={busy || undefined}
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
-            {selectedTier === "enterprise"
-              ? t("business.billing.contactSales")
-              : t("business.billing.trialFlow.confirmCta")}
+            {t("business.billing.trialFlow.confirmCta")}
           </button>
           <p className="text-center text-[11px] leading-snug text-muted-foreground">
             {t("business.billing.trialPaymentNote")}
@@ -164,6 +116,10 @@ export function BillingTrialSection({
   }, [autoOpenTrial, billing.trialEligible, onAutoOpenHandled]);
 
   if (billing.accessSource === "sponsored") return null;
+
+  if (shouldShowTrialExpiredUpgrade(billing)) {
+    return <BillingTrialExpiredUpgrade billingCycle={billingCycle} />;
+  }
 
   if (billing.trialEligible) {
     return (
@@ -205,10 +161,7 @@ export function BillingTrialSection({
     );
   }
 
-  if (billing.trialUsed && !billing.trialEligible && billing.status === "none") {
-    if (billing.lastTrialPlanKey) {
-      return <BillingTrialExpiredUpgrade billing={billing} billingCycle={billingCycle} />;
-    }
+  if (billing.trialUsed && !billing.trialEligible) {
     return (
       <section className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
         <p className={dashboardWorkspaceUi.helperText}>{t("business.billing.trialFlow.alreadyUsed")}</p>
@@ -219,45 +172,15 @@ export function BillingTrialSection({
   return null;
 }
 
-function BillingTrialExpiredUpgrade({
-  billing,
-  billingCycle,
-}: {
-  billing: BillingStatus;
-  billingCycle: "monthly" | "yearly";
-}) {
+function BillingTrialExpiredUpgrade({ billingCycle }: { billingCycle: "monthly" | "yearly" }) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
-  const planKey = billing.lastTrialPlanKey as SubscriptionPlanKey;
-
-  if (planKey === "enterprise") {
-    return (
-      <section className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
-        <h3 className={dashboardWorkspaceUi.sectionTitle}>
-          {t("business.billing.trialFlow.expiredTitle", {
-            plan: subscriptionPlanDisplayName("enterprise", t),
-          })}
-        </h3>
-        <p className={cn(dashboardWorkspaceUi.helperText, "mt-1.5")}>
-          {t("business.billing.trialFlow.expiredEnterpriseBody")}
-        </p>
-        <Link
-          to="/contact?intent=enterprise"
-          className={cn(dashboardWorkspaceUi.btnPrimary, "mt-4 inline-flex w-full justify-center sm:w-auto")}
-        >
-          {t("business.billing.contactSales")}
-        </Link>
-      </section>
-    );
-  }
-
-  const planName = subscriptionPlanDisplayName(planKey, t);
 
   async function handleUpgrade() {
     setBusy(true);
     try {
       const session = await createBillingCheckoutSession({
-        planKey,
+        planKey: "premium",
         billingCycle,
         includeTrial: false,
         checkoutFlow: "billing",
@@ -276,11 +199,9 @@ function BillingTrialExpiredUpgrade({
 
   return (
     <section className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
-      <h3 className={dashboardWorkspaceUi.sectionTitle}>
-        {t("business.billing.trialFlow.expiredTitle", { plan: planName })}
-      </h3>
+      <h3 className={dashboardWorkspaceUi.sectionTitle}>{t("business.billing.trialFlow.expiredTitle")}</h3>
       <p className={cn(dashboardWorkspaceUi.helperText, "mt-1.5")}>
-        {t("business.billing.trialFlow.expiredBody", { plan: planName })}
+        {t("business.billing.trialFlow.expiredBody")}
       </p>
       <button
         type="button"
@@ -290,8 +211,13 @@ function BillingTrialExpiredUpgrade({
         aria-busy={busy || undefined}
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
-        {t("business.billing.trialFlow.upgradeCta", { plan: planName })}
+        {t("business.billing.trialFlow.upgradeCta")}
       </button>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        <Link to="/contact?intent=enterprise" className="font-medium text-primary hover:underline">
+          {t("business.billing.trialFlow.expiredPremiumLink")}
+        </Link>
+      </p>
     </section>
   );
 }

@@ -30,3 +30,13 @@ export function isSubscriptionV2ReadsEnabled(): boolean {
 export function isSubscriptionBillingEnabled(): boolean {
   return parseEnvFlag(process.env.SUBSCRIPTION_BILLING_ENABLED);
 }
+
+/**
+ * Internal Basic subscription on signup and lifecycle downgrade (Commit 1).
+ * Default: enabled — set `SUBSCRIPTION_BASIC_DEFAULT_ENABLED=false` to restore Option A signup.
+ */
+export function isSubscriptionBasicDefaultEnabled(): boolean {
+  const raw = process.env.SUBSCRIPTION_BASIC_DEFAULT_ENABLED;
+  if (raw === undefined || raw === "") return true;
+  return parseEnvFlag(raw);
+}

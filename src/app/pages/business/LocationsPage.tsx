@@ -36,11 +36,10 @@ const ACTION_TEAL = "#e9781c";
 export function LocationsPage() {
   const { t } = useTranslation();
   const { isBusiness } = useRequireAuth();
-  const { tier, ready, hasFeature, hasActiveEntitlements, limits } = useSubscriptionEntitlements({
+  const { tier, ready, limits } = useSubscriptionEntitlements({
     enabled: isBusiness,
     role: "business",
   });
-  const multiLocationEnabled = hasFeature("multiLocation");
   const [locations, setLocations] = useState<LocationDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -84,10 +83,7 @@ export function LocationsPage() {
   }, [load]);
 
   const atSingleLocationCap =
-    ready &&
-    hasActiveEntitlements &&
-    limits.maxLocations != null &&
-    locations.length >= limits.maxLocations;
+    ready && limits.maxLocations != null && locations.length >= limits.maxLocations;
 
   const handleSave = async () => {
     const trimmed = name.trim();

@@ -113,7 +113,7 @@ export function EmployeeDashboard() {
     hasVisibleMetrics,
     isAnalyticsSettled,
     hasPeriodActivity,
-    lastUpdatedAt,
+    metricsRefreshLastUpdatedAt,
     analyticsTimeframeLoading,
     showMetricsSkeleton,
     hasMetricsData,
@@ -307,9 +307,9 @@ export function EmployeeDashboard() {
 
   const valuesMatchPeriod = useDevDemo || valuesMatchAnalyticsPeriod;
 
-  const periodMetricsLoading = showMetricsLoading || (!useDevDemo && !displayMetrics);
+  const periodMetricsLoading = showMetricsSkeleton || (!useDevDemo && !displayMetrics);
   const showChartLoading = isAnalyticsInitialLoad;
-  const metricsSettledForPeriod = isMetricsSettled && valuesMatchAnalyticsPeriod && hasMetricsData;
+  const metricsSettledForPeriod = isMetricsSettled;
   const periodRefreshingLabel = t("dashboard.refresh.updating");
 
   const dashboardStatusItems = useMemo(
@@ -572,11 +572,11 @@ export function EmployeeDashboard() {
         <section
           className={cn(
             "employee-dashboard-analytics-intro mb-1",
-            (showMetricsLoading || analyticsPeriodRefreshing) &&
+            (periodMetricsLoading || analyticsPeriodRefreshing) &&
               "employee-dashboard-analytics-intro--loading",
           )}
           aria-labelledby="employee-analytics-period-heading"
-          aria-busy={showMetricsLoading || analyticsPeriodRefreshing || undefined}
+          aria-busy={periodMetricsLoading || analyticsPeriodRefreshing || undefined}
         >
           <div className="employee-dashboard-analytics-intro__head">
             <div className="min-w-0 space-y-1">
@@ -588,7 +588,7 @@ export function EmployeeDashboard() {
               </h2>
               <DashboardRefreshIndicator
                 isRefreshing={isPeriodSyncing}
-                lastUpdatedAt={lastUpdatedAt}
+                lastUpdatedAt={metricsRefreshLastUpdatedAt}
                 refreshFailed={Boolean(analyticsError && hasVisibleMetrics)}
               />
             </div>

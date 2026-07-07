@@ -21,6 +21,9 @@
     "mobileNavigationSection": "Navigation",
     "mobileAccountSection": "Konto"
   },
+  "status": {
+    "live": "Aktiv"
+  },
   "theme": {
     "appearance": {
       "title": "Darstellung",
@@ -418,7 +421,7 @@
           "noHiddenFees": "Keine versteckten Gebühren",
           "cancelAnytime": "Jederzeit kündbar",
           "secureOnboarding": "Sicheres Onboarding",
-          "trustedPayments": "Vertrauenswürdige Zahlungsabwicklung"
+          "trustedPayments": "Sichere Zahlungsabwicklung"
         }
       },
       "plansAria": "Tarife und Preisoptionen",
@@ -537,78 +540,56 @@
       },
       "trialCta": {
         "title": "CareTip risikofrei testen",
-        "body": "Starten Sie mit einer 4-wöchigen Testphase für Premium. Nach Ablauf wird automatisch ein kostenpflichtiges Abo aktiviert, sofern Sie nicht kündigen.",
+        "body": "Starten Sie mit einer 4-wöchigen kostenlosen Pro-Testphase. Nach Ablauf wird automatisch ein kostenpflichtiges Abo aktiviert, sofern Sie nicht kündigen.",
         "button": "4 Wochen kostenlos testen",
         "paymentNote": "Zahlungsdaten werden vor Beginn der Testphase benötigt.",
         "conversionNote": "Nach der Testphase verlängert sich Ihr Plan automatisch im gewählten Abrechnungsrhythmus, bis Sie kündigen."
       },
       "tiers": {
         "starter": {
-          "name": "Starter",
-          "tagline": "Für unabhängige Gastronomie-Betriebe",
-          "feeMonthly": "29 €/Monat",
-          "feeYearly": "290 €/Jahr",
-          "feeNoteMonthly": "oder 290 €/Jahr",
-          "feeNoteYearly": "oder 29 €/Monat",
-          "feeNote": "oder 290 €/Jahr",
-          "description": "Professionelles digitales Trinkgeld in Minuten: modernes Zahlungserlebnis für Ihr Team ohne operative Komplexität.",
-          "f0": "Bis zu 15 Mitarbeitende",
-          "f1": "Standard-QR-Codes",
-          "f2": "Export & Reporting",
-          "f3": "QR-Code-Trinkgeld",
-          "f4": "Sichere Stripe-Zahlungen",
-          "f5": "Mitarbeiterkonten & Einladungen",
-          "f6": "Business-Dashboard",
-          "f7": "Mitarbeiter-Verdienst-Dashboard",
-          "f8": "Echtzeit-Benachrichtigungen",
-          "f9": "Basis-Analysen & Reporting",
-          "f10": "Einzelstandort-Verwaltung",
-          "f11": "QR-Code-Generierung",
-          "f12": "DSGVO-konforme Kontotools",
+          "name": "Basic",
+          "tagline": "",
+          "feeMonthly": "0 € im Monat",
+          "feeYearly": "0 € im Jahr",
+          "feeNoteMonthly": "",
+          "feeNoteYearly": "",
+          "feeNote": "",
+          "description": "Für Einsteiger und kleinere Teams, die CareTip unverbindlich testen möchten.",
+          "f0": "Unbegrenzte Einnahmen",
+          "f1": "Standard QR-Code Vorlage (A5 / A6)",
+          "f2": "Basis-Dashboard",
+          "f3": "Sofort-Benachrichtigungen",
           "button": "Jetzt starten"
         },
         "business": {
-          "name": "Business",
-          "tagline": "Für wachsende Gastronomie-Teams",
-          "feeMonthly": "79 €/Monat",
-          "feeYearly": "790 €/Jahr",
-          "feeNoteMonthly": "oder 790 €/Jahr",
-          "feeNoteYearly": "oder 79 €/Monat",
-          "feeNote": "oder 790 €/Jahr",
-          "description": "Skalieren Sie mit erweiterten Analysen, Team-Performance und Mehrstandort-Management für ambitionierte Gastronomie-Marken.",
-          "f0": "Alles aus Starter",
-          "f1": "Unbegrenzte Mitarbeitende",
-          "f2": "Mehrstandort-Support",
-          "f3": "Individuelles Business- und Hotel-Branding",
-          "f4": "Steuerexport",
-          "f5": "Echtzeit-Business-Intelligence",
-          "f6": "Erweiterte Analysen & Charts",
-          "f7": "Wöchentliche, monatliche & jährliche Berichte",
-          "f8": "Tisch-QR-Systeme",
-          "f9": "Erweiterte QR-Verwaltung",
-          "f10": "Mitarbeiterziele & Performance-Tracking",
-          "f11": "CSV-Export & Reporting",
-          "f12": "Branding & Anpassung",
-          "f13": "Prioritäts-Support",
-          "button": "Auf Business upgraden"
+          "name": "Pro",
+          "tagline": "",
+          "feeMonthly": "29 € im Monat",
+          "feeYearly": "290 € im Jahr",
+          "feeNoteMonthly": "oder 290 €/Jahr",
+          "feeNoteYearly": "oder 29 €/Monat",
+          "feeNote": "oder 290 €/Jahr",
+          "description": "Für wachsende Unternehmen und Teams, die mehr Flexibilität und Branding-Optionen benötigen.",
+          "f0": "Alle Features aus Basic",
+          "f1": "Nutzung des eigenen Brandings / Logos auf der Landingpage",
+          "f2": "Editierbare Template-Dateien für den eigenen Druck",
+          "f3": "Erweiterte Statistiken und Trinkgeld-Analysen",
+          "f4": "Persönlicher Ansprechpartner beim Onboarding",
+          "button": "Auf Pro upgraden",
+          "trialButton": "4-Wochen-Test starten",
+          "subscribeButton": "Pro abonnieren"
         },
         "enterprise": {
-          "name": "Enterprise",
-          "tagline": "Für Gastronomie-Gruppen & Ketten",
+          "name": "Premium",
+          "tagline": "",
           "feeMonthly": "Auf Anfrage",
           "feeNote": "Kontaktieren Sie unser Vertriebsteam für ein individuelles Angebot",
-          "description": "Maßgeschneiderte Plattform für Organisationen mit erweiterten Anforderungen an Steuerung, Workflows und Support.",
-          "f0": "Alles aus Business",
-          "f1": "API-Integrationen",
-          "f2": "Multi-Property- und Ketten-Support",
-          "f3": "24/7 Premium-Support",
-          "f4": "Dediziertes Onboarding",
-          "f5": "Dedizierter Account Manager",
-          "f6": "Individuelle Integrationen",
-          "f7": "Multi-Brand-Verwaltung",
-          "f8": "Individuelles Reporting",
-          "f9": "SLA-Optionen",
-          "f10": "Mengenbasierte Preise",
+          "description": "Für größere Betriebe, Hotelketten oder Unternehmen mit speziellen Anforderungen und mehreren Standorten.",
+          "f0": "Alle Features aus Pro",
+          "f1": "Komplett maßgeschneidertes Design für Aufsteller und Landingpage",
+          "f2": "Multi-Account-Management für verschiedene Abteilungen/Filialen",
+          "f3": "Dedizierter Support und API-Schnittstellen",
+          "f4": "und mehr…",
           "button": "Vertrieb kontaktieren"
         }
       },
@@ -633,9 +614,9 @@
         },
         "solo": {
           "pageTitle": "Preise für Hebammen & Freelancer",
-          "pageSubtitle": "Freemium im Starter ohne monatliche Plattformgebühr, nur Transaktionsgebühren.",
+          "pageSubtitle": "Freemium im Basic-Tarif ohne monatliche Plattformgebühr, nur Transaktionsgebühren.",
           "sectionTitle": "Kostenlos starten. Upgraden, wenn Sie mehr brauchen.",
-          "sectionSubtitle": "Starter kostet nichts außer Gebühren pro Trinkgeld. Business ist optional und bietet Branding, CSV-Export, erweiterte Analysen, Premium-Support und künftige Premium-Funktionen.",
+          "sectionSubtitle": "Basic kostet nichts außer Gebühren pro Trinkgeld. Pro ist optional und bietet Branding, CSV-Export, erweiterte Analysen, Premium-Support und künftige Premium-Funktionen.",
           "tiers": {
             "starter": {
               "description": "Keine monatliche Plattformgebühr. Trinkgeld-Seite, QR-Link und transparente Gebühren pro Trinkgeld."
@@ -692,9 +673,9 @@
         },
         "midwife": {
           "pageTitle": "Preise für Hebammen",
-          "pageSubtitle": "Freemium ohne monatliche Plattformgebühr im Starter, nur Transaktionsgebühren.",
+          "pageSubtitle": "Freemium ohne monatliche Plattformgebühr im Basic-Tarif, nur Transaktionsgebühren.",
           "sectionTitle": "Digitale Wertschätzung für die Einzelpraxis.",
-          "sectionSubtitle": "Starter ist kostenlos bis auf Gebühren pro Trinkgeld. Business bietet optional Branding, CSV-Export, erweiterte Analysen und Premium-Support.",
+          "sectionSubtitle": "Kostenlos starten mit Basic und Gebühren pro Trinkgeld. Auf Pro upgraden für Branding, CSV-Export, erweiterte Analysen und Premium-Support.",
           "tiers": {
             "starter": {
               "description": "Kostenlos starten mit persönlicher Trinkgeld-Seite und QR-Link. Sie zahlen nur Transaktionsgebühren bei erfolgreichen Trinkgeldern."
@@ -709,9 +690,9 @@
         },
         "freelancer": {
           "pageTitle": "Preise für Freelancer",
-          "pageSubtitle": "Freemium ohne monatliche Plattformgebühr im Starter, nur Transaktionsgebühren.",
+          "pageSubtitle": "Freemium ohne monatliche Plattformgebühr im Basic-Tarif, nur Transaktionsgebühren.",
           "sectionTitle": "Ein Trinkgeld-Link, der mit Ihrer Arbeit wächst.",
-          "sectionSubtitle": "Starter ist kostenlos außer Transaktionsgebühren. Business ergänzt Branding, Exporte, Analysen und Premium-Support, wenn Sie bereit sind.",
+          "sectionSubtitle": "Basic ist kostenlos außer Transaktionsgebühren. Pro ergänzt Branding, Exporte, Analysen und Premium-Support, wenn Sie bereit sind.",
           "tiers": {
             "starter": {
               "description": "Kostenlos starten. Trinkgeld-Link oder QR teilen. Gebühren nur bei erhaltenen Trinkgeldern."
@@ -1944,8 +1925,8 @@
       "justNow": "Gerade aktualisiert"
     },
     "status": {
-      "live": "Live",
-      "realtimeLive": "Live",
+      "live": "Aktiv",
+      "realtimeLive": "Aktiv",
       "updating": "Aktualisierung",
       "dataUpToDate": "Aktuell",
       "liveDesc": "Echtzeit-Verbindung aktiv",
@@ -2029,46 +2010,47 @@
       "generic": "CareTip-Programm für geförderten Zugang"
     },
     "profiles": {
-      "starter": "Starter",
-      "business": "Business",
-      "enterprise": "Enterprise"
+      "starter": "Basic",
+      "business": "Pro",
+      "enterprise": "Premium"
     }
   },
   "subscription": {
     "tiers": {
-      "basic": "Starter",
-      "premium": "Business",
-      "enterprise": "Enterprise"
+      "basic": "Basic",
+      "premium": "Pro",
+      "enterprise": "Premium"
     },
     "nav": {
       "lockedAria": "{{feature}}: Premium-Funktion, tippen für Upgrade-Optionen"
     },
     "locked": {
-      "eyebrow": "Premium-Funktion",
-      "includesAria": "Im Upgrade enthalten",
-      "currentPlan": "Sie nutzen {{plan}}. Upgrade auf {{required}}, um dies freizuschalten."
+      "eyebrow": "Pro-Funktion",
+      "includesAria": "In Pro enthalten",
+      "availableOnPro": "Verfügbar mit Pro",
+      "availableOnPremium": "Verfügbar mit Premium",
+      "availableOnPlan": "Verfügbar mit {{plan}}",
+      "upgradeHint": "Upgrade zum Freischalten dieser Funktion"
     },
     "featureInfo": {
       "activationEyebrow": "CareTip Premium",
-      "upgradeEyebrow": "Upgrade erforderlich",
+      "upgradeEyebrow": "Auf Pro upgraden",
       "keyBenefits": "Hauptvorteile",
       "includedIn": "Enthalten in"
     },
     "activation": {
-      "noPlan": "Kein aktiver Plan",
-      "eyebrow": "CareTip aktivieren",
-      "title": "Wählen Sie, wie Sie starten möchten",
-      "body": "Ihr Betrieb ist bereit. Starten Sie eine Testphase oder abonnieren Sie, um Analysen, QR-Tools und Teamfunktionen freizuschalten.",
-      "trialCta": "4-Wochen-Test starten",
-      "trialHint": "Starter oder Business · Karte erforderlich",
-      "starterCta": "Starter abonnieren",
-      "starterHint": "Grundlegende Trinkgeld-Tools",
-      "businessCta": "Business abonnieren",
-      "businessHint": "Erweiterte Analysen & QR",
+      "noPlan": "Basic-Plan aktiv",
+      "eyebrow": "Auf Pro upgraden",
+      "title": "Pro-Funktionen freischalten",
+      "body": "Sie nutzen Basic mit vollem Zugang zu Trinkgeld, QR und Team-Tools. Upgraden Sie auf Pro für erweiterte Analysen, Branding, Exporte und mehr.",
+      "trialCta": "4-Wochen-Pro-Test starten",
+      "trialHint": "Pro-Testphase · Karte erforderlich",
+      "proCta": "Pro abonnieren",
+      "proHint": "29 €/Monat · erweiterte Funktionen",
+      "upgradeCta": "Auf Pro upgraden",
       "billingNote": "Pläne vergleichen und Abrechnung jederzeit unter",
       "billingLink": "Abrechnungseinstellungen",
-      "activateCta": "CareTip aktivieren",
-      "billingCompactTitle": "Wählen Sie einen Plan zum Start",
+      "billingCompactTitle": "Auf Pro upgraden",
       "resolvingEntitlements": "Dashboard wird vorbereitet…",
       "preview": {
         "sectionAria": "Dashboard-Vorschau — mit Abonnement freischalten",
@@ -2084,7 +2066,7 @@
     },
     "upgrade": {
       "premiumPlan": "Premium-Tarif",
-      "upgradeToPremium": "Auf Premium upgraden",
+      "upgradeToPremium": "Auf Pro upgraden",
       "contactSales": "Vertrieb kontaktieren"
     },
     "features": {
@@ -2096,7 +2078,7 @@
       },
       "advancedAnalytics": {
         "title": "Erweiterte Analysen",
-        "benefit": "Trends, Leistungsdiagramme und Periodenvergleiche für Ihr Team.",
+        "benefit": "Leistungseinblicke mit Pro freischalten.",
         "f0": "Umsatztrends",
         "f1": "Mitarbeiterleistung",
         "f2": "Standortvergleiche",
@@ -2113,7 +2095,7 @@
       "multiLocation": {
         "title": "Multi-Standort-Unterstützung",
         "benefit": "Trinkgeld an mehreren Standorten aus einem Dashboard verwalten.",
-        "f0": "Unbegrenzte Standorte mit Business",
+        "f0": "Unbegrenzte Standorte mit Pro",
         "f1": "QR-Codes pro Standort",
         "f2": "Berichte pro Standort"
       },
@@ -2123,20 +2105,20 @@
         "f0": "QR-Codes pro Tisch",
         "f1": "Tischzuweisung für Mitarbeitende",
         "f2": "Druckfertige Tisch-Assets",
-        "f3": "Starter enthält einen Tisch"
+        "f3": "Basic enthält einen Tisch"
       },
       "employeeQr": {
         "title": "Mitarbeiter-QR-Codes",
         "benefit": "Persönliche Trinkgeld-QR-Codes für jedes Teammitglied.",
         "f0": "Individuelle Mitarbeiter-QR-Codes",
         "f1": "Download und Druck",
-        "f2": "Im Starter enthalten"
+        "f2": "Im Basic enthalten"
       },
       "locationQr": {
         "title": "Standort-QR-Codes",
         "benefit": "QR-Codes auf Standortebene für flexible Einstiegspunkte.",
         "f0": "QR-Codes pro Standort",
-        "f1": "Starter enthält einen Standort",
+        "f1": "Basic enthält einen Standort",
         "f2": "Upgrade für mehrere Standorte"
       },
       "teamManagement": {
@@ -2144,7 +2126,7 @@
         "benefit": "Trinkgeld-Team einladen, organisieren und verwalten.",
         "f0": "Mitarbeiterliste",
         "f1": "Rollen und Aktivierung",
-        "f2": "Im Starter enthalten"
+        "f2": "Im Basic enthalten"
       },
       "customerFeedback": {
         "title": "Kundenfeedback",
@@ -2159,21 +2141,21 @@
         "benefit": "Live-Trinkgelder, Transaktionen und Auszahlungen verfolgen.",
         "f0": "Live-Trinkgeld-Feed",
         "f1": "Transaktionsverlauf",
-        "f2": "Im Starter enthalten"
+        "f2": "Im Basic enthalten"
       },
       "basicAnalytics": {
         "title": "Basis-Analysen",
         "benefit": "Wesentliche Dashboard-Metriken für den Alltag.",
         "f0": "Zeitraum-Zusammenfassungen",
         "f1": "Team-Übersichtsmetriken",
-        "f2": "Im Starter enthalten"
+        "f2": "Im Basic enthalten"
       },
       "qrTemplates": {
         "title": "QR-Vorlagen",
         "benefit": "Premium-QR-Designvorlagen für Ihre Marke.",
         "f0": "Vorlagenbibliothek",
         "f1": "Live-Vorschau",
-        "f2": "Business-Tarif und höher"
+        "f2": "Pro-Tarif und höher"
       },
       "employeeGoals": {
         "title": "Trinkgeldziele für Mitarbeitende",
@@ -2244,28 +2226,26 @@
       "billing": "Abrechnung",
       "settings": "Einstellungen",
       "planLabels": {
-        "starter": "Starter-Tarif",
-        "business": "Business-Tarif",
-        "enterprise": "Enterprise-Tarif"
+        "starter": "Basic-Tarif",
+        "business": "Pro-Tarif",
+        "enterprise": "Premium-Tarif"
       },
       "subscriptionStatus": {
         "loading": "Abonnement wird geprüft…",
-        "none": "Kein Abonnement",
-        "starter": "Starter-Tarif",
-        "business": "Business-Tarif",
-        "enterprise": "Enterprise-Tarif",
+        "none": "Basic-Tarif",
+        "starter": "Basic-Tarif",
+        "business": "Pro-Tarif",
+        "enterprise": "Premium-Tarif",
         "trialLabel": "{{plan}}-Testphase",
         "sponsored": "Gesponsorter Zugang"
       },
       "locked": {
-        "requiresActivation": "CareTip-Aktivierung erforderlich",
         "includedInPlan": "Enthalten in {{plan}}",
-        "tooltipActivation": "Aktivieren Sie CareTip, um diese Funktion freizuschalten.",
-        "tooltipUpgrade": "Enthalten in {{plan}}. Upgrade zum Freischalten dieser Funktion."
+        "tooltipUpgrade": "Enthalten in {{plan}}. Auf Pro upgraden, um diese Funktion freizuschalten."
       },
       "upgradeCta": {
-        "unsubscribedTitle": "Auf CareTip upgraden",
-        "unsubscribedBody": "Premium-Funktionen, QR Studio, Analysen und mehr freischalten.",
+        "unsubscribedTitle": "Auf Pro upgraden",
+        "unsubscribedBody": "Pro-Funktionen freischalten: erweiterte Analysen, Branding, Exporte und mehr.",
         "currentPlan": "Aktueller Plan",
         "upgrade": "Upgrade",
         "upgradePlan": "Plan upgraden",
@@ -2283,10 +2263,9 @@
         "compactSponsored": "Gesponserter Zugang"
       },
       "premiumDialog": {
-        "activationEyebrow": "Aktivierung erforderlich",
-        "upgradeEyebrow": "Premium-Funktion",
-        "activationPlanHint": "Aktivieren Sie CareTip für QR-Codes, Team-Tools, Feedback und Analysen.",
-        "includedWithPlan": "Enthalten in {{plan}}.",
+        "upgradeEyebrow": "Auf Pro upgraden",
+        "availableOnPlan": "Verfügbar mit {{plan}}",
+        "upgradeHint": "Upgrade zum Freischalten dieser Funktion",
         "maybeLater": "Vielleicht später"
       }
     }
@@ -2499,7 +2478,7 @@
       "heroFloatPayoutLabel": "Trinkgeld erfasst",
       "heroFloatStaffValue": "3",
       "heroFloatStaffLabel": "Aktive Mitarbeitende",
-      "heroFloatAnalyticsValue": "Live",
+      "heroFloatAnalyticsValue": "Aktiv",
       "heroFloatAnalyticsLabel": "Analysen aktualisiert",
       "heroHeadline": "Mehr Trinkgeld für dein Team. Null Aufwand für dein Business.",
       "heroHeadlineHighlight": "Trinkgeld",
@@ -2742,7 +2721,7 @@
       },
       "scenes": {
         "notif": {
-          "live": "Live",
+          "live": "Aktiv",
           "time": "Gerade eben",
           "amount": "+€15 Trinkgeld erhalten",
           "guest": "Gast: Anna M.",
@@ -3008,7 +2987,7 @@
       "pill": "LIVE-ANERKENNUNG",
       "feedLabel": "AKTIVITÄT IN DEINEM BETRIEB",
       "compactFeedTitle": "Live-Aktivitätsfeed",
-      "liveBadge": "Live",
+      "liveBadge": "Aktiv",
       "syncLabel": "Gerade synchronisiert",
       "point1": "Gast-Dank erreicht die Menschen, die ihn verdient haben, solange der Einsatz noch spürbar ist.",
       "point2": "Führung würdigt Spitzenleistung ohne Tabellen-Chaos am Schichtende.",
@@ -3348,12 +3327,16 @@
   },
   "business": {
     "awaitingApproval": {
-      "titlePending": "Ihr Unternehmensprofil wird geprüft",
+      "badgePending": "Prüfung läuft",
+      "badgeRejected": "Handlungsbedarf",
+      "titlePending": "Ihr Workspace ist bereit",
       "titleRejected": "Onboarding nicht freigegeben",
-      "descPending": "Ihre Registrierung wurde erfolgreich eingereicht. Während unser Team Ihr Unternehmen prüft, können Sie Ihr Konto einrichten und Ihr Dashboard erkunden. QR-Codes stehen nach der Freigabe zur Verfügung.",
+      "descPending": "Wir prüfen Ihre Unternehmensdaten. Sie können CareTip bereits erkunden, während die Verifizierung abgeschlossen wird.",
       "descRejected": "Ihr Onboarding wurde nicht freigegeben. Aktualisieren Sie Ihr Unternehmensprofil oder kontaktieren Sie den Support.",
+      "limitedFeaturesNote": "QR-Codes und auszahlungsbezogene Funktionen werden nach der Freigabe aktiviert.",
       "emailNotice": "Wir senden Ihnen eine E-Mail, sobald Ihr Onboarding freigegeben wurde.",
       "reviewProfile": "Unternehmensprofil prüfen",
+      "viewVerificationStatus": "Verifizierungsstatus anzeigen",
       "goToDashboard": "Zum Dashboard",
       "signOut": "Abmelden"
     },
@@ -3700,8 +3683,8 @@
       "verificationBannerRejectedTitle": "Geschäftsverifizierung erfordert Aufmerksamkeit",
       "verificationBannerRejectedDesc": "Ihr Lokal konnte noch nicht freigegeben werden. Kontaktieren Sie den Support bei Fragen.",
       "verificationBannerCta": "Verifizierungsstatus anzeigen",
-      "onboardingReviewBannerTitle": "Onboarding-Prüfung läuft",
-      "onboardingReviewBannerDesc": "Ihr Dashboard bleibt verfügbar, während wir Ihr Unternehmen prüfen. QR-Codes stehen nach der Onboarding-Freigabe zur Verfügung.",
+      "onboardingReviewBannerTitle": "Prüfung läuft",
+      "onboardingReviewBannerDesc": "Ihr Workspace bleibt verfügbar. QR-Codes werden nach der Freigabe freigeschaltet.",
       "onboardingReviewBannerRejectedTitle": "Onboarding nicht freigegeben",
       "onboardingReviewBannerRejectedDesc": "Aktualisieren Sie Ihr Unternehmensprofil oder kontaktieren Sie den Support. Ihr Dashboard bleibt für die Einrichtung verfügbar.",
       "onboardingReviewBannerCta": "Onboarding-Status anzeigen",
@@ -3777,6 +3760,29 @@
       "needHelpTitle": "Brauchen Sie Hilfe?",
       "needHelpDesc": "So steigern Sie die Einnahmen Ihres Teams und halten das Tippen für Gäste einfach.",
       "viewGuidelines": "Richtlinien ansehen",
+      "proUpgrade": {
+        "title": "Mehr mit CareTip Pro freischalten",
+        "subtitle": "Erweiterte Tools für Leistungseinblicke und Wachstum Ihres Betriebs.",
+        "learnMore": "Mehr erfahren",
+        "features": {
+          "advancedAnalytics": "Erweiterte Analysen",
+          "customerFeedback": "Kundenfeedback",
+          "employeeGoals": "Mitarbeiterziele",
+          "csvExports": "CSV-Exporte",
+          "branding": "Individuelles Branding",
+          "multiLocation": "Mehrstandort-Unterstützung"
+        }
+      },
+      "basicStatus": {
+        "title": "In Ihrem Basic-Tarif enthalten",
+        "includesAria": "Im Basic-Tarif enthalten",
+        "features": {
+          "qrTipping": "QR-Trinkgeld",
+          "teamManagement": "Teamverwaltung",
+          "basicDashboard": "Basis-Dashboard",
+          "qrTemplates": "Standard-QR-Vorlagen"
+        }
+      },
       "preview": {
         "viewPlans": "Tarife ansehen",
         "exploreFeatures": "CareTip-Funktionen entdecken",
@@ -3793,7 +3799,7 @@
           "unlimitedLocations": "Unbegrenzte Standorte",
           "unlimitedTables": "Unbegrenzte Tische"
         },
-        "availableWithPremium": "Verfügbar mit CareTip Premium",
+        "availableWithPremium": "Verfügbar mit Pro",
         "learnMore": "Mehr erfahren",
         "goalsDesc": "Trinkgeldziele Ihres Teams verfolgen, Fortschritt überwachen und Mitarbeitende unterstützen.",
         "feedbackDesc": "Gästebewertungen und Feedback nach jedem Trinkgeld-Erlebnis sammeln.",
@@ -4134,7 +4140,7 @@
       "heroDescWithSlug": "Druckbare Codes für Team und Lokal-Seite.",
       "heroDescNoSlug": "Team- und Lokal-QR-Codes erzeugen.",
       "allPdfs": "Alle PDFs",
-      "slugLive": "Live",
+      "slugLive": "Aktiv",
       "slugNa": "k. A.",
       "copyUrlAria": "URL kopieren",
       "print": "Drucken",
@@ -4384,7 +4390,7 @@
       "templates": {
         "title": "Premium-Vorlagen",
         "description": "Scan-optimierte Hospitality-Karten. Großer QR, klares Branding und starker Kontrast für jeden Betrieb.",
-        "basicHint": "Starter enthält Velvet Lounge Noir. Mit Premium schalten Sie alle 7 Premium-Farbvorlagen frei.",
+        "basicHint": "Basic enthält Velvet Lounge Noir. Auf Pro upgraden, um alle 7 Premium-Farbvorlagen freizuschalten.",
         "saveHint": "Vorlagen unter Branding anwenden, um Live-QR-Codes und Gästeseiten zu aktualisieren.",
         "openBranding": "Branding öffnen"
       },
@@ -4496,7 +4502,7 @@
         "feedEmpty": "Trinkgelder erscheinen hier, sobald Gäste zahlen.",
         "anonymousGuest": "Gast-Trinkgeld",
         "venueDefault": "Hauptbereich",
-        "liveBadge": "Live",
+        "liveBadge": "Aktiv",
         "timelineTitle": "Aktivitäts-Timeline",
         "mostRecent": "zuletzt"
       },
@@ -4972,10 +4978,10 @@
       "loadError": "Abrechnungsdaten konnten nicht geladen werden.",
       "loading": "Abrechnung wird geladen…",
       "retry": "Erneut versuchen",
-      "emptyStateTitle": "Sie nutzen derzeit den CareTip Starter-Plan.",
-      "emptyStateBody": "Upgraden Sie auf Premium für erweiterte Analysen, Tisch-QR, Mehrstandort und mehr.",
-      "noActiveSubscriptionTitle": "Kein aktives Abonnement",
-      "noActiveSubscriptionBody": "Wählen Sie einen Plan, um CareTip-Funktionen für Ihren Betrieb freizuschalten. Starten Sie mit einer Testphase oder abonnieren Sie direkt.",
+      "emptyStateTitle": "Sie nutzen den CareTip Basic-Plan.",
+      "emptyStateBody": "Upgraden Sie auf Pro für erweiterte Analysen, Branding, Mehrstandort und mehr.",
+      "noActiveSubscriptionTitle": "Basic-Plan aktiv",
+      "noActiveSubscriptionBody": "Sie haben vollen Basic-Zugang. Upgraden Sie auf Pro, wenn Sie erweiterte Funktionen benötigen.",
       "sponsoredAccessTitle": "Geförderter Zugang",
       "sponsoredAccessBody": "Ihr Zugang wird über das CareTip-Programm für geförderten Zugang bereitgestellt.",
       "sponsoredAccessProgramme": "Programm: {{programme}}",
@@ -5004,7 +5010,8 @@
       "cycleMonthly": "Monatlich",
       "cycleYearly": "Jährlich",
       "planManagement": "Planverwaltung",
-      "planManagementDesc": "Pläne vergleichen und Abo ändern.",
+      "planManagementDesc": "Pläne vergleichen und upgraden, wenn Sie bereit sind.",
+      "viewBillingHistory": "Abrechnungsverlauf anzeigen",
       "manageBilling": "Abrechnung verwalten",
       "cancelSubscription": "Zum Periodenende kündigen",
       "cancelConfirm": "Abo zum Ende der aktuellen Abrechnungsperiode kündigen?",
@@ -5019,8 +5026,10 @@
       "currentPlanBadge": "Aktueller Plan",
       "subscriptionSummary": {
         "title": "Aktuelles Abonnement",
-        "noActiveTitle": "Kein aktives Abonnement",
-        "noActiveBody": "Aktivieren Sie CareTip, um Premium-Funktionen freizuschalten.",
+        "currentPlanLabel": "Aktueller Plan",
+        "basicPrice": "0 €/Monat",
+        "noActiveTitle": "Basic-Plan aktiv",
+        "noActiveBody": "Sie haben vollen Basic-Zugang. Upgraden Sie auf Pro für erweiterte Funktionen.",
         "statusLabel": "Status",
         "renewsOn": "Verlängert sich",
         "paymentMethod": "Zahlungsmethode",
@@ -5031,11 +5040,38 @@
       },
       "planCard": {
         "subscribeToPlan": "{{plan}} abonnieren",
+        "subscribeToPro": "Pro abonnieren",
+        "basicActive": "{{price}} · Aktiv",
         "downgradeToPlan": "Auf {{plan}} downgraden",
         "downgradeViaPortal": "Planänderungen gelten zum Ende Ihres Abrechnungszeitraums.",
         "renewsOn": "Verlängert sich am {{date}}",
         "trialEnds": "Testphase endet am {{date}}",
         "cancelScheduled": "Zugang bis {{date}}"
+      },
+      "planComparison": {
+        "basic": {
+          "f0": "QR-Trinkgeld",
+          "f1": "Basis-Dashboard",
+          "f2": "Standard-QR-Vorlagen",
+          "f3": "Teamverwaltung",
+          "f4": "Benachrichtigungen"
+        },
+        "pro": {
+          "f0": "Alles aus Basic",
+          "f1": "Individuelles Branding",
+          "f2": "Erweiterte Analysen",
+          "f3": "Kundenfeedback",
+          "f4": "CSV-Exporte",
+          "f5": "Mitarbeiterziele",
+          "f6": "Mehrere Standorte"
+        },
+        "premium": {
+          "f0": "Alles aus Pro",
+          "f1": "Individuelle Workflows",
+          "f2": "Erweitertes Reporting",
+          "f3": "Prioritäts-Support",
+          "f4": "Dediziertes Onboarding"
+        }
       },
       "customPricing": "Individuell",
       "perMonth": "pro Monat",
@@ -5068,23 +5104,24 @@
       "startTrial": "4 Wochen kostenlos testen",
       "trialFlow": {
         "recommended": "Empfohlen für neue Nutzer",
-        "promoTitle": "Starten Sie Ihre 4-wöchige Testphase",
-        "promoBody": "Wählen Sie Starter oder Business und testen Sie CareTip mit allen Funktionen des Plans. Zahlungsdaten werden jetzt erfasst; die Belastung erfolgt erst nach Ende der Testphase.",
-        "promoCta": "4 Wochen kostenlos testen",
-        "promoCtaAlt": "Kostenlos testen, heute keine Zahlung",
-        "orSubscribeBelow": "Oder abonnieren Sie sofort einen Plan unten",
-        "chooseTitle": "Test-Erlebnis wählen",
-        "chooseDesc": "Wählen Sie den Plan, den Sie in Ihrer 4-wöchigen Testphase ausprobieren möchten.",
-        "confirmCta": "4-wöchige Testphase starten",
+        "promoTitle": "Starten Sie Ihre 4-wöchige Pro-Testphase",
+        "promoBody": "Testen Sie Pro-Funktionen zusätzlich zu Ihrem Basic-Plan. Zahlungsdaten werden jetzt erfasst; die Belastung erfolgt erst nach Ende der Testphase.",
+        "promoCta": "4-Wochen-Pro-Test starten",
+        "promoCtaAlt": "Pro-Testphase starten",
+        "orSubscribeBelow": "Oder Pro unten abonnieren",
+        "chooseTitle": "Pro-Testphase starten",
+        "chooseDesc": "Ihre 4-wöchige Testphase upgraded Basic auf Pro. Sie können vor Ende der Testphase abonnieren oder kündigen.",
+        "confirmCta": "4-Wochen-Pro-Test starten",
         "enterpriseNote": "Vertrieb kontaktieren",
-        "alreadyUsed": "Ihre kostenlose Testphase wurde bereits genutzt. Wählen Sie einen Abonnementplan, um fortzufahren.",
-        "expiredTitle": "Ihre {{plan}}-Testphase ist beendet",
-        "expiredBody": "Setzen Sie mit {{plan}} fort, um die Funktionen aus Ihrer Testphase zu behalten.",
-        "expiredEnterpriseBody": "Kontaktieren Sie unser Team, um Enterprise-Funktionen weiter zu nutzen.",
-        "upgradeCta": "Upgrade auf {{plan}}",
+        "alreadyUsed": "Ihre Pro-Testphase wurde bereits genutzt. Abonnieren Sie Pro unten für erweiterte Funktionen.",
+        "expiredTitle": "Ihre Pro-Testphase ist beendet",
+        "expiredBody": "Sie nutzen jetzt Basic. Upgraden Sie auf Pro, um erweiterte Analysen, Branding, Exporte und mehr zu behalten.",
+        "expiredEnterpriseBody": "Kontaktieren Sie unser Team für Premium-Funktionen.",
+        "expiredPremiumLink": "Premium benötigt? Vertrieb kontaktieren",
+        "upgradeCta": "Auf Pro upgraden",
         "planHint": {
-          "basic": "Essenzielle Trinkgeld-Tools für kleine Teams",
-          "premium": "Erweiterte Analysen, QR-Branding und Team-Tools",
+          "basic": "Ihr aktueller kostenloser Plan — Trinkgeld, QR und Team-Tools inklusive",
+          "premium": "Erweiterte Analysen, Branding, Exporte, Mehrstandort und Team-Ziele",
           "enterprise": "Individuelle Einführung für Ihre Organisation. Vertrieb kontaktieren."
         }
       },
@@ -5129,8 +5166,8 @@
       },
       "plans": {
         "basic": {
-          "name": "Starter",
-          "tagline": "Trinkgeld-Basics für kleine Teams",
+          "name": "Basic",
+          "tagline": "Kostenlos — Trinkgeld-Basics für kleine Teams",
           "f0": "QR-Trinkgeld für Team und Lokal",
           "f1": "Echtzeit-Benachrichtigungen",
           "f2": "Mitarbeiter-Einladungscodes",
@@ -5139,9 +5176,9 @@
           "f5": "Standard-Support"
         },
         "premium": {
-          "name": "Premium",
+          "name": "Pro",
           "tagline": "Erweiterte Tools für wachsende Betriebe",
-          "f0": "Alles aus Starter",
+          "f0": "Alles aus Basic",
           "f1": "Erweiterte Analysen",
           "f2": "CSV-Export",
           "f3": "Tisch-QR-Codes",
@@ -5151,9 +5188,9 @@
           "f7": "Prioritäts-Support"
         },
         "enterprise": {
-          "name": "Enterprise",
+          "name": "Premium",
           "tagline": "Individuelle Verträge für große Betriebe",
-          "f0": "Alles aus Premium",
+          "f0": "Alles aus Pro",
           "f1": "Dedizierter Account Manager",
           "f2": "Individuelles Onboarding",
           "f3": "SLA & Compliance",
@@ -5172,7 +5209,7 @@
       "hits30d": "{{count}} Signale in 30 Tagen",
       "inferred": "aus Kontodaten",
       "upgradeTitle": "Upgrade-Möglichkeiten",
-      "upgradeDisclaimer": "Nur sichtbar, wenn Ihre Nutzung Starter übersteigt. Sie können Ihren aktuellen Plan behalten.",
+      "upgradeDisclaimer": "Nur sichtbar, wenn Ihre Nutzung Basic übersteigt. Sie können Ihren aktuellen Plan behalten.",
       "suggestedTier": "Vorgeschlagener Plan: {{tier}}",
       "viewPlans": "Pläne vergleichen",
       "retentionTitle": "Kontogesundheit",
@@ -5220,7 +5257,7 @@
       "toastPasswordUpdated": "Passwort aktualisiert.",
       "toastPrefsSaved": "Einstellungen gespeichert.",
       "toastImageOnly": "Bitte eine Bilddatei wählen.",
-      "heroBodyLong": "Einmalige Trinkgelder per QR-Code und Mitarbeiterlinks. Zahlungen nutzen Stripe Payment Intents. Im Starter-Tarif gibt es kein CareTip-Abo.",
+      "heroBodyLong": "Einmalige Trinkgelder per QR-Code und Mitarbeiterlinks. Zahlungen nutzen Stripe Payment Intents. Basic ist kostenlos — auf Pro upgraden für erweiterte Funktionen.",
       "linkTipsActivity": "Trinkgelder & Aktivität ansehen",
       "linkFeeDetails": "Gebühren",
       "labelEmailReadonly": "E-Mail-Adresse (nur lesen)",
@@ -5460,7 +5497,7 @@
         "team_scale": "{{staffCount}} Mitarbeitende auf Basic.",
         "multi_location": "{{locationCount}} Standorte auf Basic.",
         "table_qr": "Tisch-QR auf Basic in Nutzung.",
-        "csv_export": "Export & Reporting auf Starter genutzt.",
+        "csv_export": "Export & Reporting — auf Pro upgraden zum Freischalten.",
         "employee_goals": "Ziele auf Basic in Nutzung.",
         "branding": "Branding auf Basic konfiguriert.",
         "enterprise_scale": "{{locations}} Standorte, {{staff}} Personal, {{qrScans30d}} QR-Scans."

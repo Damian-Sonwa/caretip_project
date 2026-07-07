@@ -1,8 +1,7 @@
 import { Link } from "react-router";
 import { Circle, Clock, QrCode, ShieldCheck, Sparkles, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ActivateCareTipCta } from "../subscription/ActivateCareTipCta";
-import { ActivationPlanButtons } from "../subscription/ActivateCareTipCta";
+import { UpgradeCta } from "../subscription/UpgradeCta";
 import {
   resolveQrStudioVerificationPhase,
   type QrStudioVerificationPhase,
@@ -166,7 +165,7 @@ export function QrStudioAccessPanel({ reason, onboardingVerificationStatus, clas
           {t("business.qrStudio.access.subscriptionBody")}
         </p>
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <ActivateCareTipCta action="trial" size="md" />
+          <UpgradeCta featureKey="employeeQr" className="min-h-11" />
           <Link
             to="/dashboard/billing/subscription"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-background px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/50"
@@ -228,7 +227,7 @@ export function QrStudioAccessPanel({ reason, onboardingVerificationStatus, clas
         ))}
       </ol>
       <div className="mt-6 space-y-4 border-t border-border/60 pt-6">
-        <ActivationPlanButtons className="text-left" />
+        <UpgradeCta featureKey="employeeQr" className="w-full sm:w-auto" />
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
           <Button asChild variant="outline" className="min-h-11">
             <Link to={ONBOARDING_STATUS_PATH}>

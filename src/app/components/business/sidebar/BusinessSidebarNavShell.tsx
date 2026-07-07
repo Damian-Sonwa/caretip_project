@@ -103,9 +103,7 @@ function SidebarChildNavItem({
   const planLabel = t(planLabelKeyForFeature(lock.dialogFeatureKey));
 
   const secondaryLabel = lock.locked
-    ? lock.reason === "activation_required"
-      ? t("dashboardNav.business.locked.requiresActivation")
-      : t("dashboardNav.business.locked.includedInPlan", { plan: planLabel })
+    ? t("dashboardNav.business.locked.includedInPlan", { plan: planLabel })
     : null;
 
   const itemBody = (
@@ -151,9 +149,7 @@ function SidebarChildNavItem({
           <TooltipContent side="right" className="max-w-[240px] text-left">
             <p className="font-semibold">{t(catalog.titleKey)}</p>
             <p className="mt-1 text-primary-foreground/90">
-              {lock.reason === "activation_required"
-                ? t("dashboardNav.business.locked.tooltipActivation")
-                : t("dashboardNav.business.locked.tooltipUpgrade", { plan: planLabel })}
+              {t("dashboardNav.business.locked.tooltipUpgrade", { plan: planLabel })}
             </p>
           </TooltipContent>
         </Tooltip>

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import aboutTeamImg from "../../../../images/about-team.jpeg";
-import missionImg from "../../../../images/mission002.png";
+import missionImg from "../../../../images/caretip-mission001.png";
 import { cn } from "@/lib/utils";
 import { usePublicScrollReveal } from "@/lib/usePublicScrollReveal";
 

@@ -85,7 +85,7 @@ export function LandingFeaturesSection() {
       className={cn(
         landingUi.section,
         landingUi.landingSurface,
-        "caretip-landing-features-section relative overflow-hidden lg:py-24 dark:bg-neutral-950",
+        "caretip-landing-features-section relative overflow-hidden dark:bg-neutral-950",
       )}
     >
       <div className="relative mx-auto max-w-7xl">

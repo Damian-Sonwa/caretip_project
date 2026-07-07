@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
 import { NotificationInboxSync } from "../components/NotificationInboxSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
-import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
+import { useDashboardLayoutPaintReady } from "../lib/globalAppLoading";
 
 type EmployeeBusinessBranding = {
   businessLogo: string | null;
@@ -50,7 +50,7 @@ export function EmployeeLayout() {
     };
   }, [authStatus, user?.role]);
 
-  useRegisterPagePaintReady("employee-layout-paint");
+  useDashboardLayoutPaintReady("employee-layout-paint");
 
   return (
     <div className="relative min-h-screen bg-background">

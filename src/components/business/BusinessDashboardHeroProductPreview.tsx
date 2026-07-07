@@ -69,7 +69,7 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-semibold text-white/85">{t("business.heroPreview.tableLabel")}</p>
                       <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
-                        {t("business.heroPreview.liveBadge")}
+                        {t("status.live")}
                       </span>
                     </div>
                     <div className="mt-3 grid grid-cols-12 gap-3 items-center">
@@ -162,7 +162,7 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
                 <p className="text-sm font-semibold text-white">{t("business.heroPreview.teamPulse")}</p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/25">
                   <Sparkles className="h-3.5 w-3.5 text-emerald-400" aria-hidden />
-                  {t("business.heroPreview.liveBadge")}
+                  {t("status.live")}
                 </span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">

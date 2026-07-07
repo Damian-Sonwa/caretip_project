@@ -12,7 +12,7 @@ import type { TFunction } from "i18next";
 import type { NavigateFunction } from "react-router";
 import { toast } from "sonner";
 
-export type ActivationCheckoutPlan = "trial" | "starter" | "business";
+export type ActivationCheckoutPlan = "trial" | "pro";
 
 async function closeOverlayThenTrialNavigate(
   navigate?: NavigateFunction,
@@ -44,10 +44,9 @@ export async function startActivationCheckout(
     return;
   }
 
-  const planKey = plan === "starter" ? "basic" : "premium";
-  primeCheckoutSyncExpectation(planKey);
+  primeCheckoutSyncExpectation("premium");
   const session = await createBillingCheckoutSession({
-    planKey,
+    planKey: "premium",
     billingCycle: "monthly",
     checkoutFlow: "billing",
   });

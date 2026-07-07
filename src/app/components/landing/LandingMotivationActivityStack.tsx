@@ -66,7 +66,7 @@ export function LandingMotivationActivityStack() {
                 </div>
                 {card.showLive ? (
                   <span className="caretip-motivation-activity__live caretip-motivation-activity__live--pulse">
-                    {t("landing.motivation.liveBadge")}
+                    {t("status.live")}
                   </span>
                 ) : card.showSyncDot ? (
                   <span className="caretip-motivation-activity__status" aria-hidden>

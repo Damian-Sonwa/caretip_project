@@ -10,13 +10,12 @@ import { BillingPlanManagement } from "./billing/BillingPlanManagement";
 import { BillingTrialSection, BILLING_START_TRIAL_HASH } from "./billing/BillingTrialSection";
 import { BillingSubscriptionLifecycle } from "./billing/BillingSubscriptionLifecycle";
 import { BillingSubscriptionSummary } from "./billing/BillingSubscriptionSummary";
-import { BillingTimeline } from "./billing/BillingTimeline";
 import { PricingBillingToggle } from "@/components/pricing/PricingBillingToggle";
 import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 import { cn } from "@/lib/utils";
 import { BILLING_PLANS_SECTION_ID, scrollToBillingPlansSection } from "../../../lib/activateCareTipNavigation";
 
-const BILLING_HISTORY_PREVIEW_LIMIT = 8;
+const BILLING_HISTORY_PATH = "/dashboard/billing/history";
 
 export function BusinessSettingsBillingPanel() {
   const { t } = useTranslation();
@@ -89,10 +88,10 @@ export function BusinessSettingsBillingPanel() {
 
   if (!data) return null;
 
-  const historyPreview = data.events.slice(0, BILLING_HISTORY_PREVIEW_LIMIT);
+  const hasBillingHistory = data.events.length > 0;
 
   return (
-    <div className="space-y-8">
+    <div className="billing-settings-panel space-y-8">
       <BillingSubscriptionSummary
         billing={data}
         onManagePayment={canOpenPortal && !portalBusy ? () => void openBillingPortal() : undefined}
@@ -100,32 +99,21 @@ export function BusinessSettingsBillingPanel() {
 
       <BillingSubscriptionLifecycle billing={data} />
 
-      {data.accessSource !== "sponsored" && historyPreview.length > 0 ? (
-        <section aria-labelledby="billing-history-heading">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h2 id="billing-history-heading" className={dashboardWorkspaceUi.sectionTitle}>
-              {t("business.billing.nav.history")}
-            </h2>
-            {data.events.length > BILLING_HISTORY_PREVIEW_LIMIT ? (
+      {data.accessSource !== "sponsored" ? (
+        <section id="billing-plans" className="billing-settings-panel__plans space-y-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className={dashboardWorkspaceUi.sectionTitle}>{t("business.billing.planManagement")}</h2>
+              <p className={dashboardWorkspaceUi.pageDescription}>{t("business.billing.planManagementDesc")}</p>
+            </div>
+            {hasBillingHistory ? (
               <Link
-                to="/dashboard/billing/history"
-                className={cn(dashboardWorkspaceUi.btnGhost, "text-sm")}
+                to={BILLING_HISTORY_PATH}
+                className={cn(dashboardWorkspaceUi.btnGhost, "text-sm shrink-0")}
               >
-                {t("dashboard.viewAll")}
+                {t("business.billing.viewBillingHistory")}
               </Link>
             ) : null}
-          </div>
-          <div className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
-            <BillingTimeline events={historyPreview} />
-          </div>
-        </section>
-      ) : null}
-
-      {data.accessSource !== "sponsored" ? (
-        <section id="billing-plans" className="space-y-5">
-          <div>
-            <h2 className={dashboardWorkspaceUi.sectionTitle}>{t("business.billing.planManagement")}</h2>
-            <p className={dashboardWorkspaceUi.pageDescription}>{t("business.billing.planManagementDesc")}</p>
           </div>
 
           <BillingTrialSection

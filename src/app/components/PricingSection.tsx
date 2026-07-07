@@ -20,11 +20,16 @@ interface PricingSectionProps {
   copyScope?: PricingCopyScope;
 }
 
-function tierSignupHref(tierKey: "starter" | "business" | "enterprise" | undefined, billingCycle: BillingCycle): string {
+function tierSignupHref(
+  tierKey: "starter" | "business" | "enterprise" | undefined,
+  billingCycle: BillingCycle,
+  trial = false,
+): string {
   if (tierKey === "enterprise") return "/contact?intent=demo&plan=enterprise";
   if (!tierKey) return "/contact?intent=demo";
+  if (tierKey === "starter") return "/signup";
   return buildAuthPathForCheckoutIntent(
-    buildCheckoutIntent({ marketingPlan: tierKey, billingCycle, trial: false }),
+    buildCheckoutIntent({ marketingPlan: tierKey, billingCycle, trial }),
     "signup",
   );
 }
@@ -54,6 +59,37 @@ export function PricingSection({
       <div className="caretip-pricing-tiers__grid">
         {tiers.map((tier) => {
           const isEnterprise = tier.tierKey === "enterprise";
+          const isPro = tier.tierKey === "business";
+
+          const footer = isPro ? (
+            <div className="flex w-full flex-col gap-2">
+              <Link
+                to={tierSignupHref("business", billingCycle, true)}
+                className={cn(pricingPageUi.cardCtaPrimary, "w-full text-center")}
+              >
+                {t("staticPages.pricing.tiers.business.trialButton")}
+              </Link>
+              <Link
+                to={tierSignupHref("business", billingCycle, false)}
+                className={cn(pricingPageUi.cardCtaSecondary, "w-full text-center")}
+              >
+                {t("staticPages.pricing.tiers.business.subscribeButton")}
+              </Link>
+            </div>
+          ) : (
+            <Link
+              to={tierSignupHref(tier.tierKey, billingCycle)}
+              className={cn(
+                isEnterprise
+                  ? pricingPageUi.cardCtaEnterprise
+                  : tier.isPopular
+                    ? pricingPageUi.cardCtaPrimary
+                    : pricingPageUi.cardCtaSecondary,
+              )}
+            >
+              {tier.buttonText}
+            </Link>
+          );
 
           return (
             <PricingTierCard
@@ -62,20 +98,7 @@ export function PricingSection({
               billingCycle={billingCycle}
               copyScope={copyScope}
               deferFeatureSkeleton
-              footer={
-                <Link
-                  to={tierSignupHref(tier.tierKey, billingCycle)}
-                  className={cn(
-                    isEnterprise
-                      ? pricingPageUi.cardCtaEnterprise
-                      : tier.isPopular
-                        ? pricingPageUi.cardCtaPrimary
-                        : pricingPageUi.cardCtaSecondary,
-                  )}
-                >
-                  {tier.buttonText}
-                </Link>
-              }
+              footer={footer}
             />
           );
         })}

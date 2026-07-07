@@ -31,6 +31,12 @@ export type ExpandableInfoCardProps = {
   learnLessLabel: string;
   className?: string;
   imageClassName?: string;
+  /** Extra classes on the media frame (aspect ratio, crop hooks). */
+  imageMediaClassName?: string;
+  /** `contain` keeps the full image visible inside the media frame (inset padding). */
+  imageFit?: "cover" | "contain";
+  /** CSS object-position for cover crops, e.g. `50% 28%`. */
+  imagePosition?: string;
   titleClassName?: string;
 };
 
@@ -50,6 +56,9 @@ export function ExpandableInfoCard({
   learnLessLabel,
   className,
   imageClassName,
+  imageMediaClassName,
+  imageFit = "cover",
+  imagePosition,
   titleClassName,
 }: ExpandableInfoCardProps) {
   const [expanded, setExpanded] = useState(false);
@@ -70,7 +79,10 @@ export function ExpandableInfoCard({
       ) : null}
       <div
         className={cn(
-          "caretip-expandable-info-card__media relative aspect-[16/10] w-full overflow-hidden",
+          "caretip-expandable-info-card__media relative w-full overflow-hidden",
+          imageMediaClassName ?? "aspect-[16/10]",
+          imageFit === "contain" &&
+            "caretip-expandable-info-card__media--contain bg-neutral-100/80 px-4 pt-4 sm:px-5 sm:pt-5 dark:bg-neutral-900/50",
           tag ? "mt-0" : undefined,
           imageClassName,
         )}
@@ -79,7 +91,13 @@ export function ExpandableInfoCard({
           src={imageSrc}
           webpSrc={imageWebpSrc}
           alt={imageAlt}
-          className="h-full w-full object-cover object-center transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.01]"
+          className={cn(
+            "h-full w-full",
+            imageFit === "contain"
+              ? "rounded-xl object-contain object-center"
+              : "object-cover transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.01]",
+          )}
+          style={imageFit === "cover" && imagePosition ? { objectPosition: imagePosition } : undefined}
           loading="lazy"
           decoding="async"
         />

@@ -901,7 +901,7 @@ export function QRCodeManagementPage({
           <div>
             <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statSlug")}</p>
             <p className={businessUi.atAGlanceStatValue}>
-              {businessSlug ? t("business.qrPage.slugLive") : t("business.qrPage.slugNa")}
+              {businessSlug ? t("status.live") : t("business.qrPage.slugNa")}
             </p>
           </div>
         </div>

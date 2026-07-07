@@ -9,6 +9,8 @@ import { StatsFetchError, logStatsPhase } from "../utils/statsErrors.js";
 import { randomBytes } from "node:crypto";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { prisma } from "../prisma.js";
+import { isSubscriptionBasicDefaultEnabled } from "../config/featureFlags.js";
+import { provisionInternalBasicSubscription } from "./subscription.service.js";
 import { emitBusinessDataChanged, emitPlatformDataUpdated } from "../socket/socketEmitters.js";
 import {
   toManagerBusinessProfileDto,
@@ -105,14 +107,25 @@ export async function getBusinessByUserId(userId: string) {
   const baseName = (u.email.split("@")[0] || "My").trim();
   const name = `${baseName} venue`;
   const slug = await generateUniqueBusinessSlugForName(name);
-  return prisma.business.create({
-    data: {
-      userId: u.id,
-      name,
-      slug,
-      businessType: null,
-      location: null,
-    },
+  return prisma.$transaction(async (tx) => {
+    const business = await tx.business.create({
+      data: {
+        userId: u.id,
+        name,
+        slug,
+        businessType: null,
+        location: null,
+      },
+    });
+
+    if (isSubscriptionBasicDefaultEnabled()) {
+      await provisionInternalBasicSubscription(business.id, {
+        source: "auto_heal",
+        tx,
+      });
+    }
+
+    return business;
   });
 }
 

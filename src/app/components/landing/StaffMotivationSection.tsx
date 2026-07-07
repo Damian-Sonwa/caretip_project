@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Award, Star, Target, Trophy } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import trophyImg from "../../../../images/trophy.jpeg";
 
 function Medal3D() {
@@ -265,6 +266,8 @@ function ExplodedViewStage({
   headlineHover: boolean;
   recognitionHover: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="relative mx-auto w-full max-w-[560px]"
@@ -318,7 +321,7 @@ function ExplodedViewStage({
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold text-gray-600">Top performer</p>
             <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-black text-emerald-600 dark:text-emerald-400">
-              Live
+              {t("status.live")}
             </span>
           </div>
           <p className="mt-2 text-base font-black text-gray-900">

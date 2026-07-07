@@ -19,11 +19,9 @@ type ActivateCareTipCtaProps = {
   className?: string;
   variant?: "primary" | "outline" | "ghost";
   size?: "sm" | "md";
-  /** billing = link to billing page; trial = start trial checkout */
+  /** billing = link to billing page; trial = start Pro trial */
   action?: "billing" | "trial";
-  /** When provided (e.g. inside a modal), closes the overlay before navigating. */
   closeBeforeNavigate?: CloseBeforeNavigate;
-  /** Overlay close animation duration — use ACTIVATION_SHEET_CLOSE_MS for sheets. */
   closeAnimationMs?: number;
 };
 
@@ -49,7 +47,7 @@ export function ActivateCareTipCta({
     className,
   );
 
-  async function handleBillingActivate() {
+  async function handleBillingUpgrade() {
     if (busy) return;
     setBusy(true);
     try {
@@ -66,11 +64,11 @@ export function ActivateCareTipCta({
           type="button"
           className={baseClass}
           disabled={busy}
-          onClick={() => void handleBillingActivate()}
+          onClick={() => void handleBillingUpgrade()}
         >
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
           <Sparkles className="h-3.5 w-3.5" aria-hidden />
-          {t("subscription.activation.activateCta")}
+          {t("subscription.activation.upgradeCta")}
         </button>
       );
     }
@@ -78,7 +76,7 @@ export function ActivateCareTipCta({
     return (
       <Link to={BILLING_SUBSCRIPTION_PLANS_URL} className={baseClass}>
         <Sparkles className="h-3.5 w-3.5" aria-hidden />
-        {t("subscription.activation.activateCta")}
+        {t("subscription.activation.upgradeCta")}
       </Link>
     );
   }
@@ -129,7 +127,7 @@ export function ActivationPlanButtons({
   return (
     <div
       className={cn(
-        layout === "grid" ? "grid gap-3 sm:grid-cols-3" : "flex flex-wrap gap-3",
+        layout === "grid" ? "grid gap-3 sm:grid-cols-2" : "flex flex-wrap gap-3",
         className,
       )}
     >
@@ -153,27 +151,14 @@ export function ActivationPlanButtons({
       <button
         type="button"
         disabled={busy !== null}
-        onClick={() => void handle("starter")}
+        onClick={() => void handle("pro")}
         className="flex min-h-[44px] flex-col items-start gap-1 rounded-xl border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/40 disabled:opacity-60"
       >
         <span className="text-sm font-semibold text-foreground">
-          {busy === "starter" ? <Loader2 className="inline h-4 w-4 animate-spin" aria-hidden /> : null}
-          {t("subscription.activation.starterCta")}
+          {busy === "pro" ? <Loader2 className="inline h-4 w-4 animate-spin" aria-hidden /> : null}
+          {t("subscription.activation.proCta")}
         </span>
-        <span className="text-xs text-muted-foreground">{t("subscription.activation.starterHint")}</span>
-      </button>
-
-      <button
-        type="button"
-        disabled={busy !== null}
-        onClick={() => void handle("business")}
-        className="flex min-h-[44px] flex-col items-start gap-1 rounded-xl border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/40 disabled:opacity-60"
-      >
-        <span className="text-sm font-semibold text-foreground">
-          {busy === "business" ? <Loader2 className="inline h-4 w-4 animate-spin" aria-hidden /> : null}
-          {t("subscription.activation.businessCta")}
-        </span>
-        <span className="text-xs text-muted-foreground">{t("subscription.activation.businessHint")}</span>
+        <span className="text-xs text-muted-foreground">{t("subscription.activation.proHint")}</span>
       </button>
     </div>
   );

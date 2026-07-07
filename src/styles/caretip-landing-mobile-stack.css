@@ -89,6 +89,19 @@
     aspect-ratio: 16 / 10;
   }
 
+  .caretip-landing #real-life .caretip-expandable-info-card__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .caretip-landing #real-life .caretip-expandable-info-card__media--contain img {
+    object-fit: contain;
+    object-position: center;
+  }
+
   .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__body {
     order: 0;
     padding: 0.875rem 1rem 1rem;
@@ -193,5 +206,46 @@
     font-weight: 600;
     line-height: 1.08;
     letter-spacing: -0.028em;
+  }
+}
+
+/* Midwife real-life card — all breakpoints */
+.caretip-landing #real-life .caretip-real-life-card-image--midwife {
+  aspect-ratio: 16 / 11;
+  margin-bottom: -1.5rem;
+}
+
+.caretip-landing #real-life .caretip-real-life-card-image--midwife img {
+  object-fit: cover;
+  object-position: 50% 24%;
+  transform: scale(1.08);
+  transform-origin: 50% 18%;
+}
+
+.caretip-landing #real-life .caretip-real-life-card--midwife .caretip-expandable-info-card__body {
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
+  padding-top: 1.75rem;
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.72) 0%,
+    rgb(255 255 255 / 0.96) 0.75rem,
+    rgb(255 255 255 / 1) 1.25rem
+  );
+}
+
+html.dark .caretip-landing #real-life .caretip-real-life-card--midwife .caretip-expandable-info-card__body {
+  background: linear-gradient(
+    180deg,
+    rgb(10 10 10 / 0.72) 0%,
+    rgb(10 10 10 / 0.96) 0.75rem,
+    rgb(10 10 10 / 1) 1.25rem
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing #real-life .caretip-real-life-card-image--midwife img {
+    transform: none;
   }
 }

@@ -5,7 +5,6 @@ import {
   featureListKeys,
   getFeatureCatalog,
 } from "@/app/lib/subscriptionFeatureCatalog";
-import { ActivateCareTipCta } from "../../subscription/ActivateCareTipCta";
 import { UpgradeCta } from "../../subscription/UpgradeCta";
 import {
   Dialog,
@@ -30,7 +29,6 @@ export function PremiumAccessDialog({
   open,
   onOpenChange,
   featureKey,
-  lockReason,
 }: PremiumAccessDialogProps) {
   const { t } = useTranslation();
   if (!featureKey) return null;
@@ -38,7 +36,6 @@ export function PremiumAccessDialog({
   const catalog = getFeatureCatalog(featureKey);
   const features = featureListKeys(catalog);
   const planLabel = t(planLabelKeyForFeature(featureKey));
-  const isActivation = lockReason === "activation_required";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,9 +45,7 @@ export function PremiumAccessDialog({
             <div className="flex items-center gap-2 text-primary">
               <Lock className="h-4 w-4 shrink-0" aria-hidden />
               <span className="text-xs font-semibold uppercase tracking-wide">
-                {isActivation
-                  ? t("dashboardNav.business.premiumDialog.activationEyebrow")
-                  : t("dashboardNav.business.premiumDialog.upgradeEyebrow")}
+                {t("dashboardNav.business.premiumDialog.upgradeEyebrow")}
               </span>
             </div>
             <DialogTitle className="text-xl font-semibold tracking-tight">
@@ -70,27 +65,17 @@ export function PremiumAccessDialog({
               </li>
             ))}
           </ul>
-          <p className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            {isActivation
-              ? t("dashboardNav.business.premiumDialog.activationPlanHint")
-              : t("dashboardNav.business.premiumDialog.includedWithPlan", { plan: planLabel })}
+          <p className="text-sm text-muted-foreground">
+            {t("dashboardNav.business.premiumDialog.availableOnPlan", { plan: planLabel })}
           </p>
         </div>
         <DialogFooter className="flex-col gap-2 border-t border-border/60 bg-muted/10 px-6 py-4 sm:flex-col sm:justify-stretch">
-          {isActivation ? (
-            <ActivateCareTipCta
-              size="md"
-              className="w-full justify-center"
-              closeBeforeNavigate={() => onOpenChange(false)}
-            />
-          ) : (
-            <UpgradeCta
-              featureKey={featureKey}
-              className="w-full justify-center"
-              fullWidth
-              closeBeforeNavigate={() => onOpenChange(false)}
-            />
-          )}
+          <UpgradeCta
+            featureKey={featureKey}
+            className="w-full justify-center"
+            fullWidth
+            closeBeforeNavigate={() => onOpenChange(false)}
+          />
           <Button type="button" variant="ghost" className="w-full" onClick={() => onOpenChange(false)}>
             {t("dashboardNav.business.premiumDialog.maybeLater")}
           </Button>

@@ -5,6 +5,7 @@ import {
 import type Stripe from "stripe";
 import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
 import { BILLING_CHECKOUT_METADATA_KEYS, STRIPE_BILLING_AUDIT_TYPES } from "../lib/subscription/subscriptionAuditTypes.js";
+import { isSubscriptionMirrorEntitled } from "../lib/subscription/subscriptionMirrorEntitlement.js";
 import { mapStripeSubscriptionStatus } from "../lib/subscription/mapStripeSubscriptionStatus.js";
 import { getStripeClient } from "./stripe.service.js";
 import { prisma } from "../prisma.js";
@@ -12,6 +13,7 @@ import {
   applyStripeMirrorTransactional,
   buildMirrorSnapshotFromStripeSubscription,
   createSubscriptionAuditEventData,
+  downgradeToInternalBasic,
   findSubscriptionForStripeBilling,
 } from "./subscription.service.js";
 import {
@@ -252,6 +254,31 @@ async function handleInvoicePaymentFailed(event: Stripe.Event, invoice: Stripe.I
   const snapshot = buildMirrorSnapshotFromStripeSubscription(sub);
   const mapped = mapStripeSubscriptionStatus(sub.status);
   snapshot.status = mapped.status;
+
+  const entitled = isSubscriptionMirrorEntitled({
+    status: snapshot.status,
+    cancelAtPeriodEnd: snapshot.cancelAtPeriodEnd,
+    cancellationEffective: snapshot.cancellationEffective,
+    currentPeriodEnd: snapshot.currentPeriodEnd,
+    canceledAt: snapshot.canceledAt,
+  });
+
+  if (!entitled) {
+    await downgradeToInternalBasic({
+      subscriptionRowId: row.id,
+      businessId: row.businessId,
+      auditType: STRIPE_BILLING_AUDIT_TYPES.invoicePaymentFailed,
+      stripeEventId: event.id,
+      auditPayload: {
+        invoiceId: invoice.id,
+        attemptCount: invoice.attempt_count,
+        stripeSubscriptionId: subId,
+        status: snapshot.status,
+      },
+      reason: "invoice_payment_failed_final",
+    });
+    return;
+  }
 
   await applyStripeMirrorTransactional({
     subscriptionRowId: row.id,

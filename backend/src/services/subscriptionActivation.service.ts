@@ -11,9 +11,10 @@ import { getStripeClient, isStripeConfigured } from "./stripe.service.js";
 import {
   applyStripeMirrorTransactional,
   buildMirrorSnapshotFromStripeSubscription,
+  downgradeToInternalBasic,
   ensureInitialSubscriptionMirrorFromStripe,
   findSubscriptionForStripeBilling,
-  removeEndedSubscriptionMirror,
+  isInternalBasicSubscription,
   type SubscriptionAuditType,
 } from "./subscription.service.js";
 
@@ -198,14 +199,15 @@ export async function activateSubscriptionMirrorFromStripeSubscription(params: {
   }
 
   if (!isSubscriptionMirrorEntitled(snapshot)) {
-    await removeEndedSubscriptionMirror({
+    await downgradeToInternalBasic({
       subscriptionRowId: row.id,
       businessId: row.businessId,
       auditType,
       stripeEventId,
       auditPayload,
+      reason: "stripe_subscription_ended",
     });
-    logTrialSync("activation.mirror_removed", {
+    logTrialSync("activation.mirror_downgraded_to_basic", {
       source,
       businessId: row.businessId,
       subscriptionRowId: row.id,
@@ -249,6 +251,25 @@ export async function tryActivateSubscriptionFromStripeForBusiness(params: {
   }
   if (!isStripeConfigured()) {
     return "stripe_not_configured";
+  }
+
+  const internalMirror = await prisma.subscription.findUnique({
+    where: { businessId: params.businessId },
+    select: {
+      planKey: true,
+      status: true,
+      stripeSubscriptionId: true,
+      isTrial: true,
+    },
+  });
+  if (internalMirror && isInternalBasicSubscription(internalMirror)) {
+    logTrialSync("activation.stop", {
+      source,
+      outcome: "ignored",
+      reason: "internal_basic_no_stripe_sync",
+      businessId: params.businessId,
+    });
+    return "ignored";
   }
 
   const stripe = getStripeClient();

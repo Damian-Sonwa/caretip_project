@@ -82,6 +82,10 @@ function buildSponsoredState(
 /**
  * Authoritative subscription + entitlement resolver.
  * Never infers a plan from missing data or Business.subscriptionTier alone.
+ *
+ * Internal Basic (`planKey=basic`, `status=active`, no Stripe IDs) is a first-class
+ * entitled subscription — `hasActiveEntitlements: true`, `accessSource: "subscription"`.
+ * `accessSource: "none"` is exceptional (no mirror row, ended mirror without downgrade, or no sponsor).
  */
 export async function resolveSubscriptionEntitlements(
   businessId: string,
@@ -278,7 +282,7 @@ export function maskEmployeeGoalsInResponse<T extends Record<string, unknown>>(
   };
 }
 
-/** Any entitled subscription (Starter+). Operational APIs use this before capability checks. */
+/** Any entitled subscription (Basic+). Operational APIs use this before capability checks. */
 export function requireOperationalSubscription() {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (subscriptionBypass(req)) {

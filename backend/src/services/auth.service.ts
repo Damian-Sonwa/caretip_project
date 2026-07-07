@@ -5,6 +5,8 @@ import { prisma } from "../prisma.js";
 import { validatePassword } from "../utils/passwordValidation.js";
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
 import { generateUniqueBusinessSlugForName } from "./business.service.js";
+import { isSubscriptionBasicDefaultEnabled } from "../config/featureFlags.js";
+import { provisionInternalBasicSubscription } from "./subscription.service.js";
 import {
   buildVerifyEmailUrl,
   createEmailVerificationToken,
@@ -394,39 +396,50 @@ export async function registerBusiness(
     ? resolveUserPreferredLocale(input.locale)
     : null;
 
-  const created = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      role: "MANAGER",
-      isPlatformAdmin: false,
-      emailVerified: false,
-      preferredLocale,
-      business: {
-        create: {
-          name: placeholderBusinessName,
-          slug,
-          businessType: null,
-          location: null,
-          registeredAddress: null,
-          contactPhone: null,
-          contactEmail: null,
-          website: null,
+  const created = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email,
+        passwordHash,
+        role: "MANAGER",
+        isPlatformAdmin: false,
+        emailVerified: false,
+        preferredLocale,
+        business: {
+          create: {
+            name: placeholderBusinessName,
+            slug,
+            businessType: null,
+            location: null,
+            registeredAddress: null,
+            contactPhone: null,
+            contactEmail: null,
+            website: null,
+          },
         },
       },
-    },
-    include: {
-      business: {
-        select: {
-          id: true,
-          name: true,
-          verificationStatus: true,
-          onboardingVerificationStatus: true,
-          kycVerificationStatus: true,
+      include: {
+        business: {
+          select: {
+            id: true,
+            name: true,
+            verificationStatus: true,
+            onboardingVerificationStatus: true,
+            kycVerificationStatus: true,
+          },
         },
+        employee: { select: { id: true, name: true, avatar: true, businessId: true } },
       },
-      employee: { select: { id: true, name: true, avatar: true, businessId: true } },
-    },
+    });
+
+    if (isSubscriptionBasicDefaultEnabled() && user.business?.id) {
+      await provisionInternalBasicSubscription(user.business.id, {
+        source: "email_signup",
+        tx,
+      });
+    }
+
+    return user;
   });
 
   // Managers must verify email for password sign-ups — await so delivery runs before HTTP response (serverless-safe).

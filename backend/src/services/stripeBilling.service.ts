@@ -1,6 +1,10 @@
 import type Stripe from "stripe";
 import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
 import { getStripeClient, isStripeConfigured } from "./stripe.service.js";
+import {
+  assertSelfServeCheckoutPlanKey,
+} from "../lib/subscription/billingCheckoutPolicy.js";
+import { resolveStripeCheckoutPriceId } from "../lib/subscription/stripePricePlanCatalog.js";
 import { BILLING_CHECKOUT_METADATA_KEYS } from "../lib/subscription/subscriptionAuditTypes.js";
 import { mapBusinessTierToPlanKey } from "../lib/subscription/mapSubscriptionPlanKey.js";
 import type { SubscriptionPlanKey } from "@prisma/client";
@@ -33,25 +37,36 @@ function checkoutReturnUrls(flow: SubscriptionCheckoutFlow): {
   };
 }
 
-function resolveCheckoutPriceId(planKey: SubscriptionPlanKey, billingCycle: "monthly" | "yearly"): string {
-  const envKey =
-    billingCycle === "yearly"
-      ? {
-          basic: process.env.STRIPE_PRICE_BASIC_YEARLY,
-          premium: process.env.STRIPE_PRICE_PREMIUM_YEARLY,
-          enterprise: process.env.STRIPE_PRICE_ENTERPRISE_YEARLY,
-        }[planKey]
-      : {
-          basic: process.env.STRIPE_PRICE_BASIC_MONTHLY,
-          premium: process.env.STRIPE_PRICE_PREMIUM_MONTHLY,
-          enterprise: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY,
-        }[planKey];
+function logStripeCheckoutFailure(params: {
+  planKey: SubscriptionPlanKey;
+  billingCycle: "monthly" | "yearly";
+  priceId: string;
+  err: unknown;
+}): void {
+  const stripeMsg =
+    params.err instanceof Stripe.errors.StripeError
+      ? params.err.message
+      : params.err instanceof Error
+        ? params.err.message
+        : String(params.err);
+  console.error(
+    "[billing.checkout] stripe_session_failed",
+    JSON.stringify({
+      planKey: params.planKey,
+      billingCycle: params.billingCycle,
+      resolvedPriceId: params.priceId,
+      stripeError: stripeMsg,
+      ...(params.err instanceof Stripe.errors.StripeError
+        ? { stripeType: params.err.type, stripeCode: params.err.code ?? null }
+        : {}),
+    }),
+  );
+}
 
-  const priceId = envKey?.trim();
-  if (!priceId) {
-    throw new Error(`Stripe price not configured for ${planKey} ${billingCycle}`);
-  }
-  return priceId;
+/** Pro self-serve checkout only (internal planKey `premium`). */
+function resolveCheckoutPriceId(planKey: SubscriptionPlanKey, billingCycle: "monthly" | "yearly"): string {
+  assertSelfServeCheckoutPlanKey(planKey);
+  return resolveStripeCheckoutPriceId(billingCycle);
 }
 
 /** Create or retrieve Stripe Customer for a business (stored on Business; mirrored on Subscription when present). */
@@ -135,6 +150,8 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
     throw new Error("Stripe is not configured");
   }
 
+  assertSelfServeCheckoutPlanKey(params.planKey);
+
   const billingCycle = params.billingCycle ?? "monthly";
   const priceId = resolveCheckoutPriceId(params.planKey, billingCycle);
   const customerId = await ensureStripeCustomerForBusiness({
@@ -157,7 +174,7 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
   const trialEligible =
     params.includeTrial === true &&
     isSubscriptionTrialEnabled() &&
-    (params.planKey === "basic" || params.planKey === "premium");
+    params.planKey === "premium";
   const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
     metadata: {
       [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
@@ -173,23 +190,34 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
   const checkoutFlow = params.checkoutFlow ?? "billing";
   const { successUrl, cancelUrl } = checkoutReturnUrls(checkoutFlow);
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
-    payment_method_collection: "always",
-    success_url: successUrl,
-    cancel_url: cancelUrl,
-    subscription_data: subscriptionData,
-    metadata: {
-      [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
-      ...(subscriptionId
-        ? { [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: subscriptionId }
-        : {}),
-      [BILLING_CHECKOUT_METADATA_KEYS.planKey]: params.planKey,
-      [BILLING_CHECKOUT_METADATA_KEYS.source]: "platform_checkout",
-    },
-  });
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      payment_method_collection: "always",
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      subscription_data: subscriptionData,
+      metadata: {
+        [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
+        ...(subscriptionId
+          ? { [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: subscriptionId }
+          : {}),
+        [BILLING_CHECKOUT_METADATA_KEYS.planKey]: params.planKey,
+        [BILLING_CHECKOUT_METADATA_KEYS.source]: "platform_checkout",
+      },
+    });
+  } catch (err) {
+    logStripeCheckoutFailure({
+      planKey: params.planKey,
+      billingCycle,
+      priceId,
+      err,
+    });
+    throw err;
+  }
 
   return { sessionId: session.id, url: session.url };
 }

@@ -5,7 +5,7 @@ import {
   SubscriptionPlanKey,
   SubscriptionStatus,
   TrialSource,
-  type Prisma,
+  Prisma,
 } from "@prisma/client";
 import type Stripe from "stripe";
 import {
@@ -22,6 +22,333 @@ import {
 import { prisma } from "../prisma.js";
 import { isSubscriptionMirrorEntitled } from "../lib/subscription/subscriptionMirrorEntitlement.js";
 import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
+
+type DbClient = Prisma.TransactionClient | typeof prisma;
+
+function dbClient(tx?: Prisma.TransactionClient): DbClient {
+  return tx ?? prisma;
+}
+
+/** Internal Basic: free entitlement row with no Stripe billing linkage. */
+export function isInternalBasicSubscription(sub: {
+  planKey: SubscriptionPlanKey;
+  status: SubscriptionStatus;
+  stripeSubscriptionId: string | null;
+  isTrial: boolean;
+}): boolean {
+  return (
+    sub.planKey === SubscriptionPlanKey.basic &&
+    sub.status === SubscriptionStatus.active &&
+    sub.stripeSubscriptionId == null &&
+    sub.isTrial === false
+  );
+}
+
+const INTERNAL_BASIC_MIRROR_FIELDS = {
+  planKey: SubscriptionPlanKey.basic,
+  status: SubscriptionStatus.active,
+  billingCycle: BillingCycle.monthly,
+  stripeSubscriptionId: null,
+  stripeCustomerId: null,
+  stripePriceId: null,
+  platformFeeCents: null,
+  isTrial: false,
+  trialSource: null,
+  trialStartedAt: null,
+  trialEndsAt: null,
+  cancelAtPeriodEnd: false,
+  canceledAt: null,
+  cancellationEffective: null,
+  currentPeriodStart: null,
+  currentPeriodEnd: null,
+  renewalDate: null,
+} as const;
+
+function internalBasicMirrorUpdateData(trialExpiredAt: Date | null): Prisma.SubscriptionUpdateInput {
+  return {
+    ...INTERNAL_BASIC_MIRROR_FIELDS,
+    trialReminderSent: Prisma.DbNull,
+    trialExpiredAt,
+  };
+}
+
+/** Downgrade path — preserve Pro trial history on the mirror row. */
+function internalBasicDowngradeUpdateData(params: {
+  trialExpiredAt: Date | null;
+  trialStartedAt: Date | null;
+  trialEndsAt: Date | null;
+  trialSource: TrialSource | null;
+}): Prisma.SubscriptionUpdateInput {
+  return {
+    planKey: SubscriptionPlanKey.basic,
+    status: SubscriptionStatus.active,
+    billingCycle: BillingCycle.monthly,
+    stripeSubscriptionId: null,
+    stripeCustomerId: null,
+    stripePriceId: null,
+    platformFeeCents: null,
+    isTrial: false,
+    trialSource: params.trialSource,
+    trialStartedAt: params.trialStartedAt,
+    trialEndsAt: params.trialEndsAt,
+    trialReminderSent: Prisma.DbNull,
+    trialExpiredAt: params.trialExpiredAt,
+    cancelAtPeriodEnd: false,
+    canceledAt: null,
+    cancellationEffective: null,
+    currentPeriodStart: null,
+    currentPeriodEnd: null,
+    renewalDate: null,
+  };
+}
+
+function internalBasicMirrorCreateData(
+  businessId: string,
+  trialExpiredAt?: Date | null,
+): Prisma.SubscriptionUncheckedCreateInput {
+  return {
+    businessId,
+    ...INTERNAL_BASIC_MIRROR_FIELDS,
+    trialExpiredAt: trialExpiredAt ?? null,
+  };
+}
+
+export type InternalBasicProvisionResult = {
+  subscriptionId: string;
+  created: boolean;
+  updated: boolean;
+  skipped: boolean;
+};
+
+/**
+ * Idempotent internal Basic mirror — creates or resets a Subscription row without Stripe.
+ * Skips businesses that already have an entitled paid/trial mirror (Pro/Premium).
+ */
+export async function provisionInternalBasicSubscription(
+  businessId: string,
+  opts?: {
+    source?: SubscriptionMirrorSource;
+    tx?: Prisma.TransactionClient;
+    preserveTrialExpiredAt?: boolean;
+  },
+): Promise<InternalBasicProvisionResult> {
+  const client = dbClient(opts?.tx);
+  const source = opts?.source ?? "email_signup";
+
+  const business = await client.business.findUnique({
+    where: { id: businessId },
+    select: {
+      id: true,
+      subscription: {
+        select: {
+          id: true,
+          planKey: true,
+          status: true,
+          stripeSubscriptionId: true,
+          isTrial: true,
+          cancelAtPeriodEnd: true,
+          cancellationEffective: true,
+          currentPeriodEnd: true,
+          canceledAt: true,
+          trialExpiredAt: true,
+        },
+      },
+    },
+  });
+
+  if (!business) {
+    throw new Error(`Business not found: ${businessId}`);
+  }
+
+  const existing = business.subscription;
+  if (existing) {
+    if (isSubscriptionMirrorEntitled(existing)) {
+      if (isInternalBasicSubscription(existing)) {
+        return { subscriptionId: existing.id, created: false, updated: false, skipped: true };
+      }
+      return { subscriptionId: existing.id, created: false, updated: false, skipped: true };
+    }
+  }
+
+  const now = new Date();
+  const trialExpiredAt =
+    opts?.preserveTrialExpiredAt && existing?.trialExpiredAt
+      ? existing.trialExpiredAt
+      : existing?.status === SubscriptionStatus.trialing
+        ? now
+        : existing?.trialExpiredAt ?? null;
+
+  if (existing) {
+    const eventData = createSubscriptionAuditEventData({
+      auditType: SUBSCRIPTION_AUDIT_TYPES.downgradedToBasic,
+      source,
+      payload: {
+        businessId,
+        previousPlanKey: existing.planKey,
+        previousStatus: existing.status,
+        planKey: SubscriptionPlanKey.basic,
+        status: SubscriptionStatus.active,
+        reason: "provision_internal_basic",
+      },
+      occurredAt: now,
+    });
+
+    const applyUpdate = async (tx: DbClient) => {
+      await tx.business.update({
+        where: { id: businessId },
+        data: { subscriptionTier: BusinessSubscriptionTier.basic },
+      });
+      await tx.subscription.update({
+        where: { id: existing.id },
+        data: internalBasicMirrorUpdateData(trialExpiredAt),
+      });
+      await tx.subscriptionEvent.create({
+        data: {
+          subscriptionId: existing.id,
+          ...eventData,
+        },
+      });
+    };
+
+    if (opts?.tx) {
+      await applyUpdate(opts.tx);
+    } else {
+      await prisma.$transaction(async (tx) => {
+        await applyUpdate(tx);
+      });
+    }
+
+    return { subscriptionId: existing.id, created: false, updated: true, skipped: false };
+  }
+
+  const applyCreate = async (tx: DbClient) => {
+    const row = await tx.subscription.create({
+      data: {
+        ...internalBasicMirrorCreateData(businessId, trialExpiredAt),
+        events: {
+          create: createSubscriptionAuditEventData({
+            auditType: SUBSCRIPTION_AUDIT_TYPES.created,
+            source,
+            payload: {
+              planKey: SubscriptionPlanKey.basic,
+              subscriptionTier: BusinessSubscriptionTier.basic,
+              status: SubscriptionStatus.active,
+              internalBasic: true,
+            },
+            occurredAt: now,
+          }),
+        },
+      },
+      select: { id: true },
+    });
+
+    await tx.business.update({
+      where: { id: businessId },
+      data: { subscriptionTier: BusinessSubscriptionTier.basic },
+    });
+
+    return row;
+  };
+
+  const created = opts?.tx
+    ? await applyCreate(opts.tx)
+    : await prisma.$transaction(async (tx) => applyCreate(tx));
+
+  return { subscriptionId: created.id, created: true, updated: false, skipped: false };
+}
+
+export type DowngradeToInternalBasicParams = {
+  subscriptionRowId: string;
+  businessId: string;
+  auditType?: SubscriptionAuditType;
+  stripeEventId?: string | null;
+  auditPayload?: Record<string, unknown>;
+  reason?: string;
+  tx?: Prisma.TransactionClient;
+};
+
+/**
+ * Lifecycle downgrade — keeps business data, resets mirror to internal Basic active.
+ * Replaces delete-mirror behavior for normal Pro/trial/Premium ends.
+ */
+export async function downgradeToInternalBasic(
+  params: DowngradeToInternalBasicParams,
+): Promise<void> {
+  const client = dbClient(params.tx);
+  const now = new Date();
+
+  const existing = await client.subscription.findUnique({
+    where: { id: params.subscriptionRowId },
+    select: {
+      id: true,
+      businessId: true,
+      planKey: true,
+      status: true,
+      isTrial: true,
+      trialExpiredAt: true,
+      trialStartedAt: true,
+      trialEndsAt: true,
+      trialSource: true,
+    },
+  });
+
+  if (!existing || existing.businessId !== params.businessId) {
+    throw new Error("Subscription row not found for downgrade");
+  }
+
+  const trialExpiredAt =
+    existing.status === SubscriptionStatus.trialing && !existing.trialExpiredAt
+      ? now
+      : existing.trialExpiredAt;
+
+  const auditType = params.auditType ?? SUBSCRIPTION_AUDIT_TYPES.downgradedToBasic;
+  const eventData = createSubscriptionAuditEventData({
+    auditType,
+    payload: {
+      businessId: params.businessId,
+      previousPlanKey: existing.planKey,
+      previousStatus: existing.status,
+      planKey: SubscriptionPlanKey.basic,
+      status: SubscriptionStatus.active,
+      reason: params.reason ?? "lifecycle_downgrade",
+      ...params.auditPayload,
+    },
+    stripeEventId: params.stripeEventId ?? null,
+    processingResult: SubscriptionEventProcessingResult.processed,
+    occurredAt: now,
+  });
+
+  const applyDowngrade = async (tx: DbClient) => {
+    await tx.business.update({
+      where: { id: params.businessId },
+      data: { subscriptionTier: BusinessSubscriptionTier.basic },
+    });
+    await tx.subscription.update({
+      where: { id: params.subscriptionRowId },
+      data: internalBasicDowngradeUpdateData({
+        trialExpiredAt,
+        trialStartedAt: existing.trialStartedAt,
+        trialEndsAt: existing.trialEndsAt,
+        trialSource: existing.trialSource,
+      }),
+    });
+    await tx.subscriptionEvent.create({
+      data: {
+        subscriptionId: params.subscriptionRowId,
+        ...eventData,
+      },
+    });
+  };
+
+  if (params.tx) {
+    await applyDowngrade(params.tx);
+  } else {
+    await prisma.$transaction(async (tx) => {
+      await applyDowngrade(tx);
+    });
+  }
+}
+
 
 export type { SubscriptionMirrorSource };
 
@@ -206,6 +533,7 @@ export function buildNestedSubscriptionCreateData(params: {
 export type SubscriptionAuditType =
   | typeof SUBSCRIPTION_AUDIT_TYPES.created
   | typeof SUBSCRIPTION_AUDIT_TYPES.planChanged
+  | typeof SUBSCRIPTION_AUDIT_TYPES.downgradedToBasic
   | (typeof STRIPE_BILLING_AUDIT_TYPES)[keyof typeof STRIPE_BILLING_AUDIT_TYPES];
 
 /** Shape for `subscriptionEvent.create` (nested or standalone). */

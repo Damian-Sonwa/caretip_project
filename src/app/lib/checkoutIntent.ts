@@ -95,6 +95,7 @@ export function persistCheckoutIntentFromSearchParams(searchParams: URLSearchPar
     billingCycle: parseBillingCycleParam(searchParams.get("cycle")),
     trial: parseTrialParam(searchParams.get("trial")),
   });
+  if (intent.planKey === "basic") return null;
   saveCheckoutIntent(intent);
   return intent;
 }

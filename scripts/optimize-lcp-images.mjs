@@ -19,7 +19,7 @@ const TARGETS = [
   { inPath: "images/payment-infrastructure.png", outBase: "images/payment-infrastructure", maxWidth: 1200 },
   { inPath: "images/logy.png", outBase: "images/logy", maxWidth: 960 },
   { inPath: "images/rep.png", outBase: "images/rep", maxWidth: 960 },
-  { inPath: "images/hospital002.png", outBase: "images/hospital002", maxWidth: 960 },
+  { inPath: "images/new-mid.png", outBase: "images/new-mid", maxWidth: 960 },
   { inPath: "images/FYP.jpeg", outBase: "images/FYP", maxWidth: 960 },
   { inPath: "images/home.jpeg", outBase: "images/home", maxWidth: 960 },
 ];

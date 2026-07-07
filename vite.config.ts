@@ -29,7 +29,8 @@ function publicSiteOriginFromEnvValue(raw: string | undefined): string {
 }
 
 export default defineConfig(({ mode }) => {
-  const loaded = loadEnv(mode, process.cwd(), '')
+  const repoRoot = fileURLToPath(new URL('.', import.meta.url))
+  const loaded = loadEnv(mode, repoRoot, '')
   const injectedOrigin = publicSiteOriginFromEnvValue(
     loaded.BASE_URL || loaded.VITE_BASE_URL || loaded.NEXT_PUBLIC_APP_URL || loaded.VITE_APP_URL,
   )

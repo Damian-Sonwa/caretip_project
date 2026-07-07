@@ -14,7 +14,7 @@ export function LiveConnectionBadge({
   const { t } = useTranslation();
   const label =
     status === "connected"
-      ? t("dashboard.live_status")
+      ? t("status.live")
       : t(`dashboard.socket.${status}`, { defaultValue: t("dashboard.socket.idle") });
   const ok = status === "connected";
   const warn = status === "disconnected" || status === "reconnecting" || status === "connecting";

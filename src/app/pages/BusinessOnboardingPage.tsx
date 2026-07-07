@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Loader2, MapPin, Palette } from "lucide-react";
+import { Loader2, MapPin, Palette } from "lucide-react";
 import { useAuth, getPostAuthRedirect } from "../hooks/useAuth";
 import { getAuthSessionFlags } from "../lib/authSessionBootstrap";
 import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
@@ -29,14 +29,13 @@ import {
 import { BusinessOnboardingGuestPreview } from "../components/business/BusinessOnboardingGuestPreview";
 import { BusinessOnboardingLogoUpload } from "../components/business/BusinessOnboardingLogoUpload";
 import { BusinessOnboardingFinishCta } from "../components/business/BusinessOnboardingFinishCta";
+import { BusinessOnboardingNavFooter } from "../components/business/BusinessOnboardingNavFooter";
 import { BusinessOnboardingReviewSummary } from "../components/business/BusinessOnboardingReviewSummary";
 import {
   BusinessOnboardingSelectField,
   BusinessOnboardingTextField,
 } from "../components/business/BusinessOnboardingFormField";
 import {
-  onboardingBackBtn,
-  onboardingContinueBtn,
   onboardingDisplayFont,
   onboardingFormCard,
   onboardingHeadline,
@@ -223,7 +222,11 @@ export function BusinessOnboardingPage() {
       }
 
       const checkoutIntent = peekCheckoutIntent();
-      if (checkoutIntent && checkoutIntent.planKey !== "enterprise") {
+      if (
+        checkoutIntent &&
+        checkoutIntent.planKey !== "enterprise" &&
+        checkoutIntent.planKey !== "basic"
+      ) {
         try {
           primeCheckoutSyncExpectation(checkoutIntent.planKey);
           const session = await createBillingCheckoutSession({
@@ -315,11 +318,8 @@ export function BusinessOnboardingPage() {
                       busy={busy}
                       disabled={!canContinue}
                       onFinish={() => void goForward()}
+                      onBack={goBack}
                     />
-                    <button type="button" onClick={goBack} disabled={busy} className={onboardingBackBtn}>
-                      <ArrowLeft className="h-4 w-4" aria-hidden />
-                      {t("business.onboarding.actions.back")}
-                    </button>
                   </div>
                 </div>
               </div>
@@ -418,31 +418,24 @@ export function BusinessOnboardingPage() {
                       </motion.div>
                     </AnimatePresence>
 
-                    <div className="space-y-4 border-t border-zinc-200/70 pt-8 dark:border-zinc-800/70">
-                      <button
-                        type="button"
-                        onClick={() => void goForward()}
-                        disabled={!canContinue || busy}
-                        aria-busy={busy}
-                        className={cn(onboardingContinueBtn, "w-full sm:max-w-md")}
-                      >
-                        {busy ? (
+                    <BusinessOnboardingNavFooter
+                      primaryLabel={
+                        busy ? (
                           <>
                             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                             {t("business.onboarding.actions.saving")}
                           </>
                         ) : (
                           t("business.onboarding.actions.continue")
-                        )}
-                      </button>
-
-                      {step > 1 ? (
-                        <button type="button" onClick={goBack} disabled={busy} className={onboardingBackBtn}>
-                          <ArrowLeft className="h-4 w-4" aria-hidden />
-                          {t("business.onboarding.actions.back")}
-                        </button>
-                      ) : null}
-                    </div>
+                        )
+                      }
+                      onPrimary={() => void goForward()}
+                      onBack={goBack}
+                      showBack={step > 1}
+                      busy={busy}
+                      disabled={!canContinue}
+                      backLabel={t("business.onboarding.actions.back")}
+                    />
                   </section>
                 </div>
               </div>

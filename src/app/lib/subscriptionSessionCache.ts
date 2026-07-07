@@ -2,6 +2,8 @@ import type { BusinessSubscriptionTier, SubscriptionLifecycleStatus } from "./su
 
 export type EntitlementAccessSource = "none" | "subscription" | "sponsored";
 
+const ENTITLEMENTS_CACHE_VERSION = "2";
+const VERSION_STORAGE_KEY = "caretip.subscriptionEntitlementsVersion";
 const TIER_STORAGE_KEY = "caretip.subscriptionTier";
 const STATUS_STORAGE_KEY = "caretip.subscriptionStatus";
 const ACCESS_SOURCE_STORAGE_KEY = "caretip.accessSource";
@@ -53,6 +55,19 @@ function readStoredAccessSource(): EntitlementAccessSource | null {
   return null;
 }
 
+/** Drop stale Option A session cache after internal Basic migration (Commit 4). */
+export function migrateSubscriptionEntitlementsCacheIfNeeded(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    const storedVersion = sessionStorage.getItem(VERSION_STORAGE_KEY);
+    if (storedVersion === ENTITLEMENTS_CACHE_VERSION) return;
+    clearSubscriptionTierSession();
+    sessionStorage.setItem(VERSION_STORAGE_KEY, ENTITLEMENTS_CACHE_VERSION);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Prime from profile fetch so entitlement hooks can render on first paint. */
 export function primeSubscriptionEntitlementsFromSession(opts: {
   tier?: BusinessSubscriptionTier | null;
@@ -91,6 +106,7 @@ export function primeSubscriptionEntitlementsFromSession(opts: {
     cachedTier = opts.tier;
     try {
       sessionStorage.setItem(TIER_STORAGE_KEY, opts.tier);
+      sessionStorage.setItem(VERSION_STORAGE_KEY, ENTITLEMENTS_CACHE_VERSION);
     } catch {
       /* ignore */
     }
@@ -144,6 +160,7 @@ export function clearSubscriptionTierSession(): void {
     sessionStorage.removeItem(TIER_STORAGE_KEY);
     sessionStorage.removeItem(STATUS_STORAGE_KEY);
     sessionStorage.removeItem(ACCESS_SOURCE_STORAGE_KEY);
+    sessionStorage.removeItem(VERSION_STORAGE_KEY);
   } catch {
     /* ignore */
   }

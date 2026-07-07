@@ -3,7 +3,7 @@ import {
   useAppLoadingRegistration,
 } from "../context/AppLoadingManager";
 
-/** Single global overlay while navigating away after a successful sign-in. */
+/** Registers the post-login overlay key — consumed by {@link AuthPostLoginTransitionRegistrar}. */
 export function useAuthPostLoginTransitionOverlay(active: boolean): void {
   useAppLoadingRegistration(
     "auth-post-login-transition",

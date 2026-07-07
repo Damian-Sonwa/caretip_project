@@ -44,7 +44,7 @@ const TOAST_OK = { style: { background: "#e9932f", color: "#ffffff" } } as const
 export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useTranslation();
   const { isBusiness } = useRequireAuth();
-  const { tier, ready, hasFeature, hasActiveEntitlements, limits } = useSubscriptionEntitlements({
+  const { tier, ready, hasFeature, limits } = useSubscriptionEntitlements({
     enabled: isBusiness,
     role: "business",
   });
@@ -168,7 +168,7 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
             <Button
               type="button"
               onClick={() => setModalOpen(true)}
-              disabled={!isBusiness || (ready && (!hasActiveEntitlements || atTableCap))}
+              disabled={!isBusiness || (ready && (!tableQrEnabled || atTableCap))}
               className="w-full shrink-0 sm:w-auto"
             >
               {t("business.tablesPage.create")}
@@ -181,7 +181,7 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
           <Button
             type="button"
             onClick={() => setModalOpen(true)}
-            disabled={!isBusiness || (ready && (!hasActiveEntitlements || atTableCap))}
+            disabled={!isBusiness || (ready && (!tableQrEnabled || atTableCap))}
             className="w-full shrink-0 sm:w-auto"
           >
             {t("business.tablesPage.create")}
@@ -196,7 +196,7 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
             : "dashboard-page-contained mx-auto w-full max-w-5xl px-4 py-8 sm:px-6",
         )}
       >
-        {ready && !hasActiveEntitlements ? (
+        {ready && !tableQrEnabled ? (
           <LockedFeatureCard featureKey="tableQr" tier={tier} />
         ) : ready && atTableCap ? (
           <div className="mb-6">

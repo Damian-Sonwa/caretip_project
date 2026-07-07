@@ -11,8 +11,10 @@ import {
 import { useProtectedRouteGate } from "../hooks/useProtectedRouteGate";
 import {
   isAuthLogoutTransitionActive,
+  isAuthPostLoginTransitionActive,
   subscribeAuthLogoutTransition,
-} from "../lib/authLogoutTransition";
+  subscribeAuthPostLoginTransition,
+} from "../lib/authTransitionIntent";
 import { AppRouteGateShell } from "./AppRouteGateShell";
 
 export function ProtectedRoute({
@@ -29,11 +31,16 @@ export function ProtectedRoute({
     isAuthLogoutTransitionActive,
     () => false,
   );
+  const postLoginTransitionActive = useSyncExternalStore(
+    subscribeAuthPostLoginTransition,
+    isAuthPostLoginTransitionActive,
+    () => false,
+  );
 
   useAppLoadingRegistration(
     `protected-route-guard:${rolesKey}:${gate.pathname}`,
     APP_LOADING_PRIORITY.ROUTE_GUARD,
-    gate.guardBlocking && !logoutTransitionActive,
+    gate.guardBlocking && !logoutTransitionActive && !postLoginTransitionActive,
   );
 
   if (logoutTransitionActive) {

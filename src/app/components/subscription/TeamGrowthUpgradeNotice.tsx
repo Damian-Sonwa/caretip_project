@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ActivateCareTipCta } from "./ActivateCareTipCta";
+import { UpgradeCta } from "./UpgradeCta";
 import { cn } from "@/lib/utils";
 
 /** Upgrade notice for team invite / add-staff actions — not an error state. */
@@ -33,7 +33,7 @@ export function TeamGrowthUpgradeNotice({ className }: { className?: string }) {
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-2 sm:items-end">
-          <ActivateCareTipCta action="trial" size="md" className="w-full sm:w-auto" />
+          <UpgradeCta featureKey="teamManagement" className="w-full sm:w-auto" />
           <Link
             to="/dashboard/billing/subscription"
             className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:bg-muted/50 sm:w-auto"

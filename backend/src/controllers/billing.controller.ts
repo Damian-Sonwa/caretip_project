@@ -7,6 +7,11 @@ import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
 import { isSubscriptionTrialEnabled } from "../config/subscriptionTrial.js";
 import { assertTrialCheckoutAllowed } from "../services/trialEligibility.service.js";
 import {
+  BASIC_CHECKOUT_NOT_REQUIRED_MESSAGE,
+  ENTERPRISE_CHECKOUT_CONTACT_SALES_MESSAGE,
+  BillingCheckoutNotAllowedError,
+} from "../lib/subscription/billingCheckoutPolicy.js";
+import {
   createManagerCheckoutSession,
   createManagerPortalSession,
   getBillingStatusForBusiness,
@@ -17,6 +22,10 @@ import {
 import { isStripeConfigured } from "../services/stripe.service.js";
 import { resolveSubscriptionEntitlements } from "../services/subscriptionEntitlement.service.js";
 import { CLIENT_FALLBACK, clientSafeMessage, logServerError } from "../utils/httpErrors.js";
+import {
+  normalizeStripePriceIdEnv,
+  stripeCheckoutPriceEnvKey,
+} from "../lib/subscription/stripePricePlanCatalog.js";
 
 function getUserId(req: Request): string | null {
   const uid = req.user?.userId ?? req.user?.id;
@@ -47,24 +56,6 @@ function checkoutClientMessage(err: unknown): string {
   return clientSafeMessage(err, CLIENT_FALLBACK.generic);
 }
 
-const PRICE_ENV_BY_PLAN: Record<
-  SubscriptionPlanKey,
-  { monthly: string; yearly: string }
-> = {
-  basic: {
-    monthly: "STRIPE_PRICE_BASIC_MONTHLY",
-    yearly: "STRIPE_PRICE_BASIC_YEARLY",
-  },
-  premium: {
-    monthly: "STRIPE_PRICE_PREMIUM_MONTHLY",
-    yearly: "STRIPE_PRICE_PREMIUM_YEARLY",
-  },
-  enterprise: {
-    monthly: "STRIPE_PRICE_ENTERPRISE_MONTHLY",
-    yearly: "STRIPE_PRICE_ENTERPRISE_YEARLY",
-  },
-};
-
 /** Temporary investigation logging — prints immediately before checkout HTTP 400 responses. */
 function logCheckout400(reason: string, details: Record<string, unknown>): void {
   console.error(`[billing.checkout] 400 ${reason}`, JSON.stringify(details, null, 2));
@@ -74,8 +65,9 @@ function resolveConfiguredPriceId(
   planKey: SubscriptionPlanKey,
   billingCycle: "monthly" | "yearly",
 ): string | null {
-  const envKey = PRICE_ENV_BY_PLAN[planKey][billingCycle];
-  return process.env[envKey]?.trim() ?? null;
+  if (planKey !== "premium") return null;
+  const envKey = stripeCheckoutPriceEnvKey(billingCycle);
+  return normalizeStripePriceIdEnv(process.env[envKey]) ?? null;
 }
 
 function stripeErrorDetails(err: unknown): Record<string, unknown> {
@@ -205,11 +197,22 @@ export async function postMyBillingCheckout(req: Request, res: Response) {
       return res.status(400).json({ message: "planKey must be basic, premium, or enterprise" });
     }
 
+    if (planKey === "basic") {
+      logCheckout400("basic_checkout_blocked", { businessId: ctx.businessId, planKey });
+      return res.status(400).json({ message: BASIC_CHECKOUT_NOT_REQUIRED_MESSAGE });
+    }
+
+    if (planKey === "enterprise") {
+      logCheckout400("enterprise_checkout_blocked", { businessId: ctx.businessId, planKey });
+      return res.status(400).json({ message: ENTERPRISE_CHECKOUT_CONTACT_SALES_MESSAGE });
+    }
+
     billingCycle = parseBillingCycle(requestBody.billingCycle);
     includeTrial = requestBody.includeTrial === true;
     checkoutFlow = parseCheckoutFlow(requestBody.checkoutFlow);
     const billingCycleResolved = billingCycle ?? "monthly";
-    const priceEnvKey = PRICE_ENV_BY_PLAN[planKey][billingCycleResolved];
+    const priceEnvKey =
+      planKey === "premium" ? stripeCheckoutPriceEnvKey(billingCycleResolved) : null;
     const configuredPriceId = resolveConfiguredPriceId(planKey, billingCycleResolved);
 
     const mirror = await prisma.subscription.findUnique({
@@ -287,6 +290,9 @@ export async function postMyBillingCheckout(req: Request, res: Response) {
   } catch (err) {
     logServerError("billing.postMyBillingCheckout", err);
     const message = err instanceof Error ? err.message : String(err);
+    if (err instanceof BillingCheckoutNotAllowedError) {
+      return res.status(400).json({ message: err.message, code: err.code });
+    }
     if (message.includes("not enabled") || message.includes("not configured")) {
       return res.status(503).json({ message });
     }
