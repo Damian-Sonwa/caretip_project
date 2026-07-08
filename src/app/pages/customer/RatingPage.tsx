@@ -147,7 +147,8 @@ export function RatingPage() {
         stepTitle={feedbackHeader.stepTitle}
         trustMessage={feedbackHeader.trustMessage}
         loading
-        loadingMessage={t("tipFlow.loading.tipDetails")}
+        loadingContext="stripeReturn"
+        loadingRegistrationKey="rating-page-verification"
       />
     );
   }

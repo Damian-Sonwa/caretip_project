@@ -1,10 +1,12 @@
 import { Suspense, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router";
 import {
   APP_LOADING_PRIORITY,
   useAppLoadingRegistration,
   useRegisterGlobalAppInit,
 } from "../lib/globalAppLoading";
+import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
 import {
   DashboardOutletFallback,
   DashboardOutletShellHold,
@@ -31,15 +33,17 @@ function RouteChunkSuspenseFallback({
   registrationKey: string;
 }) {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
   useRegisterGlobalAppInit(
     `${registrationKey}-chunk`,
     variant === "dashboard" || variant === "minimal",
+    resolveRouteLoadingMessage(pathname, t),
   );
   useAppLoadingRegistration(
     `${registrationKey}-shell-chunk`,
     APP_LOADING_PRIORITY.ROUTE_GUARD,
     variant === "shell",
-    t("common.preparingWorkspace"),
+    resolveRouteLoadingMessage(pathname, t),
   );
 
   if (variant === "minimal") {

@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useLocation } from "react-router";
 import { useSyncExternalStore } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthPostLoginTransitionOverlay } from "../lib/useAuthPostLoginTransitionOverlay";
+import { resolveAppLoadingContextMessage } from "../lib/appLoadingContexts";
 import {
   endAuthPostLoginTransition,
   getAuthPostLoginTargetPath,
@@ -23,6 +25,7 @@ const DASHBOARD_SHELL_POST_LOGIN_PATHS = new Set([
  * Survives login-page unmount so the overlay does not blink during navigation.
  */
 export function AuthPostLoginTransitionRegistrar({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const active = useSyncExternalStore(
     subscribeAuthPostLoginTransition,
     isAuthPostLoginTransitionActive,
@@ -31,7 +34,10 @@ export function AuthPostLoginTransitionRegistrar({ children }: { children: React
   const { pathname } = useLocation();
   const targetPath = getAuthPostLoginTargetPath();
 
-  useAuthPostLoginTransitionOverlay(active);
+  useAuthPostLoginTransitionOverlay(
+    active,
+    resolveAppLoadingContextMessage("signingIn", t),
+  );
 
   /** Fallback for post-auth pages without a dashboard layout (onboarding, verify-email). */
   useLayoutEffect(() => {

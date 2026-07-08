@@ -11,6 +11,8 @@ import {
 import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthBootstrapLoadingRegistrar } from "./components/AuthBootstrapLoadingRegistrar";
 import { AuthPostLoginTransitionRegistrar } from "./components/AuthPostLoginTransitionRegistrar";
+import { AuthLogoutTransitionRegistrar } from "./components/AuthLogoutTransitionRegistrar";
+import { LanguageChangeLoadingRegistrar } from "./components/LanguageChangeLoadingRegistrar";
 import { RouteNavigationLoadingRegistrar } from "./components/RouteNavigationLoadingRegistrar";
 import { useMarkAppShellReadyOptional } from "./context/AppLoadingSplashContext";
 import { RouteChunkBoundary } from "./routing/RouteChunkBoundary";
@@ -108,11 +110,15 @@ function RootLayout() {
       <ScrollToTop />
       <RouteNavigationLoadingRegistrar>
         <AuthBootstrapLoadingRegistrar>
-          <AuthPostLoginTransitionRegistrar>
-            <RouteChunkBoundary variant="minimal" registrationKey="root-route">
-              <Outlet />
-            </RouteChunkBoundary>
-          </AuthPostLoginTransitionRegistrar>
+          <AuthLogoutTransitionRegistrar>
+            <AuthPostLoginTransitionRegistrar>
+              <LanguageChangeLoadingRegistrar>
+                <RouteChunkBoundary variant="minimal" registrationKey="root-route">
+                  <Outlet />
+                </RouteChunkBoundary>
+              </LanguageChangeLoadingRegistrar>
+            </AuthPostLoginTransitionRegistrar>
+          </AuthLogoutTransitionRegistrar>
         </AuthBootstrapLoadingRegistrar>
       </RouteNavigationLoadingRegistrar>
     </>

@@ -61,7 +61,13 @@ export function TipCompletionPage() {
   }
 
   if (verification.phase === "loading") {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.finishingUp")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="finishing"
+        registrationKey="tip-completion-loading"
+      />
+    );
   }
 
   if (verification.phase === "pending") {

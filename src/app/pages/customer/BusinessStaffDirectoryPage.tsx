@@ -126,7 +126,13 @@ export function BusinessStaffDirectoryPage() {
   }, [socket, data, reloadDirectory]);
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.teamDirectory")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="findingRecipient"
+        registrationKey="business-staff-directory-loading"
+      />
+    );
   }
 
   if (error || !data) {

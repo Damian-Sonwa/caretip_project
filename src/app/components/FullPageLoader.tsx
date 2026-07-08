@@ -1,11 +1,21 @@
-import { AppBrandedLoadingScreen } from "./AppBrandedLoadingScreen";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../context/AppLoadingManager";
 import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
-import { useGlobalAppLoadingActive } from "../lib/globalAppLoading";
 
-export function FullPageLoader({ message }: { message?: string }) {
-  const globalLoadingActive = useGlobalAppLoadingActive();
-  if (globalLoadingActive) {
-    return <GlobalAppLoadingHold />;
-  }
-  return <AppBrandedLoadingScreen message={message} />;
+export function FullPageLoader({
+  message,
+  registrationKey = "full-page-loader",
+}: {
+  message?: string;
+  registrationKey?: string;
+}) {
+  useAppLoadingRegistration(
+    registrationKey,
+    APP_LOADING_PRIORITY.ROUTE_GUARD,
+    true,
+    message,
+  );
+  return <GlobalAppLoadingHold />;
 }

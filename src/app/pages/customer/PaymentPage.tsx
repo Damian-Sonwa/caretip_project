@@ -251,7 +251,7 @@ export function PaymentPage() {
       stepTitle={paymentHeader.stepTitle}
       trustMessage={paymentHeader.trustMessage}
       loading={!contextReady}
-      loadingMessage={t("tipFlow.loading.preparingCheckout")}
+      loadingContext="checkout"
       bottomBar={
         showCheckout ? (
           <div className={cf.fixedBottomBar}>

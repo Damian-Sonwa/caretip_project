@@ -94,15 +94,33 @@ export function EmployeeQrEntryPage() {
   }
 
   if (phase === "loading") {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.tipDetails")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="findingRecipient"
+        registrationKey="employee-qr-entry-loading"
+      />
+    );
   }
 
   if (phase === "redirecting") {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.openingTipFlow")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="tipPage"
+        registrationKey="employee-qr-entry-redirect"
+      />
+    );
   }
 
   if (!emp || repeatAmount == null) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.openingTipFlow")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="tipPage"
+        registrationKey="employee-qr-entry-ready"
+      />
+    );
   }
 
   return (

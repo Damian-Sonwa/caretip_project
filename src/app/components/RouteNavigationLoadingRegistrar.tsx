@@ -7,6 +7,7 @@ import {
   useAppLoadingRegistration,
   useReleaseAppBootOverlay,
 } from "../context/AppLoadingManager";
+import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
 import { isPublicMarketingPath } from "../lib/publicRoutes";
 
 /**
@@ -25,7 +26,7 @@ export function RouteNavigationLoadingRegistrar({ children }: { children: ReactN
     "route-navigation",
     APP_LOADING_PRIORITY.ROUTE_GUARD,
     pending,
-    t("common.preparingWorkspace"),
+    resolveRouteLoadingMessage(pathname, t),
   );
 
   useEffect(() => {

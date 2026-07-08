@@ -1,8 +1,16 @@
+import { useId } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { AppBrandedLoadingScreen } from "./AppBrandedLoadingScreen";
 import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
-import { useGlobalAppLoadingActive } from "../lib/globalAppLoading";
 import { LoadingSpinner } from "./ui/loading-spinner";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../context/AppLoadingManager";
+import {
+  resolveAppLoadingContextMessage,
+  type AppLoadingContext,
+} from "../lib/appLoadingContexts";
 
 /** Text-only “CareTip” mark for loading states (no logo image). */
 export function CareTipLoadingTitle({
@@ -34,24 +42,40 @@ export function CareTipLoadingTitle({
 
 export type CareTipPageLoaderProps = {
   message?: string;
+  /** Action-aware copy when `message` is omitted. */
+  context?: AppLoadingContext;
   className?: string;
+  /** Stable key for global overlay registration (fullscreen / wait). */
+  registrationKey?: string;
   /**
    * fullscreen — full-viewport branded (dashboards / rare full-page module loads).
    * section — in-page blocks (lists, settings body).
    * compact — tables, overlays, modals (smaller title + md spinner).
-   * wait — full-viewport **non-branded** wait (QR resolve, guards, data hydration).
-   *          CareTip-branded moments are reserved for app launch (PWA) and global route transitions.
+   * wait — full-viewport branded wait (QR resolve, guards, data hydration).
    */
   variant?: "fullscreen" | "section" | "compact" | "wait";
 };
 
 export function CareTipPageLoader({
   message,
+  context,
   className,
+  registrationKey,
   variant = "fullscreen",
 }: CareTipPageLoaderProps) {
-  const globalLoadingActive = useGlobalAppLoadingActive();
+  const { t } = useTranslation();
+  const autoKey = useId();
+  const isFullScreen = variant === "wait" || variant === "fullscreen";
+  const resolvedMessage =
+    message ?? (context ? resolveAppLoadingContextMessage(context, t) : undefined);
   const spinnerSize = variant === "compact" ? "md" : "lg";
+
+  useAppLoadingRegistration(
+    registrationKey ?? `caretip-page-loader:${autoKey}`,
+    APP_LOADING_PRIORITY.ROUTE_GUARD,
+    isFullScreen,
+    resolvedMessage,
+  );
 
   const variantClass =
     variant === "fullscreen"
@@ -62,11 +86,8 @@ export function CareTipPageLoader({
           ? "flex flex-col items-center justify-center gap-6 py-16 px-4"
           : "flex flex-col items-center justify-center gap-4";
 
-  if (variant === "wait" || variant === "fullscreen") {
-    if (globalLoadingActive) {
-      return <GlobalAppLoadingHold className={className} />;
-    }
-    return <AppBrandedLoadingScreen className={className} message={message} />;
+  if (isFullScreen) {
+    return <GlobalAppLoadingHold className={className} />;
   }
 
   return (
@@ -79,9 +100,9 @@ export function CareTipPageLoader({
       <CareTipLoadingTitle compact={variant === "compact"} />
       <div className="flex flex-col items-center gap-3">
         <LoadingSpinner size={spinnerSize} />
-        {message ? (
+        {resolvedMessage ? (
           <p className="max-w-sm text-center text-sm text-muted-foreground">
-            {message}
+            {resolvedMessage}
           </p>
         ) : null}
       </div>

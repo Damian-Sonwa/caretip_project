@@ -4,7 +4,6 @@ import { Link, useNavigate, useLocation } from 'react-router';
 import { AuthFieldGroup } from './auth/AuthFieldGroup';
 import { AuthEmployeeVenueBanner } from './auth/AuthEmployeeVenueBanner';
 import { AuthTrustStrip } from './auth/AuthTrustStrip';
-import { LoadingSpinner } from './ui/loading-spinner';
 import { beginAuthPostLoginTransition, isAuthPostLoginTransitionActive, subscribeAuthPostLoginTransition } from '../lib/authPostLoginTransition';
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
@@ -99,6 +98,7 @@ export function AuthPage() {
 
   const [inviteContext, setInviteContext] = useState<ValidatedInviteContext | null>(null);
   const [inviteGateReady, setInviteGateReady] = useState(!isEmployeeJoinSignup);
+  const inviteGateBlocking = isEmployeeJoinSignup && !inviteGateReady;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -119,11 +119,24 @@ export function AuthPage() {
   const [authFlowInProgress, setAuthFlowInProgress] = useState(false);
 
   const signupSubmitting = isSubmitting && !isLogin;
+  const loginSubmitting = isSubmitting && isLogin;
   useAppLoadingRegistration(
     "auth-signup-submit",
     APP_LOADING_PRIORITY.AUTH,
     signupSubmitting,
     t("common.creatingWorkspace"),
+  );
+  useAppLoadingRegistration(
+    "auth-login-submit",
+    APP_LOADING_PRIORITY.AUTH,
+    loginSubmitting,
+    t("common.loading.signingIn"),
+  );
+  useAppLoadingRegistration(
+    "auth-invite-gate",
+    APP_LOADING_PRIORITY.AUTH,
+    inviteGateBlocking,
+    t("common.loading.sessionCheck"),
   );
 
   /** Single post-auth navigation — only after explicit login/OAuth/continue (never on mount/back). */
@@ -474,7 +487,6 @@ export function AuthPage() {
   const showEmployeeSignupFields = !isLogin && authLane === 'employee';
 
   const resumeSessionPending = user != null && !sessionValidated;
-  const inviteGateBlocking = isEmployeeJoinSignup && !inviteGateReady;
 
   const postLoginTransitionActive = useSyncExternalStore(
     subscribeAuthPostLoginTransition,
@@ -485,16 +497,7 @@ export function AuthPage() {
     postLoginTransitionActive || (authFlowInProgress && Boolean(postAuthRedirectRef.current));
 
   if (inviteGateBlocking) {
-    return (
-      <div
-        className="caretip-auth-page relative flex min-h-[100dvh] items-center justify-center font-sans"
-        role="status"
-        aria-busy="true"
-        aria-live="polite"
-      >
-        <LoadingSpinner size="lg" className="text-primary/80" />
-      </div>
-    );
+    return <AuthBootstrapShell />;
   }
   if (
     shouldShowAuthBootstrapShell({

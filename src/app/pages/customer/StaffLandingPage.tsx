@@ -125,7 +125,8 @@ export function StaffLandingPage() {
     return (
       <CareTipPageLoader
         variant="wait"
-        message={previewProfile ? t("tipFlow.loading.employeeProfile") : t("tipFlow.loading.openingTipScreen")}
+        context="tipPage"
+        registrationKey="staff-landing-pending"
       />
     );
   }
@@ -145,7 +146,8 @@ export function StaffLandingPage() {
     return (
       <CareTipPageLoader
         variant="wait"
-        message={previewProfile ? t("tipFlow.loading.employeeProfile") : t("tipFlow.loading.openingTipScreen")}
+        context="tipPage"
+        registrationKey="staff-landing-fallback"
       />
     );
   }

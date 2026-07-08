@@ -2,6 +2,10 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
 import { I18N_STORAGE_KEY } from "./constants";
+import {
+  beginAppLanguageChange,
+  endAppLanguageChange,
+} from "../app/lib/appLanguageLoading";
 import { registerI18nIntegrityDev } from "./i18nIntegrityDev";
 
 export type AppLanguage = "de" | "en";
@@ -38,8 +42,16 @@ export async function ensureLocaleBundle(lng: AppLanguage): Promise<void> {
  * Switch UI language after the target locale bundle is loaded (avoids missing keys).
  */
 export async function changeAppLanguage(lng: AppLanguage): Promise<void> {
-  await ensureLocaleBundle(lng);
-  await i18n.changeLanguage(lng);
+  const current = i18n.language?.startsWith("de") ? "de" : "en";
+  if (current === lng) return;
+  beginAppLanguageChange();
+  try {
+    await ensureLocaleBundle(lng);
+    await i18n.changeLanguage(lng);
+    await new Promise((resolve) => window.setTimeout(resolve, 280));
+  } finally {
+    endAppLanguageChange();
+  }
 }
 
 /**

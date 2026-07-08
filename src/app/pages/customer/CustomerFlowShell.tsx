@@ -1,11 +1,17 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 import { cn } from "@/lib/utils";
 import { customerFlowUi as cf } from "./customerFlowUi";
 import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
 import { CustomerJourneyCareTipAttribution } from "./CustomerJourneyCareTipAttribution";
 import type { CustomerJourneyEmployeeIdentity, CustomerJourneyVenueBrand } from "./customerJourneyBrand";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "@/app/context/AppLoadingManager";
+import { GlobalAppLoadingHold } from "@/app/components/GlobalAppLoadingHold";
+import type { AppLoadingContext } from "@/app/lib/appLoadingContexts";
+import { resolveAppLoadingContextMessage } from "@/app/lib/appLoadingContexts";
 
 type CustomerFlowShellProps = {
   headerLeading?: ReactNode;
@@ -17,6 +23,8 @@ type CustomerFlowShellProps = {
   showCareTipAttribution?: boolean;
   loading?: boolean;
   loadingMessage?: string;
+  loadingContext?: AppLoadingContext;
+  loadingRegistrationKey?: string;
   withBottomCta?: boolean;
   className?: string;
   mainClassName?: string;
@@ -26,6 +34,7 @@ type CustomerFlowShellProps = {
 
 /**
  * Persistent customer journey shell — header stays mounted while body loads.
+ * Full-page async work uses the global branded overlay (not inline spinners).
  */
 export function CustomerFlowShell({
   headerLeading,
@@ -37,6 +46,8 @@ export function CustomerFlowShell({
   headerTrailing,
   loading = false,
   loadingMessage,
+  loadingContext = "checkout",
+  loadingRegistrationKey = "customer-flow-shell",
   withBottomCta = false,
   className,
   mainClassName,
@@ -44,6 +55,16 @@ export function CustomerFlowShell({
   bottomBar,
 }: CustomerFlowShellProps) {
   const { t } = useTranslation();
+  const overlayMessage =
+    loadingMessage ??
+    resolveAppLoadingContextMessage(loadingContext, t);
+
+  useAppLoadingRegistration(
+    loadingRegistrationKey,
+    APP_LOADING_PRIORITY.ROUTE_GUARD,
+    loading,
+    overlayMessage,
+  );
 
   return (
     <div className={cn(withBottomCta ? cf.pageWithBottomCta : cf.page, className)}>
@@ -58,17 +79,7 @@ export function CustomerFlowShell({
 
       <div className={cn(cf.main, mainClassName)}>
         {loading ? (
-          <div
-            className="flex flex-col items-center justify-center gap-4 py-16 sm:py-20"
-            role="status"
-            aria-busy="true"
-            aria-live="polite"
-          >
-            <LoadingSpinner size="lg" />
-            {loadingMessage ? (
-              <p className="max-w-sm text-center text-sm text-muted-foreground">{loadingMessage}</p>
-            ) : null}
-          </div>
+          <GlobalAppLoadingHold className="min-h-[40vh] py-16 sm:py-20" />
         ) : (
           children
         )}

@@ -21,6 +21,8 @@ import {
 } from "../lib/globalAppLoadingTrace";
 import { dismissHtmlMarketingBootBridge } from "../lib/htmlMarketingBootBridge";
 import { isPublicMarketingPath, isPublicShellPath } from "../lib/publicRoutes";
+import { resolveInitialBootLoadingMessage } from "../lib/appLoadingContexts";
+import i18n from "@/i18n/i18n";
 import { traceLoaderRegistration, warnLoaderDiagDeadlock } from "../lib/loaderDiagFlags";
 
 const OVERLAY_FADE_MS = 180;
@@ -132,7 +134,11 @@ function createInitialRegistrations(): Map<string, Registration> {
   if (!shouldRegisterInitialAppBoot(readInitialPathname())) {
     return initial;
   }
-  initial.set(BOOTSTRAP_KEY, { key: BOOTSTRAP_KEY, priority: APP_LOADING_PRIORITY.AUTH });
+  initial.set(BOOTSTRAP_KEY, {
+    key: BOOTSTRAP_KEY,
+    priority: APP_LOADING_PRIORITY.AUTH,
+    message: resolveInitialBootLoadingMessage(readInitialPathname(), i18n.t.bind(i18n)),
+  });
   return initial;
 }
 

@@ -83,7 +83,13 @@ export function SuccessPage() {
   };
 
   if (verification.phase === "loading") {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.tipDetails")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="tipPage"
+        registrationKey="success-page-loading"
+      />
+    );
   }
 
   if (verification.phase === "pending") {
@@ -99,7 +105,13 @@ export function SuccessPage() {
   }
 
   if (!verified) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.verifyingPayment")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="stripeReturn"
+        registrationKey="success-page-verifying"
+      />
+    );
   }
 
   return (

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useSyncExternalStore } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router";
 import { isClientSessionRevoked } from "../lib/api";
 import { authDebug } from "../lib/authDebugLog";
@@ -16,6 +17,7 @@ import {
   subscribeAuthPostLoginTransition,
 } from "../lib/authTransitionIntent";
 import { AppRouteGateShell } from "./AppRouteGateShell";
+import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
 
 export function ProtectedRoute({
   allowedRoles,
@@ -24,6 +26,7 @@ export function ProtectedRoute({
   allowedRoles: Array<"business" | "employee">;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   const gate = useProtectedRouteGate(allowedRoles);
   const rolesKey = allowedRoles.join(",");
   const logoutTransitionActive = useSyncExternalStore(
@@ -41,6 +44,7 @@ export function ProtectedRoute({
     `protected-route-guard:${rolesKey}:${gate.pathname}`,
     APP_LOADING_PRIORITY.ROUTE_GUARD,
     gate.guardBlocking && !logoutTransitionActive && !postLoginTransitionActive,
+    resolveRouteLoadingMessage(gate.pathname, t),
   );
 
   if (logoutTransitionActive) {

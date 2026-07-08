@@ -102,7 +102,13 @@ export function SelectEmployeePage() {
   }
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.teamMembers")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="findingRecipient"
+        registrationKey="select-employee-loading"
+      />
+    );
   }
 
   if (error) {

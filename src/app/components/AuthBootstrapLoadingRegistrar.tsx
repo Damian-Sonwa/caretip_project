@@ -11,7 +11,8 @@ import {
   useAppLoadingRegistration,
   useReleaseAppBootOverlay,
 } from "../context/AppLoadingManager";
-import { isPublicShellPath } from "../lib/publicRoutes";
+import { isPublicShellPath, isPublicMarketingPath } from "../lib/publicRoutes";
+import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
 import {
   GLOBAL_LOADER_STUCK_WARN_MS,
   traceAuthLoadingCompleted,
@@ -56,7 +57,7 @@ export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNod
     "app-auth-bootstrap",
     APP_LOADING_PRIORITY.AUTH,
     authBootstrapBlocking,
-    t("common.preparingWorkspace"),
+    resolveRouteLoadingMessage(pathname, t),
   );
 
   useEffect(() => {

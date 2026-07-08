@@ -115,7 +115,13 @@ export function LocationQrLandingPage() {
   }, [data?.business?.id, data?.employees, repeatDismissed]);
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.locationDetails")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="tipPage"
+        registrationKey="location-qr-loading"
+      />
+    );
   }
 
   if (error || !data) {

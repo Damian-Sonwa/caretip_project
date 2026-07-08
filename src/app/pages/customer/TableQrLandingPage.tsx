@@ -119,7 +119,13 @@ export function TableQrLandingPage() {
   }, [data?.business?.id, data?.employees, repeatDismissed]);
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.tableDetails")} />;
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        context="tipPage"
+        registrationKey="table-qr-loading"
+      />
+    );
   }
 
   if (error || !data) {
