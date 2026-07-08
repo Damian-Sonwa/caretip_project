@@ -71,7 +71,7 @@ export function headerConfirmingTipFor(t: TFunction, name?: string | null) {
   return {
     stepTitle: name
       ? t("tipFlow.header.confirmingTipFor", { name })
-      : t("tipFlow.loading.confirmingTip"),
+      : t("common.loading.stripeReturn"),
     trustMessage: t("tipFlow.header.confirmingTipHint"),
   };
 }

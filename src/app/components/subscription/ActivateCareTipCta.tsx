@@ -42,10 +42,10 @@ export function ActivateCareTipCta({
   const [busy, setBusy] = useState(false);
 
   useAppLoadingRegistration(
-    "activation-checkout",
+    "activate-caretip",
     APP_LOADING_PRIORITY.APP_INIT,
     busy,
-    t("common.openingSecureCheckout"),
+    t("common.loading.checkout"),
   );
 
   const baseClass = cn(

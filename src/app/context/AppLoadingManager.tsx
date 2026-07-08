@@ -24,27 +24,20 @@ import { isPublicMarketingPath, isPublicShellPath } from "../lib/publicRoutes";
 import { resolveInitialBootLoadingMessage } from "../lib/appLoadingContexts";
 import i18n from "@/i18n/i18n";
 import { traceLoaderRegistration, warnLoaderDiagDeadlock } from "../lib/loaderDiagFlags";
+import {
+  OVERLAY_EXIT_DEBOUNCE_MS,
+  OVERLAY_FADE_MS,
+  OVERLAY_SHOW_THRESHOLD_MS,
+  resolveMinOverlayVisibleMs,
+  shouldBypassOverlayShowThreshold,
+} from "../lib/appLoadingTiming";
+import {
+  pickOverlayMessage,
+  pickOverlayWinner,
+} from "../lib/appLoadingJourney";
 
-const OVERLAY_FADE_MS = 180;
-/** Absorb one-frame registration gaps between auth, route guard, and layout paint. */
-const OVERLAY_EXIT_DEBOUNCE_MS = 120;
-/** Avoid sub-frame loader flashes — intentional minimum visible time. */
-const MIN_OVERLAY_VISIBLE_MS = 280;
 /** Block APP_INIT from re-opening the overlay shortly after a full dismiss (paint-ready race). */
 const OVERLAY_REENTRY_LOCK_MS = 600;
-
-/** Same-priority overlay winner — higher wins. */
-const OVERLAY_KEY_PRECEDENCE: Record<string, number> = {
-  "auth-post-login-transition": 30,
-  "app-auth-bootstrap": 20,
-  "app-boot": 10,
-};
-
-function overlayKeyPrecedence(key: string): number {
-  if (OVERLAY_KEY_PRECEDENCE[key] != null) return OVERLAY_KEY_PRECEDENCE[key]!;
-  if (key.startsWith("protected-route-guard")) return 15;
-  return 0;
-}
 
 type Registration = {
   key: string;
@@ -149,14 +142,18 @@ function createInitialOverlayPhase(): OverlayPhase {
 
 export function AppLoadingManagerProvider({ children }: { children: React.ReactNode }) {
   const launchSplashActive = useLaunchSplashActive();
+  const initialColdBootPending = createInitialOverlayPhase() === "visible";
   const [registrations, setRegistrations] = useState<Map<string, Registration>>(createInitialRegistrations);
   const [overlayPhase, setOverlayPhase] = useState<OverlayPhase>(createInitialOverlayPhase);
-  const lastWinnerKeyRef = useRef<string | null>(null);
-  const showOverlayRef = useRef(false);
+  const lastWinnerKeyRef = useRef<string | null>(initialColdBootPending ? BOOTSTRAP_KEY : null);
+  const lastShownWinnerKeyRef = useRef<string | null>(initialColdBootPending ? BOOTSTRAP_KEY : null);
+  const winnerRequestedRef = useRef(false);
   const exitDebounceRef = useRef<number | null>(null);
   const overlayDismissedAtRef = useRef(0);
-  const overlayShownAtRef = useRef(0);
+  const overlayShownAtRef = useRef(initialColdBootPending ? Date.now() : 0);
   const minVisibleTimerRef = useRef<number | null>(null);
+  const showThresholdTimerRef = useRef<number | null>(null);
+  const initialColdBootPendingRef = useRef(initialColdBootPending);
 
   const register = useCallback(
     (key: string, priority: AppLoadingPriority, active: boolean, message?: string) => {
@@ -248,30 +245,27 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
     return () => window.clearTimeout(id);
   }, []);
 
-  const winner = useMemo(() => {
-    let best: Registration | null = null;
-    const hasNonBootstrap = registrations.size > 1 || !registrations.has(BOOTSTRAP_KEY);
-    for (const reg of registrations.values()) {
-      if (reg.key === BOOTSTRAP_KEY && hasNonBootstrap) continue;
-      if (!GLOBAL_OVERLAY_PRIORITIES.has(reg.priority)) continue;
-      if (
-        !best ||
-        reg.priority > best.priority ||
-        (reg.priority === best.priority &&
-          overlayKeyPrecedence(reg.key) > overlayKeyPrecedence(best.key))
-      ) {
-        best = reg;
-      }
-    }
-    return best;
-  }, [registrations]);
+  const winner = useMemo(
+    () => pickOverlayWinner(registrations),
+    [registrations],
+  );
 
-  const showOverlay = Boolean(winner) && !launchSplashActive;
-  const overlayMessage = winner?.message;
-  showOverlayRef.current = showOverlay;
+  const overlayMessage = useMemo(
+    () => pickOverlayMessage(registrations),
+    [registrations],
+  );
+
+  const winnerRequested = Boolean(winner) && !launchSplashActive;
+  winnerRequestedRef.current = winnerRequested;
 
   useEffect(() => {
-    if (showOverlay) {
+    if (winner?.key) {
+      lastWinnerKeyRef.current = winner.key;
+    }
+  }, [winner?.key]);
+
+  useEffect(() => {
+    if (winnerRequested) {
       if (exitDebounceRef.current !== null) {
         window.clearTimeout(exitDebounceRef.current);
         exitDebounceRef.current = null;
@@ -280,26 +274,73 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
         window.clearTimeout(minVisibleTimerRef.current);
         minVisibleTimerRef.current = null;
       }
-      if (overlayPhase !== "visible") {
+
+      if (overlayPhase === "visible") {
+        return;
+      }
+
+      if (overlayPhase === "exiting") {
         overlayShownAtRef.current = Date.now();
+        lastShownWinnerKeyRef.current = winner?.key ?? lastWinnerKeyRef.current;
+        setOverlayPhase("visible");
+        return;
       }
-      setOverlayPhase("visible");
-      const key = winner?.key ?? null;
-      if (import.meta.env.DEV && key && key !== lastWinnerKeyRef.current) {
-        console.info(`[GlobalAppLoading] Overlay active — ${key}`);
+
+      if (showThresholdTimerRef.current !== null) {
+        return;
       }
-      lastWinnerKeyRef.current = key;
-      return;
+
+      const winnerKey = winner?.key ?? lastWinnerKeyRef.current;
+      if (
+        shouldBypassOverlayShowThreshold(winnerKey, initialColdBootPendingRef.current)
+      ) {
+        initialColdBootPendingRef.current = false;
+        overlayShownAtRef.current = Date.now();
+        lastShownWinnerKeyRef.current = BOOTSTRAP_KEY;
+        lastWinnerKeyRef.current = BOOTSTRAP_KEY;
+        setOverlayPhase("visible");
+        if (import.meta.env.DEV) {
+          console.info("[GlobalAppLoading] Overlay active — app-boot (cold handoff)");
+        }
+        return;
+      }
+
+      showThresholdTimerRef.current = window.setTimeout(() => {
+        showThresholdTimerRef.current = null;
+        if (!winnerRequestedRef.current) return;
+        overlayShownAtRef.current = Date.now();
+        lastShownWinnerKeyRef.current = lastWinnerKeyRef.current;
+        setOverlayPhase("visible");
+        if (import.meta.env.DEV && lastWinnerKeyRef.current) {
+          console.info(`[GlobalAppLoading] Overlay active — ${lastWinnerKeyRef.current}`);
+        }
+      }, OVERLAY_SHOW_THRESHOLD_MS);
+
+      return () => {
+        if (showThresholdTimerRef.current !== null) {
+          window.clearTimeout(showThresholdTimerRef.current);
+          showThresholdTimerRef.current = null;
+        }
+      };
+    }
+
+    if (showThresholdTimerRef.current !== null) {
+      window.clearTimeout(showThresholdTimerRef.current);
+      showThresholdTimerRef.current = null;
+      if (overlayPhase === "hidden") {
+        dismissHtmlMarketingBootBridge();
+      }
     }
 
     if (overlayPhase === "hidden") return;
 
     const scheduleExit = (): void => {
       const elapsed = Date.now() - overlayShownAtRef.current;
-      const delayExit = Math.max(0, MIN_OVERLAY_VISIBLE_MS - elapsed);
+      const minVisibleMs = resolveMinOverlayVisibleMs(lastShownWinnerKeyRef.current);
+      const delayExit = Math.max(0, minVisibleMs - elapsed);
 
       const startExit = (): void => {
-        if (showOverlayRef.current) return;
+        if (winnerRequestedRef.current) return;
         overlayDismissedAtRef.current = Date.now();
         setOverlayPhase("exiting");
         traceGlobalOverlayDismissed();
@@ -315,13 +356,12 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
       }, delayExit);
     };
 
-    /* Marketing cold loads must keep the existing min-visible fade (no instant hide). */
     if (exitDebounceRef.current !== null) {
       window.clearTimeout(exitDebounceRef.current);
     }
     exitDebounceRef.current = window.setTimeout(() => {
       exitDebounceRef.current = null;
-      if (showOverlayRef.current) return;
+      if (winnerRequestedRef.current) return;
       scheduleExit();
     }, OVERLAY_EXIT_DEBOUNCE_MS);
 
@@ -335,7 +375,7 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
         minVisibleTimerRef.current = null;
       }
     };
-  }, [showOverlay, winner?.key, overlayPhase]);
+  }, [winnerRequested, winner?.key, overlayPhase]);
 
   useEffect(() => {
     if (overlayPhase !== "exiting") return;
@@ -349,22 +389,23 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     console.debug("[GlobalAppLoading] state", {
-      showOverlay,
+      winnerRequested,
       overlayPhase,
       winner: winner?.key ?? null,
       winnerPriority: winner?.priority ?? null,
       activeKeys: [...registrations.keys()],
+      showThresholdArmed: showThresholdTimerRef.current !== null,
     });
-    if (showOverlay && winner?.key?.includes("paint")) {
+    if (winnerRequested && winner?.key?.includes("paint")) {
       console.info("[LoaderDiag] overlay winner is paint-ready", {
         key: winner.key,
         activeKeys: [...registrations.keys()],
       });
     }
-  }, [showOverlay, overlayPhase, winner, registrations]);
+  }, [winnerRequested, overlayPhase, winner, registrations]);
 
   useEffect(() => {
-    if (!import.meta.env.DEV || !showOverlay) return;
+    if (!import.meta.env.DEV || !winnerRequested) return;
     const id = window.setTimeout(() => {
       const keys = [...registrations.keys()];
       if (keys.length === 0) return;
@@ -374,14 +415,20 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
       });
     }, 10_000);
     return () => window.clearTimeout(id);
-  }, [showOverlay, winner?.key, registrations, overlayPhase]);
+  }, [winnerRequested, winner?.key, registrations, overlayPhase]);
+
+  const overlayPresented = overlayPhase === "visible" || overlayPhase === "exiting";
 
   const value = useMemo(
-    () => ({ register, releaseAppBootOverlay, overlayVisible: showOverlay || overlayPhase === "exiting" }),
-    [register, releaseAppBootOverlay, showOverlay, overlayPhase],
+    () => ({
+      register,
+      releaseAppBootOverlay,
+      overlayVisible: overlayPresented || winnerRequested,
+    }),
+    [register, releaseAppBootOverlay, winnerRequested, overlayPresented],
   );
 
-  const renderOverlay = overlayPhase === "visible" || overlayPhase === "exiting";
+  const renderOverlay = overlayPresented;
 
   /* Handoff: React branded overlay owns the screen — drop the HTML first-paint bridge. */
   useLayoutEffect(() => {

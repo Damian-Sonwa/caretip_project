@@ -362,7 +362,8 @@ export function QRLandingPage() {
         stepTitle={teamHeader.stepTitle}
         trustMessage={teamHeader.trustMessage}
         loading
-        loadingMessage={t("tipFlow.loading.venueDetails")}
+        loadingContext="findingRecipient"
+        loadingRegistrationKey="qr-landing-venue"
       />
     );
   }
@@ -386,10 +387,6 @@ export function QRLandingPage() {
   const displayName = selectedEmployee?.name?.trim() || t("tipFlow.common.valuedTeamMember");
 
   if (employeeIdParam && loading) {
-    const venueMsg =
-      tippingLocationName && tippingTableName
-        ? t("tipFlow.venueLoading", { location: tippingLocationName, table: tippingTableName })
-        : t("tipFlow.loading.tipDetails");
     const amountHeader = headerChooseAmountFor(t, displayName);
     return (
       <CustomerFlowShell
@@ -401,7 +398,8 @@ export function QRLandingPage() {
         stepTitle={amountHeader.stepTitle}
         trustMessage={amountHeader.trustMessage}
         loading
-        loadingMessage={venueMsg}
+        loadingContext="tipPage"
+        loadingRegistrationKey="qr-landing-tip"
       />
     );
   }

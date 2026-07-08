@@ -18,6 +18,7 @@ import {
 } from "../lib/authTransitionIntent";
 import { AppRouteGateShell } from "./AppRouteGateShell";
 import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
+import { shouldRegisterBrandedRouteGuard } from "../lib/appLoadingJourney";
 
 export function ProtectedRoute({
   allowedRoles,
@@ -43,7 +44,10 @@ export function ProtectedRoute({
   useAppLoadingRegistration(
     `protected-route-guard:${rolesKey}:${gate.pathname}`,
     APP_LOADING_PRIORITY.ROUTE_GUARD,
-    gate.guardBlocking && !logoutTransitionActive && !postLoginTransitionActive,
+    gate.guardBlocking &&
+      !logoutTransitionActive &&
+      !postLoginTransitionActive &&
+      shouldRegisterBrandedRouteGuard(gate),
     resolveRouteLoadingMessage(gate.pathname, t),
   );
 

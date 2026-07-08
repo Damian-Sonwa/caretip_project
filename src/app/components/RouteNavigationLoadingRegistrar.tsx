@@ -8,6 +8,7 @@ import {
   useReleaseAppBootOverlay,
 } from "../context/AppLoadingManager";
 import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
+import { shouldRegisterBrandedRouteNavigation } from "../lib/appLoadingJourney";
 import { isPublicMarketingPath } from "../lib/publicRoutes";
 
 /**
@@ -20,12 +21,14 @@ export function RouteNavigationLoadingRegistrar({ children }: { children: ReactN
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const pending = navigation.state === "loading";
+  const brandedRouteNavigation =
+    pending && shouldRegisterBrandedRouteNavigation(pathname);
   const releaseAppBootOverlay = useReleaseAppBootOverlay();
 
   useAppLoadingRegistration(
     "route-navigation",
     APP_LOADING_PRIORITY.ROUTE_GUARD,
-    pending,
+    brandedRouteNavigation,
     resolveRouteLoadingMessage(pathname, t),
   );
 

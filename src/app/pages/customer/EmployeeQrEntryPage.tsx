@@ -93,34 +93,18 @@ export function EmployeeQrEntryPage() {
     );
   }
 
-  if (phase === "loading") {
-    return (
-      <CareTipPageLoader
-        variant="wait"
-        context="findingRecipient"
-        registrationKey="employee-qr-entry-loading"
-      />
-    );
-  }
-
-  if (phase === "redirecting") {
+  if (phase === "loading" || phase === "redirecting" || !emp) {
     return (
       <CareTipPageLoader
         variant="wait"
         context="tipPage"
-        registrationKey="employee-qr-entry-redirect"
+        registrationKey="employee-qr-entry"
       />
     );
   }
 
   if (!emp || repeatAmount == null) {
-    return (
-      <CareTipPageLoader
-        variant="wait"
-        context="tipPage"
-        registrationKey="employee-qr-entry-ready"
-      />
-    );
+    return null;
   }
 
   return (

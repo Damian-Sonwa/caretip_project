@@ -34,7 +34,6 @@ import {
 } from "../../lib/pageSessionCache";
 import { DashboardListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
 import { BusinessSubPageShellSkeleton } from "../../components/dashboard/BusinessSubPageShellSkeleton";
-import { PageLoader } from "../../components/PageLoader";
 import {
   renderBrandedQRToDataUrl,
   renderBrandedQRToDataUrlLegacy,
@@ -853,7 +852,7 @@ export function QRCodeManagementPage({
     user.onboardingVerificationStatus == null;
 
   if (awaitingOnboardingStatus) {
-    return <PageLoader message={t("business.qrPage.checkingVerification")} />;
+    return <BusinessSubPageShellSkeleton />;
   }
 
   if (qrLocked && !embedded) {

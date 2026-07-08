@@ -1,12 +1,7 @@
 import { Suspense, type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
-import {
-  APP_LOADING_PRIORITY,
-  useAppLoadingRegistration,
-  useRegisterGlobalAppInit,
-} from "../lib/globalAppLoading";
-import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
+import { shouldRegisterBrandedRouteNavigation } from "../lib/appLoadingJourney";
+import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
 import {
   DashboardOutletFallback,
   DashboardOutletShellHold,
@@ -32,19 +27,11 @@ function RouteChunkSuspenseFallback({
   variant: "shell" | "dashboard" | "minimal";
   registrationKey: string;
 }) {
-  const { t } = useTranslation();
   const { pathname } = useLocation();
-  useRegisterGlobalAppInit(
-    `${registrationKey}-chunk`,
-    variant === "dashboard" || variant === "minimal",
-    resolveRouteLoadingMessage(pathname, t),
-  );
-  useAppLoadingRegistration(
-    `${registrationKey}-shell-chunk`,
-    APP_LOADING_PRIORITY.ROUTE_GUARD,
-    variant === "shell",
-    resolveRouteLoadingMessage(pathname, t),
-  );
+  const brandedChunk =
+    variant !== "shell" && shouldRegisterBrandedRouteNavigation(pathname);
+
+  useRegisterGlobalAppInit(`${registrationKey}-chunk`, brandedChunk);
 
   if (variant === "minimal") {
     return <MinimalRouteFallback />;

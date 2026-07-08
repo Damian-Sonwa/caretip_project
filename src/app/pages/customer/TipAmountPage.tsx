@@ -214,7 +214,8 @@ export function TipAmountPage() {
         venue={{ name: fallbackVenue, logo: null }}
         stepTitle={t("tipFlow.tipAmount.chooseTitle")}
         loading
-        loadingMessage={t("tipFlow.loading.redirecting")}
+        loadingContext="tipPage"
+        loadingRegistrationKey="tip-amount-redirect"
       />
     );
   }
@@ -232,7 +233,8 @@ export function TipAmountPage() {
       stepTitle={amountHeader.stepTitle}
       trustMessage={amountHeader.trustMessage}
       loading={!contextReady}
-      loadingMessage={t("tipFlow.loading.validatingScan")}
+      loadingContext="tipPage"
+      loadingRegistrationKey="tip-amount-context"
       mainClassName={cf.mainCompact}
       bottomBar={
         selectedAmount ? (

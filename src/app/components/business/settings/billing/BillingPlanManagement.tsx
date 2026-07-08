@@ -61,7 +61,7 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
     "billing-plan-checkout",
     APP_LOADING_PRIORITY.APP_INIT,
     checkoutRedirecting,
-    t("common.openingSecureCheckout"),
+    t("common.loading.checkout"),
   );
 
   async function handleUpgrade(planKey: SubscriptionPlanKey, includeTrial = false) {

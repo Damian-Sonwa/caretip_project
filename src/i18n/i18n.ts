@@ -48,7 +48,6 @@ export async function changeAppLanguage(lng: AppLanguage): Promise<void> {
   try {
     await ensureLocaleBundle(lng);
     await i18n.changeLanguage(lng);
-    await new Promise((resolve) => window.setTimeout(resolve, 280));
   } finally {
     endAppLanguageChange();
   }

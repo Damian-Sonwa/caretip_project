@@ -121,7 +121,7 @@
       "tipPage": "Opening your tip page...",
       "findingRecipient": "Finding your CareTip recipient...",
       "checkout": "Preparing secure checkout...",
-      "stripeRedirect": "Connecting securely...",
+      "stripeRedirect": "Connecting to secure payment...",
       "stripeReturn": "Confirming your tip...",
       "finishing": "Finishing up...",
       "receipt": "Preparing your receipt...",

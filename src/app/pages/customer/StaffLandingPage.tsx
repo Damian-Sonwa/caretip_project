@@ -126,7 +126,7 @@ export function StaffLandingPage() {
       <CareTipPageLoader
         variant="wait"
         context="tipPage"
-        registrationKey="staff-landing-pending"
+        registrationKey="staff-landing"
       />
     );
   }
@@ -147,7 +147,7 @@ export function StaffLandingPage() {
       <CareTipPageLoader
         variant="wait"
         context="tipPage"
-        registrationKey="staff-landing-fallback"
+        registrationKey="staff-landing"
       />
     );
   }

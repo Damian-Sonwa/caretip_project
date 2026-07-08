@@ -157,9 +157,8 @@ export function StaffTipByPublicPathPage() {
         stepTitle={pendingHeader.stepTitle}
         trustMessage={pendingHeader.trustMessage}
         loading
-        loadingMessage={
-          previewProfile ? t("tipFlow.loading.employeeProfile") : t("tipFlow.loading.openingTipScreen")
-        }
+        loadingContext="tipPage"
+        loadingRegistrationKey="staff-public-path-entry"
       />
     );
   }
@@ -183,9 +182,8 @@ export function StaffTipByPublicPathPage() {
         stepTitle={pendingHeader.stepTitle}
         trustMessage={pendingHeader.trustMessage}
         loading
-        loadingMessage={
-          previewProfile ? t("tipFlow.loading.employeeProfile") : t("tipFlow.loading.openingTipScreen")
-        }
+        loadingContext="tipPage"
+        loadingRegistrationKey="staff-public-path-entry"
       />
     );
   }

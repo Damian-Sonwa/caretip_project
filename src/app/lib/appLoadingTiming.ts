@@ -1,0 +1,68 @@
+/** Presentation-only timing — never delays API calls or navigation. */
+
+export const OVERLAY_SHOW_THRESHOLD_MS = 200;
+export const OVERLAY_EXIT_DEBOUNCE_MS = 120;
+export const OVERLAY_FADE_MS = 180;
+
+/** Default once the branded overlay is shown — long enough to read, short for routine guards. */
+export const DEFAULT_MIN_OVERLAY_VISIBLE_MS = 320;
+
+/**
+ * Premium flows deserve a longer branded moment (startup, QR, checkout, logout).
+ * Still presentation-only — work underneath is not artificially delayed.
+ */
+export const PREMIUM_MIN_OVERLAY_VISIBLE_MS = 720;
+
+const PREMIUM_OVERLAY_KEYS = new Set([
+  "app-boot",
+  "app-auth-bootstrap",
+  "auth-logout-transition",
+  "auth-post-login-transition",
+  "billing-plan-checkout",
+  "billing-trial-checkout",
+  "onboarding-submit",
+  "activate-caretip",
+  "payment-stripe-redirect",
+  "payment-page-checkout",
+]);
+
+const PREMIUM_OVERLAY_PREFIXES = [
+  "caretip-page-loader:",
+  "staff-landing",
+  "staff-public-path-entry",
+  "employee-qr-entry",
+  "table-qr-loading",
+  "location-qr-loading",
+  "qr-landing-",
+  "tip-amount-",
+  "business-staff-directory-loading",
+  "select-employee-loading",
+  "success-page-verification",
+  "tip-completion-loading",
+  "rating-page-verification",
+] as const;
+
+const PREMIUM_OVERLAY_SUBSTRINGS = ["payment", "checkout"] as const;
+
+/**
+ * Minimum time AppBrandedLoadingScreen stays mounted after becoming visible.
+ */
+export function resolveMinOverlayVisibleMs(winnerKey: string | null | undefined): number {
+  if (!winnerKey) return DEFAULT_MIN_OVERLAY_VISIBLE_MS;
+  if (PREMIUM_OVERLAY_KEYS.has(winnerKey)) return PREMIUM_MIN_OVERLAY_VISIBLE_MS;
+  if (PREMIUM_OVERLAY_PREFIXES.some((prefix) => winnerKey.startsWith(prefix))) {
+    return PREMIUM_MIN_OVERLAY_VISIBLE_MS;
+  }
+  if (PREMIUM_OVERLAY_SUBSTRINGS.some((part) => winnerKey.includes(part))) {
+    return PREMIUM_MIN_OVERLAY_VISIBLE_MS;
+  }
+  return DEFAULT_MIN_OVERLAY_VISIBLE_MS;
+}
+
+/** Cold-load HTML bridge → React overlay handoff — no show threshold gap. */
+export function shouldBypassOverlayShowThreshold(
+  winnerKey: string | null | undefined,
+  initialColdBootPending: boolean,
+): boolean {
+  return initialColdBootPending && winnerKey === "app-boot";
+}

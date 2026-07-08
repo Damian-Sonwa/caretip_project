@@ -41,7 +41,7 @@ export function BillingTrialPlanDialog({
     "billing-trial-checkout",
     APP_LOADING_PRIORITY.APP_INIT,
     busy,
-    t("common.openingSecureCheckout"),
+    t("common.loading.checkout"),
   );
 
   async function startTrialCheckout() {
@@ -191,7 +191,7 @@ function BillingTrialExpiredUpgrade({ billingCycle }: { billingCycle: "monthly" 
     "billing-trial-expired-checkout",
     APP_LOADING_PRIORITY.APP_INIT,
     busy,
-    t("common.openingSecureCheckout"),
+    t("common.loading.checkout"),
   );
 
   async function handleUpgrade() {

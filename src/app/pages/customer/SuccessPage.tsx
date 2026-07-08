@@ -86,8 +86,8 @@ export function SuccessPage() {
     return (
       <CareTipPageLoader
         variant="wait"
-        context="tipPage"
-        registrationKey="success-page-loading"
+        context="stripeReturn"
+        registrationKey="success-page-verification"
       />
     );
   }
@@ -109,7 +109,7 @@ export function SuccessPage() {
       <CareTipPageLoader
         variant="wait"
         context="stripeReturn"
-        registrationKey="success-page-verifying"
+        registrationKey="success-page-verification"
       />
     );
   }

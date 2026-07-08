@@ -81,7 +81,7 @@ export function BusinessOnboardingPage() {
     checkoutIntent &&
     checkoutIntent.planKey !== "enterprise" &&
     checkoutIntent.planKey !== "basic"
-      ? t("common.openingSecureCheckout")
+      ? t("common.loading.checkout")
       : t("common.creatingWorkspace");
 
   useAppLoadingRegistration(

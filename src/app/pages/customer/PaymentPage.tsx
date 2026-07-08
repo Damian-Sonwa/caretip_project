@@ -26,6 +26,11 @@ import {
 import { venueBrandFromFields, useCustomerVenueBrand } from "./customerJourneyBrand";
 import { headerCompletePaymentFor } from "./customerJourneyHeaderCopy";
 import { redirectToStripeCheckoutUrl } from "../../lib/safeCheckoutRedirect";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../../lib/globalAppLoading";
+import { resolveAppLoadingContextMessage } from "../../lib/appLoadingContexts";
 
 export function PaymentPage() {
   const { t } = useTranslation();
@@ -231,6 +236,15 @@ export function PaymentPage() {
   };
 
   const showCheckout = contextReady && !missingContext;
+  const stripeRedirectMessage = resolveAppLoadingContextMessage("stripeRedirect", t);
+
+  useAppLoadingRegistration(
+    "payment-stripe-redirect",
+    APP_LOADING_PRIORITY.ROUTE_GUARD,
+    processing,
+    stripeRedirectMessage,
+  );
+
   const employeeDisplayName = employeeName ?? t("tipFlow.common.teamMember");
   const paymentHeader = headerCompletePaymentFor(t, employeeDisplayName);
   const resolvedVenue = resolvedVenueSnapshot
@@ -252,6 +266,7 @@ export function PaymentPage() {
       trustMessage={paymentHeader.trustMessage}
       loading={!contextReady}
       loadingContext="checkout"
+      loadingRegistrationKey="payment-page-checkout"
       bottomBar={
         showCheckout ? (
           <div className={cf.fixedBottomBar}>
@@ -265,7 +280,7 @@ export function PaymentPage() {
                 {processing ? (
                   <>
                     <span className="inline-block size-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                    {t("tipFlow.loading.redirectingCheckout")}
+                    {stripeRedirectMessage}
                   </>
                 ) : (
                   t("tipFlow.payment.payAmount", { amount: formatEur(totalAmount) })
