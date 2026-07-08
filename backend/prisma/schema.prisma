@@ -736,7 +736,7 @@ model Transaction {
   amount                Decimal      @db.Decimal(10, 2)
   status                TipStatus    @default(pending)
   stripePaymentIntentId String?      @unique @map("stripe_payment_intent_id")
-  /// Customer-facing receipt reference (e.g. CT-2026-48291). Assigned when status becomes success.
+  /** Customer-facing receipt reference (e.g. CT-26-A8K4P9X2). Assigned when status becomes success. */
   receiptNumber         String?      @unique @map("receipt_number")
   payoutStatus          PayoutStatus @default(not_applicable) @map("payout_status")
   employeeId            String       @map("employee_id")
@@ -758,7 +758,7 @@ model Transaction {
   @@map("tips")
 }
 
-/// Monotonic per-calendar-year counter for CareTip receipt numbers (CT-YYYY-NNNNN).
+/// Legacy sequential counter table (CT-YYYY-NNNNN). Unused by current secure allocator; retained for existing DB rows.
 model TipReceiptSequence {
   year       Int @id
   lastNumber Int @default(0) @map("last_number")

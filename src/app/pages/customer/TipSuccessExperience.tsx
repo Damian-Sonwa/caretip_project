@@ -23,7 +23,7 @@ export type TipSuccessExperienceProps = {
   supportingText?: string | null;
   headline?: string;
   tipAmount?: number | null;
-  /** Customer-facing receipt reference from the server (e.g. CT-2026-48291). */
+  /** Customer-facing receipt reference from the server (e.g. CT-26-A8K4P9X2). */
   receiptNumber?: string | null;
   primaryLabel: string;
   secondaryLabel: string;
