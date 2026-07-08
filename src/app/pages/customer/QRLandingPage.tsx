@@ -362,8 +362,8 @@ export function QRLandingPage() {
         stepTitle={teamHeader.stepTitle}
         trustMessage={teamHeader.trustMessage}
         loading
-        loadingContext="findingRecipient"
-        loadingRegistrationKey="qr-landing-venue"
+        loadingContext="tipPage"
+        loadingRegistrationKey="qr-landing"
       />
     );
   }
@@ -399,7 +399,7 @@ export function QRLandingPage() {
         trustMessage={amountHeader.trustMessage}
         loading
         loadingContext="tipPage"
-        loadingRegistrationKey="qr-landing-tip"
+        loadingRegistrationKey="qr-landing"
       />
     );
   }

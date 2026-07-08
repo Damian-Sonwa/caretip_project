@@ -1,10 +1,18 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   APP_LOADING_PRIORITY,
   useAppLoadingOverlayActive,
   useAppLoadingRegistration,
 } from "../context/AppLoadingManager";
-import { signalPostLoginDashboardShellReady } from "./authPostLoginTransition";
+import {
+  isAuthPostLoginTransitionActive,
+  signalPostLoginDashboardShellReady,
+  subscribeAuthPostLoginTransition,
+} from "./authPostLoginTransition";
+import {
+  isAuthLogoutTransitionActive,
+  subscribeAuthLogoutTransition,
+} from "./authLogoutTransition";
 import { traceLoaderFlag } from "./loaderDiagFlags";
 import { globalAppLoadingHoldClassName } from "./globalAppLoadingHoldClassName";
 
@@ -28,14 +36,39 @@ export function useRegisterGlobalAppInit(
   useAppLoadingRegistration(key, APP_LOADING_PRIORITY.APP_INIT, active, message);
 }
 
+function useUserJourneyOverlayOwnsScreen(): boolean {
+  const postLoginActive = useSyncExternalStore(
+    subscribeAuthPostLoginTransition,
+    isAuthPostLoginTransitionActive,
+    () => false,
+  );
+  const logoutActive = useSyncExternalStore(
+    subscribeAuthLogoutTransition,
+    isAuthLogoutTransitionActive,
+    () => false,
+  );
+  return postLoginActive || logoutActive;
+}
+
+type PagePaintReadyOptions = {
+  /** Fires after the one-frame paint latch releases (shell commit). */
+  onPaintReleased?: () => void;
+};
+
 /**
  * One-frame overlay extension while auth/guards are active — never re-opens after dismiss.
- * Releases in useLayoutEffect after the shell commit (avoids overlayVisible circular deadlock).
+ * Technical paint keys are excluded from overlay winner selection; they must not replace user journeys.
  */
-export function useRegisterPagePaintReady(registrationKey: string, enabled = true): void {
+export function useRegisterPagePaintReady(
+  registrationKey: string,
+  enabled = true,
+  options?: PagePaintReadyOptions,
+): void {
+  const userJourneyOwnsScreen = useUserJourneyOverlayOwnsScreen();
   const overlayVisible = useAppLoadingOverlayActive();
   const latchedOnMountRef = useRef(false);
   const [paintReleased, setPaintReleased] = useState(false);
+  const onPaintReleased = options?.onPaintReleased;
 
   if (enabled && overlayVisible && !latchedOnMountRef.current && !paintReleased) {
     latchedOnMountRef.current = true;
@@ -45,9 +78,14 @@ export function useRegisterPagePaintReady(registrationKey: string, enabled = tru
     if (!enabled || !latchedOnMountRef.current) return;
     setPaintReleased(true);
     traceLoaderFlag("pageReady", false, registrationKey);
-  }, [enabled, registrationKey]);
+    onPaintReleased?.();
+  }, [enabled, registrationKey, onPaintReleased]);
 
-  const holdForPaint = enabled && latchedOnMountRef.current && !paintReleased;
+  const holdForPaint =
+    enabled &&
+    latchedOnMountRef.current &&
+    !paintReleased &&
+    !userJourneyOwnsScreen;
 
   if (holdForPaint) {
     traceLoaderFlag("pageReady", true, registrationKey);
@@ -58,13 +96,10 @@ export function useRegisterPagePaintReady(registrationKey: string, enabled = tru
 
 /**
  * Dashboard shell paint latch + post-login handoff signal.
- * Extends the overlay one frame while the shell commits, then ends the login transition.
+ * Post-login transition ends only after shell paint releases — not on layout mount alone.
  */
 export function useDashboardLayoutPaintReady(registrationKey: string, enabled = true): void {
-  useRegisterPagePaintReady(registrationKey, enabled);
-
-  useLayoutEffect(() => {
-    if (!enabled) return;
-    signalPostLoginDashboardShellReady();
-  }, [enabled, registrationKey]);
+  useRegisterPagePaintReady(registrationKey, enabled, {
+    onPaintReleased: signalPostLoginDashboardShellReady,
+  });
 }

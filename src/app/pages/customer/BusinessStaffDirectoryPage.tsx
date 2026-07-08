@@ -129,8 +129,8 @@ export function BusinessStaffDirectoryPage() {
     return (
       <CareTipPageLoader
         variant="wait"
-        context="findingRecipient"
-        registrationKey="business-staff-directory-loading"
+        context="tipPage"
+        registrationKey="business-staff-directory"
       />
     );
   }

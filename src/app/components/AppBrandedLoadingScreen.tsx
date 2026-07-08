@@ -9,6 +9,8 @@ export type AppBrandedLoadingScreenProps = {
   /** Full-viewport fixed overlay (global manager). */
   fixed?: boolean;
   message?: string;
+  /** When true and message is empty, show cold-start copy (app-boot only). */
+  allowStartupFallback?: boolean;
   /** Fade-out when global overlay is dismissing. */
   exiting?: boolean;
 };
@@ -20,10 +22,12 @@ export function AppBrandedLoadingScreen({
   className,
   fixed = false,
   message,
+  allowStartupFallback = false,
   exiting = false,
 }: AppBrandedLoadingScreenProps) {
   const { t } = useTranslation();
-  const resolvedMessage = message ?? t("common.preparingWorkspace");
+  const resolvedMessage =
+    message ?? (allowStartupFallback ? t("common.loading.starting") : undefined);
 
   useEffect(() => {
     if (!fixed || exiting) return;
@@ -46,7 +50,9 @@ export function AppBrandedLoadingScreen({
         <CareTipLoadingTitle compact className="app-branded-loader__title" />
       </div>
       <div className="flex max-w-sm flex-col items-center gap-1 text-center">
-        <p className="text-sm font-medium text-foreground">{resolvedMessage}</p>
+        {resolvedMessage ? (
+          <p className="text-sm font-medium text-foreground">{resolvedMessage}</p>
+        ) : null}
         <p className="text-xs text-muted-foreground">{t("common.onlyAMoment")}</p>
       </div>
     </div>

@@ -34,6 +34,7 @@ import {
 import {
   pickOverlayMessage,
   pickOverlayWinner,
+  isTechnicalOverlayRegistration,
 } from "../lib/appLoadingJourney";
 
 /** Block APP_INIT from re-opening the overlay shortly after a full dismiss (paint-ready race). */
@@ -144,6 +145,8 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
   const minVisibleTimerRef = useRef<number | null>(null);
   const showThresholdTimerRef = useRef<number | null>(null);
   const initialColdBootPendingRef = useRef(initialColdBootPending);
+  const initialBootMessage = createInitialRegistrations().get(BOOTSTRAP_KEY)?.message;
+  const lastJourneyMessageRef = useRef<string | undefined>(initialBootMessage);
 
   const register = useCallback(
     (key: string, priority: AppLoadingPriority, active: boolean, message?: string) => {
@@ -245,6 +248,19 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
     () => pickOverlayMessage(registrations),
     [registrations],
   );
+
+  const displayOverlayMessage = useMemo(() => {
+    if (overlayMessage && winner?.key && !isTechnicalOverlayRegistration(winner.key)) {
+      return overlayMessage;
+    }
+    return lastJourneyMessageRef.current;
+  }, [overlayMessage, winner?.key]);
+
+  useEffect(() => {
+    if (overlayMessage && winner?.key && !isTechnicalOverlayRegistration(winner.key)) {
+      lastJourneyMessageRef.current = overlayMessage;
+    }
+  }, [overlayMessage, winner?.key]);
 
   const winnerRequested = Boolean(winner);
   winnerRequestedRef.current = winnerRequested;
@@ -373,6 +389,7 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
     const id = window.setTimeout(() => {
       setOverlayPhase("hidden");
       lastWinnerKeyRef.current = null;
+      lastJourneyMessageRef.current = undefined;
     }, OVERLAY_FADE_MS);
     return () => window.clearTimeout(id);
   }, [overlayPhase]);
@@ -438,7 +455,8 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
       {renderOverlay ? (
         <AppBrandedLoadingScreen
           fixed
-          message={overlayMessage}
+          message={displayOverlayMessage}
+          allowStartupFallback={winner?.key === BOOTSTRAP_KEY && !displayOverlayMessage}
           exiting={overlayPhase === "exiting"}
         />
       ) : null}

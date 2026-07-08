@@ -246,8 +246,45 @@
           "/platform-admin/login": 1,
         };
 
+        function isCustomerPath(path) {
+          if (
+            path === "/tip-amount" ||
+            path === "/payment" ||
+            path === "/success" ||
+            path === "/rating" ||
+            path === "/tip-complete" ||
+            path === "/select-employee"
+          ) {
+            return true;
+          }
+          if (
+            path.indexOf("/staff/") === 0 ||
+            path.indexOf("/qr/employee/") === 0 ||
+            path.indexOf("/qr/location/") === 0 ||
+            path.indexOf("/qr/table/") === 0 ||
+            path.indexOf("/qr-landing/") === 0 ||
+            path.indexOf("/table/") === 0 ||
+            path.indexOf("/qr/business/") === 0
+          ) {
+            return true;
+          }
+          var parts = path.split("/").filter(Boolean);
+          if (parts.length === 2 && parts[0] !== "platform-admin" && parts[0] !== "dashboard") {
+            return true;
+          }
+          return false;
+        }
+
+        function customerBootMessage(path) {
+          if (path === "/payment") return "Preparing secure checkout...";
+          if (path === "/success" || path === "/rating") return "Confirming your tip...";
+          if (path === "/tip-complete") return "Finishing up...";
+          return "Opening your tip page...";
+        }
+
         function resolveBootMessage(path, standalone) {
           if (standalone) return "Starting CareTip...";
+          if (isCustomerPath(path)) return customerBootMessage(path);
           if (MARKETING[path]) return "Preparing your experience…";
           if (AUTH[path] || path.indexOf("/reset-password/") === 0) {
             return "Checking your session...";

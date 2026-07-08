@@ -63,6 +63,39 @@ function normalizePath(pathname: string): string {
 }
 
 /**
+ * Customer deep-link cold boot — journey-specific copy (never generic marketing landing).
+ * Keep in sync with index.html resolveBootMessage.
+ */
+export function resolveCustomerJourneyBootContext(pathname: string): AppLoadingContext | null {
+  const p = normalizePath(pathname);
+
+  if (p === "/payment") return "checkout";
+  if (p === "/success" || p === "/rating") return "stripeReturn";
+  if (p === "/tip-complete") return "finishing";
+
+  if (
+    p === "/tip-amount" ||
+    p === "/select-employee" ||
+    p.startsWith("/staff/") ||
+    p.startsWith("/qr/employee/") ||
+    p.startsWith("/qr/location/") ||
+    p.startsWith("/qr/table/") ||
+    p.startsWith("/qr-landing/") ||
+    p.startsWith("/table/") ||
+    p.startsWith("/qr/business/")
+  ) {
+    return "tipPage";
+  }
+
+  const slugSegments = p.split("/").filter(Boolean);
+  if (slugSegments.length === 2 && isPublicBusinessSlugPath(p)) {
+    return "tipPage";
+  }
+
+  return null;
+}
+
+/**
  * Path-aware message for route transitions, guards, and cold boot.
  * Used by global registrars — one branded overlay, contextual copy.
  */
@@ -173,6 +206,10 @@ export function resolveRouteLoadingMessage(pathname: string, t: TFunction): stri
 /** Initial app-boot copy before React registrars mount (i18n is ready in main.tsx). */
 export function resolveInitialBootLoadingMessage(pathname: string, t: TFunction): string {
   const p = normalizePath(pathname);
+  const customerContext = resolveCustomerJourneyBootContext(p);
+  if (customerContext) {
+    return resolveAppLoadingContextMessage(customerContext, t);
+  }
   if (typeof window !== "undefined") {
     const standalone =
       window.matchMedia?.("(display-mode: standalone)")?.matches === true ||

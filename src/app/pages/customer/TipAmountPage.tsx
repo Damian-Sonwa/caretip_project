@@ -215,7 +215,7 @@ export function TipAmountPage() {
         stepTitle={t("tipFlow.tipAmount.chooseTitle")}
         loading
         loadingContext="tipPage"
-        loadingRegistrationKey="tip-amount-redirect"
+        loadingRegistrationKey="tip-amount-journey"
       />
     );
   }
@@ -234,7 +234,7 @@ export function TipAmountPage() {
       trustMessage={amountHeader.trustMessage}
       loading={!contextReady}
       loadingContext="tipPage"
-      loadingRegistrationKey="tip-amount-context"
+      loadingRegistrationKey="tip-amount-journey"
       mainClassName={cf.mainCompact}
       bottomBar={
         selectedAmount ? (

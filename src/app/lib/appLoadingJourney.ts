@@ -73,11 +73,11 @@ const TRANSITION_PREFIXES = [
   "employee-qr-entry",
   "table-qr-loading",
   "location-qr-loading",
-  "qr-landing-",
-  "tip-amount-",
+  "qr-landing",
+  "tip-amount-journey",
   "platform-admin-route-guard",
-  "business-staff-directory-loading",
-  "select-employee-loading",
+  "business-staff-directory",
+  "select-employee",
 ] as const;
 
 function normalizePath(pathname: string): string {
@@ -89,6 +89,11 @@ function overlayKeyPrecedence(key: string): number {
   if (key.startsWith("protected-route-guard")) return 15;
   if (key.startsWith("role-protected-route-guard")) return 15;
   return 0;
+}
+
+/** Paint/chunk latches — hold commits only; never own the user-facing loading story. */
+export function isTechnicalOverlayRegistration(key: string): boolean {
+  return key.endsWith("-paint") || key.endsWith("-chunk");
 }
 
 export function resolveLoaderJourneyTier(key: string): LoaderJourneyTier {
@@ -125,6 +130,7 @@ function eligibleOverlayRegistrations(
 
   const eligible = all.filter((reg) => {
     if (reg.key === BOOTSTRAP_KEY && hasNonBootstrap) return false;
+    if (isTechnicalOverlayRegistration(reg.key)) return false;
     return true;
   });
 

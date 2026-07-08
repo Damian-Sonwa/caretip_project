@@ -105,8 +105,8 @@ export function SelectEmployeePage() {
     return (
       <CareTipPageLoader
         variant="wait"
-        context="findingRecipient"
-        registrationKey="select-employee-loading"
+        context="tipPage"
+        registrationKey="select-employee"
       />
     );
   }
