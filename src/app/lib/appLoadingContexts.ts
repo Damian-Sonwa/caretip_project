@@ -173,10 +173,21 @@ export function resolveRouteLoadingMessage(pathname: string, t: TFunction): stri
 /** Initial app-boot copy before React registrars mount (i18n is ready in main.tsx). */
 export function resolveInitialBootLoadingMessage(pathname: string, t: TFunction): string {
   const p = normalizePath(pathname);
+  if (typeof window !== "undefined") {
+    const standalone =
+      window.matchMedia?.("(display-mode: standalone)")?.matches === true ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (standalone) {
+      return resolveAppLoadingContextMessage("startup", t);
+    }
+  }
   if (isPublicMarketingPath(p)) {
-    return p === "/" ? resolveAppLoadingContextMessage("landing", t) : resolveAppLoadingContextMessage("landing", t);
+    return resolveAppLoadingContextMessage("landing", t);
   }
   if (isPublicAuthenticationPath(p)) {
+    return resolveAppLoadingContextMessage("sessionCheck", t);
+  }
+  if (p.startsWith("/platform-admin")) {
     return resolveAppLoadingContextMessage("sessionCheck", t);
   }
   return resolveAppLoadingContextMessage("startup", t);

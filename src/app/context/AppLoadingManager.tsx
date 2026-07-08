@@ -58,24 +58,6 @@ type AppLoadingManagerContextValue = {
 
 const AppLoadingManagerContext = createContext<AppLoadingManagerContextValue | null>(null);
 
-const LaunchSplashContext = createContext(false);
-
-export function LaunchSplashVisibilityProvider({
-  active,
-  children,
-}: {
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <LaunchSplashContext.Provider value={active}>{children}</LaunchSplashContext.Provider>
-  );
-}
-
-function useLaunchSplashActive(): boolean {
-  return useContext(LaunchSplashContext);
-}
-
 export function useAppLoadingRegistration(
   key: string,
   priority: AppLoadingPriority,
@@ -111,12 +93,21 @@ function readInitialPathname(): string {
   return window.location.pathname.split("?")[0]?.split("#")[0] ?? "/";
 }
 
+function isStandaloneDisplayMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(display-mode: standalone)")?.matches === true ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
 /**
  * Initial bootstrap overlay for cold loads.
- * Marketing routes always show the branded loader (no session / visit gating).
- * Auth forms stay immediate; protected apps keep the existing boot overlay.
+ * PWA, marketing, and protected shells show the branded loader immediately.
+ * Auth form shells skip React boot (HTML bridge dismisses on first paint).
  */
 function shouldRegisterInitialAppBoot(pathname: string): boolean {
+  if (isStandaloneDisplayMode()) return true;
   if (isPublicMarketingPath(pathname)) return true;
   if (isPublicShellPath(pathname)) return false;
   return true;
@@ -141,7 +132,6 @@ function createInitialOverlayPhase(): OverlayPhase {
 }
 
 export function AppLoadingManagerProvider({ children }: { children: React.ReactNode }) {
-  const launchSplashActive = useLaunchSplashActive();
   const initialColdBootPending = createInitialOverlayPhase() === "visible";
   const [registrations, setRegistrations] = useState<Map<string, Registration>>(createInitialRegistrations);
   const [overlayPhase, setOverlayPhase] = useState<OverlayPhase>(createInitialOverlayPhase);
@@ -220,6 +210,7 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
   );
 
   const releaseAppBootOverlay = useCallback(() => {
+    dismissHtmlMarketingBootBridge();
     setRegistrations((prev) => {
       if (!prev.has(BOOTSTRAP_KEY)) return prev;
       const next = new Map(prev);
@@ -255,7 +246,7 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
     [registrations],
   );
 
-  const winnerRequested = Boolean(winner) && !launchSplashActive;
+  const winnerRequested = Boolean(winner);
   winnerRequestedRef.current = winnerRequested;
 
   useEffect(() => {
@@ -456,9 +447,8 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
 }
 
 export function useAppLoadingOverlayActive(): boolean {
-  const launchSplashActive = useLaunchSplashActive();
   const ctx = useContext(AppLoadingManagerContext);
-  return launchSplashActive || (ctx?.overlayVisible ?? false);
+  return ctx?.overlayVisible ?? false;
 }
 
 export { APP_LOADING_PRIORITY };

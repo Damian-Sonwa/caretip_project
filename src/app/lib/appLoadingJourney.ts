@@ -75,6 +75,7 @@ const TRANSITION_PREFIXES = [
   "location-qr-loading",
   "qr-landing-",
   "tip-amount-",
+  "platform-admin-route-guard",
   "business-staff-directory-loading",
   "select-employee-loading",
 ] as const;

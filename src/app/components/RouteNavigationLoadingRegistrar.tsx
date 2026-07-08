@@ -11,6 +11,14 @@ import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
 import { shouldRegisterBrandedRouteNavigation } from "../lib/appLoadingJourney";
 import { isPublicMarketingPath } from "../lib/publicRoutes";
 
+function isStandaloneDisplayMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(display-mode: standalone)")?.matches === true ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
 /**
  * Shows the global branded overlay while React Router resolves lazy route modules.
  * Marketing cold-load `app-boot` is released only after the route is idle and painted,
@@ -33,7 +41,9 @@ export function RouteNavigationLoadingRegistrar({ children }: { children: ReactN
   );
 
   useEffect(() => {
-    if (!isPublicMarketingPath(pathname)) return;
+    const shouldReleaseBoot =
+      isPublicMarketingPath(pathname) || isStandaloneDisplayMode();
+    if (!shouldReleaseBoot) return;
     if (navigation.state === "loading") return;
 
     let cancelled = false;

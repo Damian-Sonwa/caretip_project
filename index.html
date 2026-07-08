@@ -183,7 +183,7 @@
     <script src="/theme-init.js"></script>
   </head>
 
-  <body style="margin: 0">
+  <body style="margin: 0; background-color: #ffffff">
     <div id="caretip-html-boot" role="status" aria-label="CareTip" aria-busy="true" hidden>
       <div class="caretip-html-boot__mark" aria-hidden="true">
         <p class="caretip-html-boot__title">
@@ -209,7 +209,7 @@
           );
         }
 
-        /* Marketing cold-load only — never dashboards/auth. */
+        /* Keep in sync with resolveInitialBootLoadingMessage (appLoadingContexts.ts). */
         var MARKETING = {
           "/": 1,
           "/pricing": 1,
@@ -227,15 +227,43 @@
           "/join": 1,
           "/join/signup": 1,
           "/get-started": 1,
+          "/tip-amount": 1,
+          "/payment": 1,
+          "/success": 1,
+          "/rating": 1,
+          "/tip-complete": 1,
+          "/select-employee": 1,
         };
+
+        var AUTH = {
+          "/login": 1,
+          "/signup": 1,
+          "/auth": 1,
+          "/forgot-password": 1,
+          "/join/signup": 1,
+          "/employee/login": 1,
+          "/business/login": 1,
+          "/platform-admin/login": 1,
+        };
+
+        function resolveBootMessage(path, standalone) {
+          if (standalone) return "Starting CareTip...";
+          if (MARKETING[path]) return "Preparing your experience…";
+          if (AUTH[path] || path.indexOf("/reset-password/") === 0) {
+            return "Checking your session...";
+          }
+          if (path.indexOf("/platform-admin") === 0) return "Checking your session...";
+          return "Starting CareTip...";
+        }
 
         var path = pathOnly();
         var el = document.getElementById("caretip-html-boot");
         if (!el) return;
 
-        if (isStandalone() || !MARKETING[path]) {
-          el.remove();
-          return;
+        var standalone = isStandalone();
+        var messageEl = document.getElementById("caretip-html-boot-message");
+        if (messageEl) {
+          messageEl.textContent = resolveBootMessage(path, standalone);
         }
 
         el.removeAttribute("hidden");

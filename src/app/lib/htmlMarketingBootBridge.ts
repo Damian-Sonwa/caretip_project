@@ -1,5 +1,5 @@
 /**
- * Minimal HTML first-paint bridge for marketing cold loads (see index.html).
+ * HTML first-paint bridge for cold loads (see index.html).
  * Visually matches AppBrandedLoadingScreen; React overlay becomes source of truth after mount.
  */
 

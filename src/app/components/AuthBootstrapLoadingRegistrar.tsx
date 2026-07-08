@@ -12,6 +12,7 @@ import {
   useReleaseAppBootOverlay,
 } from "../context/AppLoadingManager";
 import { isPublicShellPath, isPublicMarketingPath } from "../lib/publicRoutes";
+import { dismissHtmlMarketingBootBridge } from "../lib/htmlMarketingBootBridge";
 import { resolveRouteLoadingMessage } from "../lib/appLoadingContexts";
 import {
   GLOBAL_LOADER_STUCK_WARN_MS,
@@ -63,6 +64,7 @@ export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNod
   useEffect(() => {
     if (!isPublicAuthenticationPath(pathname)) return;
     releaseAppBootOverlay();
+    dismissHtmlMarketingBootBridge();
   }, [pathname, releaseAppBootOverlay]);
 
   useEffect(() => {
