@@ -47,7 +47,6 @@ export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNod
   const { t } = useTranslation();
   const { authStatus, user } = useAuth();
   const { pathname } = useLocation();
-  const publicShell = isPublicShellPath(pathname);
   const suppressBootstrap = shouldSuppressSessionBootstrapOverlay();
   const authBootstrapBlocking =
     !suppressBootstrap && shouldBlockGlobalAuthLoader(pathname, authStatus, user);
@@ -61,9 +60,9 @@ export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNod
   );
 
   useEffect(() => {
-    if (!publicShell) return;
+    if (!isPublicAuthenticationPath(pathname)) return;
     releaseAppBootOverlay();
-  }, [publicShell, releaseAppBootOverlay, pathname]);
+  }, [pathname, releaseAppBootOverlay]);
 
   useEffect(() => {
     if (authBootstrapBlocking) {

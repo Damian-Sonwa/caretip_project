@@ -1,7 +1,6 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isAiAssistantEnabled } from "../lib/featureFlags";
-import { markCareTipStartupLandingReady } from "../lib/caretipStartupSession";
 import { Navigation } from "../components/Navigation";
 import { CareTipLandingHero } from "@/components/landing/CareTipLandingHero";
 import { Footer } from "../components/Footer";
@@ -12,10 +11,6 @@ export function LandingPage() {
   const { t, i18n } = useTranslation();
   const [landingRoot, setLandingRoot] = useState<HTMLDivElement | null>(null);
   const isDe = i18n.language?.toLowerCase().startsWith("de");
-
-  useLayoutEffect(() => {
-    markCareTipStartupLandingReady();
-  }, []);
 
   return (
     <div

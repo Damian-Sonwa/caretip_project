@@ -48,7 +48,7 @@ export function HospitalityTeamsUnifiedSection() {
           className={cn(
             landingUi.hospitalityIntro,
             "caretip-hospitality-intro",
-            "mx-auto max-w-4xl py-20 text-center lg:py-28",
+            "mx-auto max-w-4xl text-center",
           )}
         >
           {landingCopyVisible(t("landing.hospitality.eyebrow")) ? (
@@ -74,8 +74,8 @@ export function HospitalityTeamsUnifiedSection() {
                 <p
                   className={cn(
                     "caretip-hospitality-lead",
-                    "mx-auto mt-6 max-w-3xl text-center text-balance",
-                    "text-lg font-semibold text-neutral-700 md:text-xl dark:text-neutral-300",
+                    "mx-auto text-center text-balance",
+                    "text-base font-semibold leading-snug text-neutral-700 md:text-lg lg:text-xl dark:text-neutral-300",
                   )}
                 >
                   {t("landing.hospitality.subtitle1")}
@@ -86,15 +86,15 @@ export function HospitalityTeamsUnifiedSection() {
                 <div
                   className={cn(
                     "caretip-hospitality-body",
-                    "mx-auto mt-5 flex max-w-2xl flex-col items-center gap-4 text-center",
-                    !hasLead && "mt-6",
+                    "mx-auto flex flex-col items-center text-center",
+                    !hasLead && "caretip-hospitality-body--solo",
                   )}
                 >
                   {landingCopyVisible(t("landing.hospitality.subtitle2")) ? (
                     <p
                       className={cn(
                         "caretip-hospitality-body__p",
-                        "m-0 text-pretty text-base leading-8 text-neutral-500 md:text-lg dark:text-neutral-400",
+                        "m-0 text-pretty text-neutral-500 dark:text-neutral-400",
                       )}
                     >
                       {t("landing.hospitality.subtitle2")}
@@ -104,7 +104,7 @@ export function HospitalityTeamsUnifiedSection() {
                     <p
                       className={cn(
                         "caretip-hospitality-body__p",
-                        "m-0 text-pretty text-base leading-8 text-neutral-500 md:text-lg dark:text-neutral-400",
+                        "m-0 text-pretty text-neutral-500 dark:text-neutral-400",
                       )}
                     >
                       {t("landing.hospitality.subtitle3")}
@@ -119,7 +119,7 @@ export function HospitalityTeamsUnifiedSection() {
                     <div
                       className={cn(
                         landingUi.sectionAccentRow,
-                        "caretip-hospitality-closing__accent mt-6 w-full justify-center lg:justify-center",
+                        "caretip-hospitality-closing__accent w-full justify-center lg:justify-center",
                       )}
                     >
                       <LandingSectionAccent
@@ -137,8 +137,9 @@ export function HospitalityTeamsUnifiedSection() {
                     <p
                       className={cn(
                         "caretip-hospitality-closing__p",
-                        "mx-auto mt-4 max-w-2xl text-pretty text-base text-neutral-500 dark:text-neutral-400",
-                        !landingCopyVisible(t("landing.hospitality.subtitle4")) && "mt-6",
+                        "mx-auto text-pretty text-neutral-500 dark:text-neutral-400",
+                        !landingCopyVisible(t("landing.hospitality.subtitle4")) &&
+                          "caretip-hospitality-closing__p--solo",
                       )}
                     >
                       {t("landing.hospitality.subtitle5")}

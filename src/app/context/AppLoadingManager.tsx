@@ -19,8 +19,8 @@ import {
   traceGlobalLoaderReady,
   traceGlobalOverlayDismissed,
 } from "../lib/globalAppLoadingTrace";
-import { isPublicAuthenticationPath } from "../lib/authSession";
-import { isPublicShellPath } from "../lib/publicRoutes";
+import { dismissHtmlMarketingBootBridge } from "../lib/htmlMarketingBootBridge";
+import { isPublicMarketingPath, isPublicShellPath } from "../lib/publicRoutes";
 import { traceLoaderRegistration, warnLoaderDiagDeadlock } from "../lib/loaderDiagFlags";
 
 const OVERLAY_FADE_MS = 180;
@@ -116,9 +116,20 @@ function readInitialPathname(): string {
   return window.location.pathname.split("?")[0]?.split("#")[0] ?? "/";
 }
 
+/**
+ * Initial bootstrap overlay for cold loads.
+ * Marketing routes always show the branded loader (no session / visit gating).
+ * Auth forms stay immediate; protected apps keep the existing boot overlay.
+ */
+function shouldRegisterInitialAppBoot(pathname: string): boolean {
+  if (isPublicMarketingPath(pathname)) return true;
+  if (isPublicShellPath(pathname)) return false;
+  return true;
+}
+
 function createInitialRegistrations(): Map<string, Registration> {
   const initial = new Map<string, Registration>();
-  if (isPublicShellPath(readInitialPathname())) {
+  if (!shouldRegisterInitialAppBoot(readInitialPathname())) {
     return initial;
   }
   initial.set(BOOTSTRAP_KEY, { key: BOOTSTRAP_KEY, priority: APP_LOADING_PRIORITY.AUTH });
@@ -126,7 +137,7 @@ function createInitialRegistrations(): Map<string, Registration> {
 }
 
 function createInitialOverlayPhase(): OverlayPhase {
-  if (isPublicShellPath(readInitialPathname())) return "hidden";
+  if (!shouldRegisterInitialAppBoot(readInitialPathname())) return "hidden";
   return "visible";
 }
 
@@ -277,11 +288,6 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
 
     if (overlayPhase === "hidden") return;
 
-    const pathname =
-      window.location.pathname.split("?")[0]?.split("#")[0] ?? "/";
-    const publicShellPath = isPublicShellPath(pathname);
-    const authRouteFade = isPublicAuthenticationPath(pathname);
-
     const scheduleExit = (): void => {
       const elapsed = Date.now() - overlayShownAtRef.current;
       const delayExit = Math.max(0, MIN_OVERLAY_VISIBLE_MS - elapsed);
@@ -303,17 +309,7 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
       }, delayExit);
     };
 
-    if (publicShellPath && !authRouteFade) {
-      if (exitDebounceRef.current !== null) {
-        window.clearTimeout(exitDebounceRef.current);
-        exitDebounceRef.current = null;
-      }
-      overlayDismissedAtRef.current = Date.now();
-      setOverlayPhase("hidden");
-      traceGlobalOverlayDismissed();
-      return;
-    }
-
+    /* Marketing cold loads must keep the existing min-visible fade (no instant hide). */
     if (exitDebounceRef.current !== null) {
       window.clearTimeout(exitDebounceRef.current);
     }
@@ -380,6 +376,17 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
   );
 
   const renderOverlay = overlayPhase === "visible" || overlayPhase === "exiting";
+
+  /* Handoff: React branded overlay owns the screen — drop the HTML first-paint bridge. */
+  useLayoutEffect(() => {
+    if (!renderOverlay) return;
+    dismissHtmlMarketingBootBridge();
+  }, [renderOverlay]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => dismissHtmlMarketingBootBridge(), 8_000);
+    return () => window.clearTimeout(id);
+  }, []);
 
   return (
     <AppLoadingManagerContext.Provider value={value}>
